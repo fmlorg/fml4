@@ -7,6 +7,7 @@
    libMIME.pl		MIME 操作関数インターフェイス
    libamctl.pl		actives members ファイルの制御ライブラリ
    libarchive.pl	Archive ライブラリ
+   libcksum.pl		loop check based on MD5 check sum
    libcompat.pl		COMPAT コード
    libcompat_cf1.pl	COMPAT: cf version 1 のための補正コード
    libcompat_cf2.pl	COMPAT: config.ph CFVersion 3 以前のものため
@@ -15,9 +16,11 @@
    libconfirm.pl	confirmation (自動登録など)
    libcrosspost.pl	クロスポスト
    libcrypt.pl		暗号化ルーチン
+   libdb.pl		TextDB
    libdebug.pl		デバッグ用なので通常使われない
    libdist.pl		配送ルーチン
    libdisthack.pl	special filtering against html and no references mail 
+   libenvf.pl           Envelope Filter
    liberror.pl		特殊な Error Handling 関数
    libexpire.pl		ＭＬの記事等の expiration を行なう
    libfml.pl		コマンドインターフェイスおよびコマンド用基本関数
@@ -27,6 +30,8 @@
    libhref.pl		URL 操作インターフェイス e.g. http://, gopher://, 
    libhtmlsubr.pl	HTML new threading code
    libkern.pl		kernel library (fml.pl から作られている。fml.plと同じ)
+   libkernsubr.pl	kernel library subroutine 1 (used some times)
+   libkernsubr2.pl	kernel library subroutine 2 (seldom used)
    liblibrary.pl	ユーザからのファイルの put と getを可能にする
    liblmtp.pl		Local Mail Transfer Protocol
    liblock.pl		rename(2) を使う昔なじみのロック機構
@@ -36,6 +41,7 @@
    libmd5.pl		MD5 (perl 5 でだけ使える)
    libmember_name.pl	$USE_MEMBER_NAME 用の関数
 			Author: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+   libmesgle.pl		Message Language Extension
    libmgrdom.pl		hack to handle migrating domains e.g. or.jp->ne.jp
    libmladdr.pl		コマンドラインによる簡易設定ルーチン(obsolete)
    libmlcp.pl		MailingList Control Protocol
@@ -56,6 +62,7 @@
    libsmtp.pl		SMTP (sendmailとの通信) インターフェイス
    libsmtphack.pl	SMTP Library hack e.g. OUTGOING_ADDRESS
    libsmtpsubr.pl	SMTP Library subroutine
+   libsmtpsubr2.pl	SMTP Library subroutine 2 (seldom used)
    libsmtputils.pl	SMTP utility functions
    libsmtpmci.pl	SMTP plural connections
    libsmtpsd.pl		SMTP SORT DOMAIN LIBRARY (smtpfeed使う方がいいよ)
@@ -64,7 +71,9 @@
    libtagdef.pl		Subject Tag definition
    libtraffic.pl	traffic コマンド 
 			Author: yuao@infonia.or.jp (Yuao Tanigawa)
+   libtrap.pl		trap vector
    libutils.pl		各種 misc な関数
+   libviruschk.pl	Virus check code
    libwhois.pl		WHOIS インターフェイス
 .fi
 .if LANG == ENGLISH
@@ -73,6 +82,7 @@
 	libMIME.pl		MIME
 	libamctl.pl		control of distribution and member list
 	libarchive.pl		archiver
+	libcksum.pl		loop check based on MD5 check sum
 	libcompat.pl		compatible routine
 	libcompat_cf1.pl	compatible routine
 	libcompat_cf2.pl	compatible routine
@@ -81,10 +91,12 @@
 	libconfirm.pl		confirmation (e.g. auto registration)
 	libcrosspost.pl		crosspost 
 	libcrypt.pl		crypt() utilities
+	libdb.pl		TextDB
 	libdebug.pl		used only in debug
 	libdist.pl		distributor
 	libdisthack.pl		pecial filtering against html 
 				and no references mail 
+	libenvf.pl		Envelope Filter
 	liberror.pl		error message utilities
 	libexpire.pl		expire
 	libfml.pl		command interface
@@ -94,6 +106,8 @@
 	libhref.pl		functions to get URL
 	libhtmlsubr.pl		HTML new threading code
 	libkern.pl		kernel library (== fml.pl)
+	libkernsubr.pl		kernel library (used sometimes)
+	libkernsubr2.pl		kernel library (seldom used)
 	liblibrary.pl		library commands
 	liblmtp.pl		Local Mail Transfer Protocol
 	liblock.pl		link(2) style lock for OS' which has no flock
@@ -104,6 +118,7 @@
 	libmember_name.pl	$USE_MEMBER_NAME
 				Author: Masayuki FUKUI 
 				<fukui@sonic.nm.fujitsu.co.jp>
+	libmesgle.pl		Message Language Extension
 	libmgrdom.pl		hack to handle migrating domains
 				e.g. or.jp->ne.jp
 	libmladdr.pl		obsolete
@@ -125,6 +140,7 @@
 	libsmtp.pl		SMTP interface, fundamental function
 	libsmtphack.pl		MTP Library hack e.g. OUTGOING_ADDRESS
 	libsmtpsubr.pl		SMTP Library subroutine
+	libsmtpsubr2.pl		SMTP Library subroutine (seldom used)
 	libsmtputils.pl		SMTP utility functions
 	libsmtpmci.pl		SMTP plural connections
 	libsmtpsd.pl		SMTP SORT DOMAIN library
@@ -133,7 +149,9 @@
 	libtagdef.pl		Subject Tag Definition
 	libtraffic.pl		traffic command
 				Author: yuao@infonia.or.jp (Yuao Tanigawa)
+	libtrap.pl		trap vector
 	libutils.pl		utilities
+	libviruschk.pl		virus check
 	libwhois.pl		whois (43/tcp) interface, both tcp and local
 .fi
 .# $Id$
