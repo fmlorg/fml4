@@ -8,12 +8,16 @@ SH = /bin/sh
 # 
 # HTML_SOURCE = index.html index-e.html roadmap.html
 HTML_SOURCE = roadmap.html
-CONV_TARGET = README INSTALL INSTALL_on_NT4 INSTALL_with_QMAIL CHECK_LIST
+SPECIAL_DOC = INDEX SEARCH INFO RELEASE_NOTES 
+CONV_TARGET = README INSTALL INSTALL_on_NT4 INSTALL_with_QMAIL CHECK_LIST UPGRADE
 
-all: INDEX SEARCH INFO RELEASE_NOTES UPGRADE $(CONV_TARGET)
+DOC_GENERATOR   = $(SH) $(FML)/distrib/doc/bin/generator.sh
+DOC_GENERATOR_D = $(SH) $(FML)/distrib/doc/bin/depend_wrapper.sh
+DOC_CONV        = $(DOC_GENERATOR)
 
-scan:
-	fvs scan .
+
+all: $(SPECIAL_DOC) $(CONV_TARGET)
+
 
 INDEX:
 	cp $(HTML_SOURCE) $(FML)/var/html/ 
@@ -21,62 +25,72 @@ INDEX:
 	cpp -P -UJAPANESE index.html > $(FML)/var/html/index-e.html
 	cp -p nt.html $(FML)/var/html/
 
+
 SEARCH:
 	cp search*.html $(FML)/var/html/
 
-FAQ:
-	(FML=$(FML);  export FML; $(SH) make-FAQ.sh)
 
-INFO:
-	(FML=$(FML);  export FML; $(SH) make-INFO.sh)
+INFO: INFO.html INFO-e.html
+
+
+INFO.html: $(FML)/.info
+	cat $(FML)/doc/html/INFOpre $(FML)/var/doc/INFO.jp \
+	> $(FML)/var/html/INFO.html
+
+
+INFO-e.html: $(FML)/.info
+	cat $(FML)/doc/html/INFOpre $(FML)/var/doc/INFO.en \
+	> $(FML)/var/html/INFO-e.html
+
 
 RELEASE_NOTES:
-	(FML=$(FML);  export FML; $(SH) make-RELEASE_NOTES.sh)
+	cat $(FML)/doc/html/RELEASE_NOTESpre $(FML)/var/doc/RELEASE_NOTES.jp \
+	> $(FML)/var/html/RELEASE_NOTES.html
 
-op:	
-	(FML=$(FML);  export FML; $(SH) op_depend.sh)
 
-do_op:
-	(FML=$(FML);  export FML; $(SH) Converter.sh -a op smm)
+op:	var/html/op/index.html
+
+
+var/html/op/index.html: doc/smm/*wix
+	(FML=$(FML);  export FML; $(DOC_GENERATOR) -a op smm)
 
 
 README:
-	(FML=$(FML);  export FML; $(SH) depend_wrapper.sh README ri)
+	(FML=$(FML);  export FML; $(DOC_GENERATOR_D) README ri)
 
 INSTALL:
-	(FML=$(FML);  export FML; $(SH) depend_wrapper.sh INSTALL ri)
+	(FML=$(FML);  export FML; $(DOC_GENERATOR_D) INSTALL ri)
 
 INSTALL_on_NT4:
-	(FML=$(FML);  export FML; $(SH) depend_wrapper.sh INSTALL_on_NT4 ri)
+	(FML=$(FML);  export FML; $(DOC_GENERATOR_D) INSTALL_on_NT4 ri)
 
 INSTALL_with_QMAIL:
-	(FML=$(FML);  export FML; $(SH) depend_wrapper.sh INSTALL_with_QMAIL ri)
+	(FML=$(FML);  export FML; $(DOC_GENERATOR_D) INSTALL_with_QMAIL ri)
 
 do_README:
-	(FML=$(FML);  export FML; $(SH) Converter.sh README ri)
+	(FML=$(FML);  export FML; $(DOC_CONV) README ri)
 
 do_INSTALL:
-	(FML=$(FML);  export FML; $(SH) Converter.sh INSTALL ri)
+	(FML=$(FML);  export FML; $(DOC_CONV) INSTALL ri)
 
 do_INSTALL_on_NT4:
-	(FML=$(FML);  export FML; $(SH) Converter.sh INSTALL_on_NT4 ri)
+	(FML=$(FML);  export FML; $(DOC_CONV) INSTALL_on_NT4 ri)
 
 do_INSTALL_with_QMAIL:
-	(FML=$(FML);  export FML; $(SH) Converter.sh INSTALL_with_QMAIL ri)
+	(FML=$(FML);  export FML; $(DOC_CONV) INSTALL_with_QMAIL ri)
 
 
 UPGRADE:
-	(FML=$(FML);  export FML; $(SH) depend_wrapper.sh UPGRADE ri)
+	(FML=$(FML);  export FML; $(DOC_GENERATOR_D) UPGRADE ri)
 
 do_UPGRADE:
-	(FML=$(FML);  export FML; $(SH) Converter.sh UPGRADE ri)
+	(FML=$(FML);  export FML; $(DOC_CONV) UPGRADE ri)
 
 CHECK_LIST:
-	(FML=$(FML);  export FML; $(SH) depend_wrapper.sh CHECK_LIST ri)
+	(FML=$(FML);  export FML; $(DOC_GENERATOR_D) CHECK_LIST ri)
 
 do_CHECK_LIST:
-	(FML=$(FML);  export FML; $(SH) Converter.sh CHECK_LIST ri)
+	(FML=$(FML);  export FML; $(DOC_CONV) CHECK_LIST ri)
 
 clean:
 	gar *~ *.bak
-
