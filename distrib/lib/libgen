@@ -31,7 +31,7 @@ GEN_LIBRARY () {
 
 
 INCREMENT_VERSION () {
-	(chdir var/run; version.pl)
+	# (chdir var/run; version.pl)
 	echo " "; 
 }
 
