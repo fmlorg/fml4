@@ -1,0 +1,82 @@
+	fml が happy99 のメールを拒否するためには？
+
+			Ken'ichi Fukamachi
+
+.toc
+
+詳しくはINSTALLマニュアルを参照。
+
+
+.P	フィルタリング
+
+.C	フィルタリング機能
+
+まずフィルタリングをONにする必要がある。以下elena MLを例にとる。
+以下の節のいづれか一つの方法を行なえばよいです。
+
+
+.S	cf 書きの人
+
+   USE_DISTRIBUTE_FILTER 1
+
+を書いてあと 
+
+	% make config.ph
+
+ でconfig.ph update
+
+.S	config.ph 生書きの人
+
+   $USE_DISTRIBUTE_FILTER = 1;
+
+.S	makefml config を使う人
+
+   makefml config ML -> security -> USE_DISTRIBUTE_FILTER -> "y" (yes)
+
+.S	make secure
+
+この際なのでフィルタリングをはじめ、セキュリティ関連の基本的な部分を全
+部有効にする
+
+   % cd /var/spool/ml/elena
+   % make secure
+
+するといろいろな設定を自動的にcfに書いてconfig.phをUPDATEする。 
+やってる設定は画面に表示されるので見ておくこと。
+
+
+.C	フィルタリングに新ルールを加える
+
+.S	cfを使う人
+
+&DEFINE_FIELD_PAT_TO_REJECT("X-Spanska", ".*Yes.*");
+
+をcfの最後(LOCAL_CONFIG行の後)に追加して config.ph を update するため
+に 
+	% make config.ph
+
+.S	config.phを使う人
+
+config.ph生書きの人は
+
+&DEFINE_FIELD_PAT_TO_REJECT("X-Spanska", ".*Yes.*");
+
+を追加。
+
+
+.P	fml以外の部分で弾く
+.C	前処理プログラム bin/multipart.pl を使う場合
+
+     MTA -> bin/multipart.pl -> fml.pl
+
+2.2A#34 以降のものにいれかえると happy99 が uuencode されたものがくっ
+ついてたらrejectする。
+＃ by Yuao Tanigawa <yuao@infonia.ne.jp>: fml-support ML's Count:05863 
+
+ただmultipart.plでやることについては意味論的に疑問はある(e.g. この場所
+でそういうことをするべきか？今後は？などについて)
+
+
+$Id$
+Copyright (C) 1999 Ken'ichi Fukamachi
+          All rights reserved. 
