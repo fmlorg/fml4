@@ -166,27 +166,23 @@ sub FmlServ
     # 
     for $ml (keys %ReqInfo) {
 	# Exceptions: fmlserv is later processed (internal functions);
-	#             majordomo:$ml is $ml majordomo(<1.91?)-compat flags;
 	next if $ml eq 'fmlserv'; 
-	next if $ml =~ /^majordomo:/;
+	next if $ml eq 'etc'; 
 
 	# reset the current procs for each ML
-	$DIR  = $MailList{$ml};	  # ML's $DIR
+	$DIR  = "$MAIL_LIST_DIR/$ml";	  # ML's $DIR
 	$cf   = "$DIR/config.ph"; # config.ph
 	$proc = $ReqInfo{$ml};	  # requests
 
-	if ($debug) {
-	    &Debug("---Processing ML $ml");
-	    &Debug("DIR\t$DIR\ncf\t$cf\nprocs\t$proc\n");
-	}
-
 	# Load $ml NAME SPACE from $list/config.ph
+	next if ! -f $cf;
 	&NewML($DIR, $ml, *e, *MailList);
 
-	&DebugEnvelopeDump("$ml e");
-
 	if ($debug) {
-	    &DebugEnvelopeDump("$ml e");
+	    &Mesg(*e, "\ndebug> requests for \"$ml\" Mailing List");
+	    &Debug("---Processing ML $ml");
+	    &Debug("DIR\t$DIR\ncf\t$cf\nprocs\t$proc\n");
+	    &DebugEnvelopeDump("$ml e") if $debug_ns;
 	}
 
 	# test chdir $DIR, next if it fails;
@@ -199,12 +195,6 @@ sub FmlServ
 
 	### PROCESS BEGIN; 
 	&Lock;			# LOCK each ML (lock $FP_SPOOL_DIR)
-
-	if ($debug) {
-	    &Mesg(*e, "\ndebug> requests for \"$ml\" Mailing List");
-	    # &Mesg(*e, $ML_cmds_log{$ml});
-	    &Debug("FmlServ::DoFmlServProc($ml, $proc, *e);");
-	}
 
 	### Processing $proc For $ml ###
 	# DoFmlServProc emulation;
@@ -233,8 +223,11 @@ sub FmlServ
 	    $ml =~ s/^/fml_/g;	# ^   => fml_ (fml_ by ando@iij-mc.c.jp)
 
 	    for $n ('SendingEntry', 'SendingArchiveEntry') {
-		$eval .= sprintf("\@%s'$n = \@main'$n;\n", $ml);
-		$eval .= sprintf("%%%s'$n = %%main'$n;\n", $ml);
+		eval(sprintf("\@%s'$n = \@main'$n;\n", $ml));
+		&Log($@) if $@;
+		eval(sprintf("%%%s'$n = %%main'$n;\n", $ml));
+		&Log($@) if $@;
+
 		$hook .= sprintf("\@main'$n = \@%s'$n;\n", $ml);
 		$hook .= sprintf("%%main'$n = %%%s'$n;\n", $ml);
 	    }
@@ -243,9 +236,6 @@ sub FmlServ
 	    # passed to "$FML_EXIT_HOOK = $hook;" after here.
 	    # and runs it at the last.
 	    $hook .= qq#&mget3_SendingEntry;\n#;
-
-	    # eval
-	    eval($eval); &Log($@) if $@;
 
 	    $FmlExitHook{'mget3'} =~ s/&mget3_SendingEntry;//g;
 	    &mget3_Reset;	# only mget3 routine called..
@@ -262,7 +252,6 @@ sub FmlServ
 	undef $FML_EXIT_HOOK;	# unlink each ML hook
 
 	# Reload NS from main'NS
-	&DestructCompatMajordomo if $e{'mode:majordomo'};
 	&ResetNS;
 
 	# reset %Envelope;
@@ -410,6 +399,8 @@ sub DoFmlServProc
     local($ml, $proc, *e) = @_;
     local($sp, $guide_p, $auth, $badproc);
 
+    &Debug("FmlServ::DoFmlServProc($ml, $proc, *e);") if $debug;
+
     # reset arrays since fmlserv handles several different ML's;
     undef @MEMBER_LIST;
     undef @ACTIVE_LIST;
@@ -478,18 +469,12 @@ sub DoFmlServProc
 }
 
 #
-# --majorodmo mode is the compatibility with majordomo
-# but the conflict fml's ml is a directory <-> majordomo's ml == members of fml
-# Hmm...
 sub NewML
 {
     local($DIR, $ml, *e, *MailList) = @_;
     local($cf)  = "$DIR/config.ph";
 
     &GetTime;
-
-    # reset
-    undef $e{'mode:majordomo:chmemlist'};
 
     if ($debug) {
 	print STDERR "NewML::Check($cf)\n";
@@ -500,19 +485,6 @@ sub NewML
 
     # default before loading $DIR/config.ph;
     &SetMLDefaults($DIR, $ml);
-
-    # compatible (required?)
-    if ($e{'mode:majordomo'} && $MailList{"majordomo:$ml"}) { 
-	&CompatMajordomo($DIR, $ml);
-    }
-
-    # compatible $DIR/$ml.auto ...?
-    # inlined &FixMLMode($DIR, $ml);
-    {
-	local($mdir) = "$MAIL_LIST_DIR/$ml";
-	$ML_MEMBER_CHECK = 1 if -f "${mdir}.closed";
-	$ML_MEMBER_CHECK = 0 if -f "${mdir}.auto";
-    }
 
     # Load config.ph and sitede.ph and record the Name Space 
     # to reset the Name Space in the end (swap, not stack on). 
@@ -534,11 +506,9 @@ sub NewML
 
     # Directory *_DIR -> FP_*_DIR (fully pathed)
     for (SPOOL_DIR,TMP_DIR,VAR_DIR,VARLOG_DIR,VARRUN_DIR,VARDB_DIR) {
-	$s .= "-d \$$_ || mkdir(\$$_, 0700); \$$_ =~ s#$DIR/##g;\n";
-	$s .= "\$FP_$_ = \"$DIR/\$$_\";\n"; # FullPath-ed (FP)
+	eval "-d \$$_||&Mkdir(\$$_); s#$DIR/##g; \$FP_$_ = \"$DIR/\$$_\";";
+	&Log($@) if $@;
     }
-    eval($s); 
-    &Log("FAIL EVAL \$SPOOL_DIR ...") if $@;
 
     ### CF Version 3;
     if ($REJECT_POST_HANDLER =~ /auto.*regist/i ||
@@ -606,7 +576,6 @@ sub SetMLDefaults
 
 
 # The point to mention is "skip if /^\./"!!!
-# We may use this feature for the compatibility with majordomo
 sub NewMLAA
 {
     local($dir, *entry) = @_;
@@ -618,40 +587,8 @@ sub NewMLAA
 	# etc is the special directory
 	next if $_ eq "etc";
 
-	# $_.archive is the default archive dir of $_
-	if (/^(\S+)\.archive$/ && -d "$dir/$_") {
-	    local($mf) = $1;	# member file
-	    next if $Envelope{'mode:majordomo'} && -f "$dir/$mf";
-	}
-	# 
-	# e.g. $_.info, $_.auto is the file of the ml $_ (majordomo)
-	# skip
-	if ($Envelope{'mode:majordomo'} && -f "$dir/$_" && /^(\S+)\.(\S+)$/) {
-	    next if -f "$dir/$1";
-	}
-
-	# FML Case
-	# IF -d elena && -f elena.auto
-	if ($Envelope{'mode:majordomo'} && -f "$dir/$_" && /^(\S+)\.(\S+)$/) {
-	    next if -d "$dir/$1";
-	}
-
 	# A Candidate
-	$entry{$_} = "$dir/$_"  if -d "$dir/$_" && (! /^\@/);
-
-	# Compat:Majordomo
-	if ($Envelope{'mode:majordomo'} && -f "$dir/$_") {
-	    -d "$dir/\@$_" || mkdir("$dir/\@$_", 0755);
-
-	    if (-d "$dir/${_}.archive") {
-		-d "$dir/\@$_/var" || mkdir("$dir/\@$_/var", 0755);
-		eval("symlink(\"$dir/${_}.archive\", \"$dir/\@$_/var/archive\")");
-	    }
-
-	    $entry{$_} = "$dir/\@$_";
-	    $entry{"majordomo:$_"} = "$dir/\@$_";
-	    print STDERR "Declare \$entry{majordomo:$_}\n";
-	} 
+	$entry{$_} = $_;
     }
     closedir(DIRD);
 
@@ -679,7 +616,7 @@ sub SortRequest
 
 	# EXPILICIT ML DETECTED. 
 	# $ml is non-nil and the ML exists
-	if ($ml && $MailList{$ml}) {	
+	if ($ml && -d "$MAIL_LIST_DIR/$ml") {
 	    $ML_cmds{$ml}         .= "$cmd @p\n";
 	    $ML_cmds_log{$ml}     .= "${ml}> $cmd $ml @p\n";	    
 	}
@@ -727,21 +664,22 @@ sub Save_mainNS
 		
 	if (defined $entry) {
 	    next if $key eq '0'; # $0;
-	    $eval .= "\$org'$key = \$main'$key;\n";
+	    eval "\$org'$key = \$main'$key;";
+	    &Log($@) if $@;
 	    $NameSpaceS{$key} = 1;
 	}
 	if (defined @entry) { 
-	    $eval .= "\@org'$key = \@main'$key;\n";
+	    eval "\@org'$key = \@main'$key;";
+	    &Log($@) if $@;
 	    $NameSpaceA{$key} = 1;
 	}
 	if ($key ne "_$package" && defined %entry) { 
-	    $eval .= "\%org'$key = \%main'$key;\n";
+	    eval "\%org'$key = \%main'$key;";
+	    &Log($@) if $@;
 	    $NameSpaceAA{$key} = 1;
 	}
     }
 
-    print $eval if $debug_ns;
-    eval($eval); &Log($@) if $@;
 }
 
 
@@ -776,21 +714,15 @@ sub Dump_mainNS
 
 sub ResetNS
 {
-    local($eval);
-
     # undef main NS
-    for (keys %ML_NameSpaceS)  { $eval .= "undef \$main'$_;\n";}
-    for (keys %ML_NameSpaceA)  { $eval .= "undef \@main'$_;\n";}
-    for (keys %ML_NameSpaceAA) { $eval .= "undef \%main'$_;\n";}
-
+    for (keys %ml'ML_NameSpaceS)  { eval "undef \$main'$_;"; &Log($@) if $@;}
+    for (keys %ml'ML_NameSpaceA)  { eval "undef \@main'$_;"; &Log($@) if $@;}
+    for (keys %ml'ML_NameSpaceAA) { eval "undef \%main'$_;"; &Log($@) if $@;}
+    
     # load main NS from org(saved main) NS
-    for (keys %NameSpaceS)  { $eval .= "\$main'$_ = \$org'$_;\n";}
-    for (keys %NameSpaceA)  { $eval .= "\@main'$_ = \@org'$_;\n";}
-    for (keys %NameSpaceAA) { $eval .= "\%main'$_ = \%org'$_;\n";}
-
-    &Debug($eval) if $debug_ns;
-    eval($eval);
-    &Log($@) if $@;
+    for (keys %NameSpaceS)  { eval "\$main'$_ = \$org'$_;"; &Log($@) if $@;}
+    for (keys %NameSpaceA)  { eval "\@main'$_ = \@org'$_;"; &Log($@) if $@;}
+    for (keys %NameSpaceAA) { eval "\%main'$_ = \%org'$_;"; &Log($@) if $@;}
 }
 
 
@@ -863,7 +795,7 @@ sub ProcLists
 
     while (($key, $value) = each %MailList) {
 	next if $key eq 'fmlserv'; # fmlserv is an exception
-	next if $key =~ /^majordomo:/;
+	next if $key eq 'etc';     # etc is special.
 	$e{'message'} .= sprintf("\t%-15s\t%s\n", $key);
     }
 
@@ -881,9 +813,12 @@ sub ProcWhich
 
     for $ml (keys %MailList) {
 	next if $ml eq 'fmlserv'; # fmlserv is an exception
+	next if $ml eq 'etc';     # etc is special.
 
-	$DIR = $MailList{$ml}; # $DIR/Elena/ FORM already;
+	$DIR = "$MAIL_LIST_DIR/$ml";	  # ML's $DIR
 
+	# evaluating cost is 9-10 pages. 
+	next if ! -f "$DIR/config.ph";
 	&NewML($DIR, $ml, *e, *MailList);
 
 	unshift(@MEMBER_LIST, $MEMBER_LIST);
@@ -894,8 +829,8 @@ sub ProcWhich
 	    $hitc++;
 	}
 
+	# reset cost is 1 page.
 	&ResetNS;
-
 	undef @MEMBER_LIST;
     } # FOREACH;
 
@@ -931,33 +866,6 @@ sub ProcHRef
     &HRef($request, *e);
 
     1;
-}
-
-
-
-##################################################################
-sub CompatMajordomo
-{
-    local($dir, $ml) = @_;
-    local($mldir) = $MAIL_LIST_DIR;
-
-    print STDERR "MAJORDOMO::($dir, $ml) = @_; mldir=$mldir\n" if $debug;
-
-    $MEMBER_LIST      = "$mldir/$ml"; # member list
-    $ACTIVE_LIST      = "$mldir/$ml"; # active member list
-    $GUIDE_FILE       = "$mldir/$ml.info";
-
-    push(@ARCHIVE_DIR, "$mldir/$ml.archive");
-    $Envelope{'mode:majordomo:chmemlist'} = 1;
-}
-
-
-sub DestructCompatMajordomo
-{
-    undef $MEMBER_LIST;
-    undef $ACTIVE_LIST;
-    undef $GUIDE_FILE;
-    undef @ARCHIVE_DIR;
 }
 
 
@@ -1042,25 +950,14 @@ package ml;
 sub main'LoadMLNS 
 {
     local($file) = @_;
-    local($key, $val, $eval);
-
-    # load Variable list(Association List)
-    %ml'NameSpaceS  = %main'NameSpaceS;
-    %ml'NameSpaceA  = %main'NameSpaceA;
-    %ml'NameSpaceAA = %main'NameSpaceAA;
+    # local($key, $val, $eval); # not required ...
     
-    # load original main NameSpace
-    foreach (keys %NameSpaceS)  { $eval .= "\$ml'$_ = \$main'$_;\n";}
-    foreach (keys %NameSpaceA)  { $eval .= "\@ml'$_ = \@main'$_;\n";}
-    foreach (keys %NameSpaceAA) { $eval .= "\%ml'$_ = \%main'$_;\n";}
-    eval($eval); &main'Log($@) if $@; #';
-    undef $eval;
-
     # load the presnet directry information (tricky?)
     $ml'DIR = $main'DIR;
 
-    do $file;
-    do $main'SiteDefPH if -f $main'SiteDefPH;
+    eval "require '$file';";
+    print STDERR $@ if $@;
+    # do $main'SiteDefPH if -f $main'SiteDefPH;
     
     if ($] =~ /5.\d\d\d/) {
 	*stab = *{"ml::"};
@@ -1074,29 +971,30 @@ sub main'LoadMLNS
 	(*entry) = $val;
 		
 	if (defined $entry) { 
-	    $eval .= "\$main'$key = \$ml'$key;\n";
+	    eval "\$main'$key = \$ml'$key;";
+	    &main'Log($@) if $@; #';
 	    $ML_NameSpaceS{$key} = 1;
 	}
 
 	if (defined @key) { 
-	    $eval .= "\@main'$key = \@ml'$key;\n";
+	    eval "\@main'$key = \@ml'$key;";
+	    &main'Log($@) if $@; #';
 	    $ML_NameSpaceA{$key} = 1;
 	}
 
 	if ($key ne "_$package" && defined %key) { 
-	    $eval .= "\%main'$key = \%ml'$key;\n";
+	    eval "\%main'$key = \%ml'$key;";
+	    &main'Log($@) if $@; #';
 	    $ML_NameSpaceAA{$key} = 1;
 	}
     }
-
-    $eval .= "\%main'ML_NameSpaceS = \%ml'ML_NameSpaceS;\n";
-    $eval .= "\%main'ML_NameSpaceA = \%ml'ML_NameSpaceA;\n";
-    $eval .= "\%main'ML_NameSpaceAA = \%ml'ML_NameSpaceAA;\n";
-    
-    &Debug($eval) if $debug_ns;
-    eval($eval); 
-    &main'Log($@) if $@; #';
 }
 
-
+sub DEFINE_SUBJECT_TAG { 1;}
+sub DEFINE_MODE  { 1;}
+sub DEFINE_FIELD_FORCED  { 1;}
+sub DEFINE_FIELD_ORIGINAL { 1;}
+sub DEFINE_FIELD_OF_REPORT_MAIL  { 1;}
+sub ADD_FIELD     { 1;}
+sub DELETE_FIELD  { 1;}
 1;
