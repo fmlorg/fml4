@@ -438,13 +438,9 @@ check also GNU Privacy Gaurd.
 
 remove &Open()
 
-	kern/fml.pl
-	kern/libsmtpsubr.pl
-	kern/msend.pl
-	proc/libconfirm.pl
-	proc/libdist.pl
-	proc/libmti.pl
-	proc/librelayhack.pl
+  contrib/localhack/release-2/member_name/src/libmember_name.pl
+  contrib/mail2fax/libfax.pl
+  kern/libkernsubr.pl
 
 
 .S	アドレス一括書き換え
