@@ -5025,6 +5025,7 @@ sub do_mead
 
     &Conv($ml, "$exec_dir/include-mead", "$ML_DIR/$ml/include-mead");
     &Conv($ml, "$exec_dir/mead-aliases", "$ML_DIR/$ml/aliases");
+    &Conv($ml, "$exec_dir/mead_force.ph", "$ML_DIR/$ml/mead_force.ph.example");
 
     print "\n";
     print "   The next step: update your MTA configuration. For example\n";
