@@ -11,9 +11,10 @@
 	このファイルは昔FAQという名前でした。
 	FAQ、Setting、改造の仕方等に関するガイドになっています。
 	＃注意：なお改造は最新版を手に入れてから行なうのをお奨めします(^^)
+
 	ftp://ftp.phys.titech.ac.jp/pub/net/fml-current/
 	http://www.phys.titech.ac.jp/uja/fml/
-	＃README, INFOも見てくださいね、んがんん…
+
 .HTML_PRE_END
 
 ----------目次----------
@@ -779,120 +780,6 @@ lib Elena は 700、driver は755としておけば、
 	Ｋです。
 
 
-.# ##########################################################
-.#	command line options
-.include clo.wix
-
-
-.# ##########################################################
-.C	config.phの項目一覧
-.key	config.ph
-.label	{config}
-
-あくまで Advanced なので慣れてない人はデフォールトでもいっこう
-に構いませんし、この章は読み飛ばしていっこうに差し支えありません。
-#Mariel
-1.3.1.10 前後からは config.ph は項目ごとに並びかえられています。
-
-Advanced の中で今の御時世で特別注意を払うべきなものはこの辺でしょうか
-＃次の一覧も御覧下さい
-
-デバッグモード			.seealso debug-mode
-$debug		= 1;            
-
-自動登録			.seealso auto-regist
-$ML_MEMBER_CHECK = 0;
-
-ＭＩＭＥ			.seealso MIME-1, MIME-2
-$USE_LIBMIME	= 1;
-$LIBMIMEDIR	= "$DIR/contrib/MIME";
-
-ＮＩＦＴＹ対策			.seealso against-nifty
-$AGAINST_NIFTY = 1;		もう必要ないらしい
-
-ロックのしかた
-$USE_FLOCK	= 1;		
-
-誤動作コマンドチェック		.seealso command-plural2
-$COMMAND_CHECK_LIMIT = 3;
-
-＃簡易config.ph として config.ph-fundamental というのにもっとも基本的
-＃なカスタムだけ抜き出したファイルがあります。
-＃ここにでてくる変数だけをみるほうがわかりやすいかもしれません
-＃つかうなら config.ph-fundamental -> config.ph にしてください
-
-
-.S	設定一覧（Advanced Setting）
-
-
-■デバッグモード
-$debug		= 1;            
-
-■メンバーチェックと自動登録
-$ML_MEMBER_CHECK = 1;		# メンバーチェックするか否か？
-
-・メールの中身を問わずに自動登録する時
-$DEFAULT_SUBSCRIBE = "subscribe";
-				# ただメールをだせば自動登録の時に
-				# 登録アドレスを最初から代えたいなら
-				# subscribe Email-address としてもらう。
-
-・共通
-$AUTO_REGISTERD_UNDELIVER_P = 1;# 自動登録の時、登録願いメールをＭＬへ
-				# フォワードするか否か？
-
-$AUTO_REGISTRATION_LINES_LIMIT = 0;# この行数以下のメール、例えば
-				# ただ”subscribe”一行のメールはＭＬ
-				# へは流さない
-				#（上のUNDELIVER_Pの設定に拘らず）
-				#今は 0 の場合デフォールト 8と設定される
-
-
-・自動登録する時にキーワードを必要とする時
-
-$REQUIRE_SUBSCRIBE = "subscribe";# 自動登録でsubjectに "subscribe" が必要
-$REQUIRE_SUBSCRIBE_IN_BODY = 1;	# 自動登録で本文に    "subscribe" が必要
-
-
-■ヘッダの形
-
-$SUPERFLUOUS_HEADERS = 1;	# ヘッダのadditionalなものをそのまま保存
-				# 例えば X-うじゃ の類。
-				# デフォールトは切捨て
-
-$USE_LIBMIME	= 1;		# MIME decodingを行なう
-$LIBMIMEDIR	= "$DIR/contrib/MIME";
-				# MIME decodeをするためのライブラリ
-
-$STRIP_BRACKETS = 0;		# サブジェクト の [Elena:ID] 形を抜く
-$SUBJECT_HML_FORM = 1;		# Subject: [Elena:ID] の形
-$BRACKET	= 'Elena';	# Subject: [$BRACKET:$ID] ...
-				#           ^^^^^^^^キーワード
-
-$AGAINST_NIFTY = 1;		# ＮＩＦＴＹ対策にobsoleteなErrors-to
-				# をつける;_;
-
-■ Ｓｅｎｄｍａｉｌとのおつきあい
-
-$HOST		= 'localhost';	# どのマシンのSendmailを使う？
-
-■ＯＳ、その他
-
-$USE_FLOCK	= 1;		# ロックアルゴリズムの選択
-
-$COMMAND_SYNTAX_EXTENSION = 1;	# "#member"形と"# member"形は同じ意味
-
-$COMMAND_CHECK_LIMIT = 3;	# 最初の３行は間違いコマンド探しの対象
-				# としてチェックされます。
-
-$USE_WHOIS = 0;			# Whois libraryを使うか？
-$DEFAULT_WHOIS_SERVER = "localhost";	# Default whois server
-
-$USE_RFC934 = 0;		# まとめおくりで９３４フォーマット
-
-@ARCHIVE_DIR = ('old');		# gzipした記事群のアーカイブのおき場所
-
-
 .S	デバッグモード
 .label	{debug-mode}
 
@@ -900,6 +787,39 @@ $USE_RFC934 = 0;		# まとめおくりで９３４フォーマット
 るので、テストに使って下さいませ。０にすると配送もするようになります。
 .key	$debug
 	$debug        = 1;
+
+.S	配送されるメールのヘッダのカスタマイズ
+.seealso header-custom
+
+.S 	OS, MISC: OTHER CUSTOM OPTIONS
+.seealso config-misc
+
+.S HOOKS: ML-specific hooks e.g. "# list"
+.seealso	customize
+
+フックの章をみてください
+
+
+.# ##########################################################
+.#	command line options
+.include clo.wix
+
+
+.# ##########################################################
+.C	自動登録
+.label	{auto-regist}
+
+
+.S	基本挙動
+
+	１．メンバーファイルと比較して
+	２．見知らぬ人なら	
+	３．メンバーファイルに登録して
+	４．管理者へ知らせ
+	５．WELCOME（ひゅ〜ひゅ〜どんどんぱふぱふぅ）というメールを返す
+	６．	→ そのメールをＭＬにフォワードする（配送）
+	   or	→ そのメールをＭＬにフォワードしない（配送しない）
+	７．管理者にはいづれの場合でもメールをフォワードする
 
 
 .S	メンバーチェック or 自動登録
@@ -980,35 +900,6 @@ $DEFAULT_SUBSCRIBE = "subscribe";
 デフォールトは $AUTO_REGISTRATION_LINES_LIMIT = 8; となってます
 これを -1 にしておけば、たとえ 中身なしメールでも流れます:-)
 ＃０だと、８に変更されてしまうから
-
-
-.S	配送されるメールのヘッダのカスタマイズ
-.seealso header-custom
-
-.S 	OS, MISC: OTHER CUSTOM OPTIONS
-.seealso config-misc
-
-.S HOOKS: ML-specific hooks e.g. "# list"
-.seealso	customize
-
-フックの章をみてください
-
-
-.# ##########################################################
-.C	自動登録
-.label	{auto-regist}
-
-
-.S	基本挙動
-
-	１．メンバーファイルと比較して
-	２．見知らぬ人なら	
-	３．メンバーファイルに登録して
-	４．管理者へ知らせ
-	５．WELCOME（ひゅ〜ひゅ〜どんどんぱふぱふぅ）というメールを返す
-	６．	→ そのメールをＭＬにフォワードする（配送）
-	   or	→ そのメールをＭＬにフォワードしない（配送しない）
-	７．管理者にはいづれの場合でもメールをフォワードする
 
 
 .S	自動登録の時にSubject: subscribe と明示的に書いてもらうようにしたい
@@ -1213,59 +1104,66 @@ $START_HOOK  = q#
 .label	{header-custom}
 
 
-.S	ヘッダの形とadditionalなものをそのまま保存すること
+.S	ヘッダのフォーマット
 .key	ヘッダの保存
+.key	@HdrFieldsOrder 
+.key	--through
+
+fml はヘッダのフィールドの成形を行います。これは配列変数
+
+	@HdrFieldsOrder 
+
+に従い、その順番に並べかえます。凝る場合:-)は、 @HdrFieldsOrder を 
+config.ph 等で定義してください。
+
+@HdrFieldsOrder で定義された必要なフィー
+ルドのみをきりだしますが、Received: Return-Receipt-To: を除くすべての
+フィールドを使うには
+
+	$SUPERFLUOUS_HEADERS = 1;
+
+かコマンドラインで --through と定義してください。
+例：
+	fml.pl $DIR --through 
+
+
+
+.S	Cc: フィールドを“つけない”
+
+デフォールトではつけますので、切り落とすときは
+
+	$NOT_USE_CC = 1;
+
+
+.S	ヘッダでの MIME 問題
 .key	$PREVENT_MIME
 
-デフォールトはMIME の３つのフィールドは↓通します。
+デフォールトでMIME の３つのフィールドを通しています。
 
-$PREVENT_MIME をセットしない限り常に 
 	MIME-Version:
 	Content-Type:
 	Content-Transfer-Encoding:
-をとおす。（１．４）
 
+	$PREVENT_MIME = 1; 
+
+とするとこれらのフィールドを切り落とします。
 ＃つまり MIME反対派の方は $PREVENT_MIME をセットしてください
 
-それ以外のすべてのヘッダを通す（Received等はのぞく）時は
 
-.key	$SUPERFLUOUS_HEADERS
-	$SUPERFLUOUS_HEADERS = 1;	# preserve more header fields
-
-とすると実行できます。0なら案１です。
-＃保存する時はsub GetFieldsFromHeaderでマッチしないフィールドは保存し
-ている
-
-
-.S	CC: フィールドを“つけない”
-
-デフォールトではつけます
-$NOT_USE_CC = 1;
-
-
-.S	CC: フィールドだけをつける
-.key	$HEADER_ADD_HOOK
-
-［Obsolete］（やると↓二重についちゃうぞ）
-config.ph で
-
-$SUPERFLUOUS_HEADERS = 0;	# preserve more header fields
-
-として、なおかつ
-
-$HEADER_ADD_HOOK = q#
-    $body .= "Cc: $Cc\n" if($Cc);
-#;
-
-
-.S	MIME decodingを行なう
+.S	MIME Decoding を行なう
 .key	MIME
 .label	{MIME-1}
+.key	$USE_MIME
 
-summaryに書くsubjectをMIME decodeをしてから書き込むようにするなら１です。
+各種の MIME Decoding を行うためには、
 
-.key	$USE_LIBMIME
-	$USE_LIBMIME	= 1;		# when use MIME Extension in libMIME.pl
+	$USE_MIME	= 1;
+
+と定義します。これを定義した場合
+
+	「summaryに書くsubjectをMIME decodeをしてから書き込む」
+
+ようになります。
 
 例：
 	……
@@ -1277,26 +1175,16 @@ summaryに書くsubjectをMIME decodeをしてから書き込むようにするなら１です。
 
 	94/04/03 20:47:47 [1:fukachan@phys.t] Re: TELEPHONE そんなぁ〜
 
-
 と記録されます
 
 注意：subject をちょんぎったりはしませんが、一行にしてからdecodeして全
 部書いてます。summaryは１行１メールがわかりやすくていいでしょ？
-もし、２行のsubjectは２行でというなら
 
-at sub GetFieldsFromHeader in fml.pl
 
-    # for summary file
-    $Summary_Subject = $Subject;
-#    $Summary_Subject =~ s/\n(\s+)/$1/g;	←この行を削る
-    $User = substr($From_address, 0, 15);
+.S	MIME Decoding を行なうに関するメモ…
 
-とでもしておいて下さい。
-
-注意２ or メモ： ISO-2022-JP の文字がない限りは require しません（ま、
-たいしてかるくはならんが…）。fml.pl中の
-
-	local($INCLUDE_LIBMIME) = 1 if($MailHeaders =~ /ISO\-2022\-JP/o);
+ISO-2022-JP の文字がない限りは require しません（ま、たいして軽くはな
+らんが…）。
 
 .key RFC1522
 RFC1522	2. Syntax of encoded-words
@@ -1307,49 +1195,24 @@ RFC1522	2. Syntax of encoded-words
    token = 1*<Any CHAR except SPACE, CTLs, and especials>
 
 
-.S	配送するメールのMIME部分はDecodeしてしまいたい
+.S	配送するメールのMIME部分はDecodeしてから配送したい
 .label	{MIME-2}
 .seealso MIME-1
 
-では、配送するメールのMIME部分はDecodeしてしまいたい時はどうするか？
-例えば、fml.pl の sub GetFieldsFromHeaderで
+＃注意：以下試していない。
 
-    if($USE_LIBMIME && ($MailHeaders =~ /ISO\-2022\-JP/o)) {
-        require 'libMIME.pl';
-	$Summary_Subject = &DecodeMimeStrings($Summary_Subject);
-    }
+sub Distribute で
 
-を
+    for (@HdrFieldsOrder) {
+	$lcf = $_; $lcf =~ tr/A-Z/a-z/; # lower case field name
 
-    if($USE_LIBMIME && ($MailHeaders =~ /ISO\-2022\-JP/o)) {
-        require 'libMIME.pl';
-	$Summary_Subject = &DecodeMimeStrings($Summary_Subject);
-	$MailBody = &DecodeMimeStrings($MailBody);
-    }
+という部分を
 
-で本文の任意の ISO-2022-JP で始まる部分だけをMIME decodeします
+    for (@HdrFieldsOrder) {
+	if (/ISO\-2022\-JP/o) { $_ = &DecodeMimeStrings($_);}
 
-
-.S	MIME decodeをするためのライブラリ libMIME.pl はどこにあるか？
-.label	{MIME-3}
-	$LIBMIMEDIR	= "$LIBDIR/contrib/MIME";
-					# location in libMIME.pl
-
-mimer.plというものを使うinterface部分です。適当に移してくださいませ。
-最初はもっと大層なことをしていたのですが、今はmimer.plの関数を一個呼ぶ
-くらいです。改造はlibMIME.plの中をいじる方がいいでしょう。
-
-MIME decodingの解説：
-最初は、fj.sources,fj.lang.perlにながれた
-Message-ID: <C1977.94Jan24130052@crcsn82.mdc.crc.co.jp>
-という	mime_pls 1.00a	というもので
-
-mime_pls.doc   mimer.pl       mimew.pl       
-
-の３つセットです。この記事の後のパッチもあててあります。
-#thanks to c1977@crcsn82.mdc.crc.co.jp (private communication)
-
-いまでは 1.11a です。2.00alpha  も ftp.physにおいてあります
+とすれば ISO-2022-JP で始まる部分だけをMIME decodeします。
+実はこうすると、本文の中のMIMEもDecodeしてしまいますね(^^)
 
 
 .S	MIMEのカスタマイズ変数
@@ -1368,9 +1231,12 @@ $MIME_CONTENT_TYPE = 'multipart/mixed;';
 
 以下は MIME/Multipart で使う変数です。
 
-$MIME_MULTIPART_BOUNDARY   = "--Thu_18_May_95_02:36:26--"な形で日付を設定します。
+$MIME_MULTIPART_BOUNDARY = "--Thu_18_May_95_02:36:26--"
+
+な形で日付を設定します。
 
 そのあと、これら↓の変数を設定してます。
+
 	$MIME_MULTIPART_DELIMITER  = $MIME_MULTIPART_BOUNDARY;
 	$MIME_MULTIPART_DELIMITER .= "\nContent-Type: message/rfc822\n";
 	$MIME_MULTIPART_CLOSE_DELIMITER = $MIME_MULTIPART_BOUNDARY;
@@ -1388,11 +1254,14 @@ $MIME_MULTIPART_PREAMBLE = なし
 $MIME_MULTIPART_TRAILER = なし
 
 
-.S	Subject: [Elena:ID] サブジェクト の [Elena:ID] を抜く
+.S	Subject: の成形 ([Elena:ID] を抜く)
 .key	Subjectから[Elena:ID]を抜く
 .key	$STRIP_BRACKETS
 
-これは Subject: [Elena:ID] の形で配送するための前処理です。今は、
+	$STRIP_BRACKETS = 1;
+
+とすると、Subjectから [ML:fukachan] みたいな部分をカットする。
+これは Subject: [Elena:ID] の形で配送するための前処理です。
 
 	    # e.g. Subject: [Elena:001] Uso...
 	    $contents =~ s/\[$BRACKET:\d+\]\s*//g;
@@ -1402,10 +1271,6 @@ $MIME_MULTIPART_TRAILER = なし
 じるのは気持ち悪いので、そういうことを極力少なくするために（Subjectの
 変更は個人がやってくれると期待して）いじらないことにしました。
 
-変数は
-	$STRIP_BRACKETS = 0;		# Strip e.g. [ML:fukachan] in Subject
-
-１ならSubjectから [ML:fukachan] みたいな部分をカットする。
 
 解説：昔は、
 
@@ -1435,12 +1300,8 @@ $MIME_MULTIPART_TRAILER = なし
 何のために必要な前処理かというと、次を見てみよう(^^;;
 
 
-.S	hml 1.6 のSubjectの形がいいの
-
-次項参照↓
-
-
-.S	Subject: [Elena:ID] サブジェクトという形にする
+.S	hml 1.6 のSubjectのフォーマット
+.S	Subject: [Elena:ID] という形にする
 .key	$SUBJECT_HML_FORM
 .key	$BRACKET
 .key	hml形のSubject
@@ -1477,6 +1338,35 @@ Subject: [3:fukachan] フリーキックはやっぱりエレナさんが最高さ
 にしてます（config.phの中で）＃必要なので勝手にonしてしまいます
 
 
+.S	Subject: を (Elena 100) とかの任意の形に成形する
+
+	fml 	Subject: はいじらない
+	hml	Subject: [Elena:100]
+
+なんですが、他のフォーマットを使うために 
+例えば、
+
+	$SUBJECT_FREE_FORM = 1;
+	$BEGIN_BRACKET     = '(';
+	$BRACKET           = 'Elena';
+	$BRACKET_SEPARATOR = ' ';
+	$END_BRACKET       = ')';
+	$SUBJECT_FREE_FORM_REGEXP = "\\($BRACKET \\d+\\)";
+
+と定義すると (Elena 100) の形になり、Reply のメールの (Elena 99) をは
+ずし新しい (Elena 100) をつけるようになります。
+
+他の例： Subject: [Elena 100]
+
+	$SUBJECT_FREE_FORM = 1;
+	$BEGIN_BRACKET     = '[';
+	$BRACKET           = 'Elena';
+	$BRACKET_SEPARATOR = ' ';
+	$END_BRACKET       = ']';
+	$SUBJECT_FREE_FORM_REGEXP = "\\[$BRACKET \\d+\\]";
+
+	
+
 .S	ＮＩＦＴＹ対策をするか？（参加者にＮＩＦの人もいる）
 .label	{NIFTY}
 .label	{$AGAINST_NIFTY}
@@ -1509,7 +1399,7 @@ config.ph あたりで
 .key	$USE_ORIGINAL_MESSAGE_ID
 
 $USE_ORIGINAL_MESSAGE_ID = 1; とすると、オリジナルのMessage-IDを保存し
-てヘッダにつけます。
+てヘッダにつけます。デフォールトは fml がつけます。
 
 
 .S	Message-IDを個人の趣味でカスタム化する
@@ -1534,45 +1424,22 @@ $body .= "Message-ID: ".
 #;
 
 
-.S	宇宙歴0403.3238…（おあそびその１）
+.S	宇宙歴(外国TVシリーズMLで使ってます:-)
 
-＊＊＊ 削除しました(95/10/2) ＊＊＊
-libcompat.pl にBackward compatibility のためのコードがあります。
+	http://www.phys.titech.ac.jp/uja/Startrek/
 
-しゃれで作りました (_o_)
+config.ph で	$APPEND_STARDATE = 1; とすると宇宙歴がつきます:-)
 
-	$STAR_TREK_FORM = 1;
-とか config.ph でしておくと
+	Date: Fri, 19 May 95 22:31:09  JST
+	From: "No.6 Fukachan" <fukachan@phys.titech.ac.jp>
+	Subject: Re: Nantonaku Leonard Nimoy 
+	To: enterprise@phys.titech.ac.jp (Foreign TV Series ML)
+	X-ML-Name: Prisoner
+	X-Stardate: [-31]5697.8164
 
-Subject: [0403.00128] 外国ＴＶシリーズＭＬむけですね、これは
-＃もちろん外国ＴＶ ＭＬといえど実際には使ってないけど:-)
+	…本文略…
 
-みたいに、宇宙歴もどきとＩＤがセットの形をつけます（おあそび）。
-＃お遊びですが、One-actionだから許して(_o_)
-
-余談ですが、このStardateに意味はありません。翻訳の時に適当につけられた
-ものです。詳しくは、エンサイクロペディア等をごらんください。
-＃http://www.phys.titech.ac.jp/uja/Startrek/
-
-
-.S	宇宙歴その２
-
-外国ＴＶシリーズＭＬで使ってます:-)
-＃http://www.phys.titech.ac.jp/uja/Startrek/
-
-config.ph で	$APPEND_STARDATE = 1;
-
-Date: Fri, 19 May 95 22:31:09  JST
-From: "No.6 Fukachan" <fukachan@phys.titech.ac.jp>
-Subject: Re: Nantonaku Leonard Nimoy 
-To: enterprise@phys.titech.ac.jp (Foreign TV Series ML)
-X-ML-Name: Prisoner
-X-Stardate: [-31]5697.816493
-
-…本文略…
-
-みたいになります。
-スタートレックＦＡＱにプログラムがのっています
+みたいになります。スタートレックＦＡＱにプログラムがのっています
 libStardate.pl はその perl 版です。
 
 
@@ -1586,26 +1453,11 @@ Elena@phys.titech.ac.jp というＭＬで
 Elena@phys.titech.ac.jp	と Anna@phys.titech.ac.jp
 の両方を投稿可能にする（いくつあっても全部配列にして ずらずらかけばおなじ。）
 
-config.ph に次の設定をする。その複数のアドレスを(ループチェックに使うために)
+config.ph に次のような設定をしてください
 
 @PLAY_TO = (	'Elena@phys.titech.ac.jp', 
 		'Anna@phys.titech.ac.jp');
 
-のように、かいてください。配列の先頭がオリジナルのアドレス(==
-$MAIL_LIST)です。
-
-こうすると Elena になげても Anna に投げても どっちでもＯＫで、
-to: と reply-to:を変更します。
-＃名前の変更 in 1.5delta. Playing_to  -> SMTP_OPEN_HOOK
-
-＊＊＊ 注意： Playing_to は削除しました。 ＊＊＊
-libcompat.pl にBackward compatibility のためのコードがあります。
-
-
-あと、↓このように書いてみてください。
-
-例（全体）： 
-----------------------------------------------------------------
 # Here is a playing of "To addresses change"; string to eval
 $SMTP_OPEN_HOOK .= q#
     local($a);
@@ -1617,9 +1469,15 @@ $SMTP_OPEN_HOOK .= q#
     }
 #;
 
-----------------------------------------------------------------
+その複数のアドレスを(ループチェックに使うために) @PLAY_TO が必要です。
+配列の先頭がオリジナルのアドレス(==$MAIL_LIST)です。
 
+こうすると Elena になげても Anna に投げても どっちでもＯＫで、
+to: と reply-to:を変更します。
+＃名前の変更 in 1.5delta. Playing_to  -> SMTP_OPEN_HOOK
 
+＊＊＊ 注意： Playing_to は削除しました。 ＊＊＊
+libcompat.pl にBackward compatibility のためのコードがあります。
 
 
 
@@ -2437,7 +2295,6 @@ which とか
 .include remote.wix
 .include forward.wix
 .include fml_local.wix
-.include sid.wix
 .include ftpmail.wix
 .include modify.wix
 .include function.wix
@@ -2907,7 +2764,8 @@ Current(1.6以降) では、すべての変数は
 
 
 .include ref.wix
-.include appendix.wix
+.include app/fmlR1.wix
+.include app/sid.wix
 .# FAQ ENDS
 
 

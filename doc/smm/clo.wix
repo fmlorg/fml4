@@ -88,6 +88,10 @@ $LIBDIR にセットされます。
 	MAINTAINER = uja-admin@domain 
 	admin syntax を使う
 
+ --hml 
+	hml 1.6 compatible mode 
+	例えば Subject: [Elena:100] シンタックス等
+
  --fmlserv		
 
 	CONTROL_ADDRESS = fmlserv@domain
@@ -118,6 +122,9 @@ $LIBDIR にセットされます。
 	
 	この index.html の中では 逆順 つまり １００、９９、…
 	のように URLが並ぶ
+
+ --mime
+	$USE_MIME = 1;
 
  --force:field=value
 
