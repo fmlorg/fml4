@@ -117,13 +117,15 @@ sub Init
     }
 
     %Prog = ( 
-	     'phase1:text', 'ReadFile',
-	     'phase1:html', 'ReadFile',
-	     'phase1:roff', 'ReadFile',
+	     'phase1:text',  'ReadFile',
+	     'phase1:html',  'ReadFile',
+	     'phase1:roff',  'ReadFile',
+	     'phase1:latex', 'ReadFile',
 
-	     'phase2:text', 'OutputFile',
-	     'phase2:html', 'OutputFile',
-	     'phase2:roff', 'OutputFile',
+	     'phase2:text',  'OutputFile',
+	     'phase2:html',  'OutputFile',
+	     'phase2:roff',  'OutputFile',
+	     'phase2:latex', 'OutputFile',
 	     );
 }
 
@@ -230,6 +232,9 @@ sub Print
 {
     # Save the body
     if ($mode eq 'text') {
+	print "$Tag$_\n";
+    }
+    elsif ($mode eq 'latex') {
 	print "$Tag$_\n";
     }
     elsif ($mode eq 'html') {
@@ -344,7 +349,7 @@ sub ReadFile
 	if (/^\.($HTML_KEYWORD)/) {
 	    print STDERR "\tCATCH HTML($&)\n" if $verbose;
 	    if ($mode eq 'html')  {
-		s/^\.($HTML_KEYWORD)/($_  = &HtmlExpand($1, $2, $file, $mode)) || next/e;
+		s/^\.($HTML_KEYWORD)/($_ = &HtmlExpand($1, $2, $file, $mode)) || next/e;
 	    }
 	    else {
 		next;		# skip .HTML.*
@@ -561,6 +566,32 @@ sub OutputFile
 
 	    print $_;
 	}
+    }
+    elsif ($mode eq 'latex') {
+	# &OutputLaTex('ENG');
+	&OutputLatex('TMPF');
+    }
+
+}
+
+
+sub OutputLatex
+{
+    local($input) = @_;
+
+    while (<$input>) {
+	undef $Error;
+
+	s/\#\.ptr\{(\S+)\}/&PtrExpand($1)/gei;
+	s/^\#\.xref\s+(.*)/&IndexExpand($1)/gei;
+	s/^\#\.url\s+(.*)/&IndexExpand($1,1)/gei;
+	s/^(\#\.index)/$Index{$Lang}/; 
+	s/^=S//;
+
+	print STDERR "==Error:\n- $prev\n+ $_\n" if $Error; 
+	$prev = $_;
+
+	print $_;
     }
 }
 
