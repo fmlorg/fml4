@@ -51,13 +51,18 @@ sub Command
       # skip null line
       next GivenCommands if /^\s*$/o; 
 
-      &SecureP($_) || last GivenCommands;
-
       # e.g. *-ctl server, not require '# command' syntax
-      $_ = "# $_" if $COMMAND_ONLY_SERVER && (!/^\#/o); 
+      if ($COMMAND_ONLY_SERVER && (!/^\#/o)) { $_ = "# $_";}
+
+      # check '# in-secre-matching-pattern ...' 
+      next GivenCommands unless /^\#\s*\w+/o;	# against the signature(NOT COMMAND_ONLY)
+
+      print STDERR "SECURE CHECK IN>$_\n" if $debug;
+      &SecureP($_) || last GivenCommands;
+      print STDERR "SECURE CHECK OK>$_\n" if $debug;
 
       ### Illegal syntax
-      if (! /^#/o) {
+      if (! /^\#/o) {
 	  next GivenCommands unless $USE_WARNING;
 
 	  &Log("ERROR:Command Syntax without ^#");

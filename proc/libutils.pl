@@ -541,6 +541,7 @@ sub SecWarn
 	&Log("INSECURE [$_[0]] has illegal characters", "$`($&)$'");
 	$s = "INSECURE WARNING\nFrom: $From_address\n\n$_[0]\nIllegal chars \"$`$'\"\n";
     }
+
     &Warn("Insecure [$_[0]] $ML_FN", "$s\n".('-' x 30)."\n". &WholeMail);
 }
 

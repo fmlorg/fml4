@@ -90,7 +90,7 @@ sub ExecMSend
     &MSend4You;			        # MAIN
 
     if ($_cf{"opt:n"}|| $debug && ($ID % 3 == 0)) {     # debug mode
-	print STDERR "DEBUG MODE try turn over @NEWSYSLOG_FILES\n";
+	print STDERR "DEBUG MODE try turn over \@NEWSYSLOG_FILES \n";
 	require 'libnewsyslog.pl'; 
 	&NewSyslog(@NEWSYSLOG_FILES);
     }
@@ -649,9 +649,13 @@ sub InitConfig
 	($AUTO_REGISTERED_UNDELIVER_P = $AUTO_REGISTERD_UNDELIVER_P);
 
     ### Initialize DIR's and FILE's of the ML server
+    local($s);
     for ('SPOOL_DIR', 'TMP_DIR', 'VAR_DIR', 'VARLOG_DIR', 'VARRUN_DIR') {
-	eval("-d \$$_ || mkdir(\$$_, 0700); \$$_ =~ s#$DIR/##g;");
+	$s .= "-d \$$_ || mkdir(\$$_, 0700); \$$_ =~ s#$DIR/##g;\n";
+	$s .= "\$FP_$_ = \"$DIR/\$$_\";\n"; # FullPath-ed (FP)
     }
+    eval($s) || &Log("FAIL EVAL SPOOL_DIR ...");
+
     for ($ACTIVE_LIST, $LOGFILE, $MEMBER_LIST, $MGET_LOGFILE, 
 	 $SEQUENCE_FILE, $SUMMARY_FILE, $LOG_MESSAGE_ID) {
 	-f $_ || &Touch($_);	

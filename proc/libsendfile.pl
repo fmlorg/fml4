@@ -121,7 +121,7 @@ sub mget3
     ###### for Headers and a few variables
     $0 = "--mget3 try send-back-processes $FML $LOCKFILE>";
 
-    $which     = " @value ";	# file1 file2 ... (MAY BE NOISY?)
+    $which     = join(" ", @value);# file1 file2 ... (MAY BE NOISY?)
     $mode      = $cf{'mode'};	# set $mode !
     $subject   = $e{'r:Subject'} || "Matomete Send [$which $cf{'mode-doc'}]";
     $to        = $cf{'reply-to'} = $e{'Addr2Reply:'};
