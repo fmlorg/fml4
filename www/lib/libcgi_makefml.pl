@@ -382,8 +382,11 @@ sub Translate2LogOption
 	    return $NULL;
 	}
     }
+    elsif ($x eq 'all') {
+	return 'all';
+    }
     else {
-	&ERROR("invalid 'log' option");
+	&ERROR("invalid 'log' command option");
 	return $NULL;	
     }
 }
