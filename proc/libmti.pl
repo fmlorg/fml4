@@ -425,7 +425,10 @@ sub Date2UnixTime
     $shift = $shift_t + ($shift_m/60);
     $shift = ($pm eq '+' ? -1 : +1) * $shift;
 
-    &timegm($sec,$min,$hour,$day,$month,$year) + $shift*3600;
+    local($t);
+    eval('$t = &timegm($sec,$min,$hour,$day,$month,$year) + $shift*3600');
+    &Log($@) if $@;
+    $t;
 }
 
 
