@@ -496,13 +496,13 @@ To create "mbox", you use lib/Utilities/packmbox.pl and runs
 うことができて便利でしょう。
 
 .S	配送するメールのMIME部分はDecodeしてしまいたい
-=E.S	MIME-Decode MIME parts of a mail to distribute
+=E.S	MIME-Decode MIME parts of mail to distribute
 .xref	MIME-1
 
 では、配送するメールのMIME部分はDecodeしてしまいたい時はどうするか？
 例えば、fml.pl の sub GetFieldsFromHeaderで
 =E
-To MIME-Decode MIME parts of a mail to distribute is to change
+To MIME-Decode MIME parts of mail to distribute is to change
 
     if ($USE_LIBMIME && ($MailHeaders =~ /ISO\-2022\-JP/o)) {
         require 'libMIME.pl';

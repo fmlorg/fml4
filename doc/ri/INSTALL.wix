@@ -93,7 +93,7 @@ elena MLを作る。
 ないます。配送自体はＭＬサーバの役目ではありません。
 =E
 Fml, a ML server (manager) is a filtering process. It does not need to
-handle delivery process. MTA receives a mail, kicks off fml and
+handle delivery process. MTA receives mail, kicks off fml and
 injects the mail to fml. fml checks, adjusts the mail header and body,
 and distribute the ML article to ML members by passing it to MTA for
 delivery.
@@ -117,7 +117,7 @@ delivery.
 [Figure]
 
 <a host>                                      <ML Server Host>
-a mail from a member
+mail from a member
    |
    V                    kick off fml
  MTA (e.g. sendmail)   ------------------>     
@@ -142,7 +142,7 @@ A mailing list driver can accept commands, too.
 アルタイムにＭＬの記事(メール)を読むより、例えば3時間に一度過去3時間の
 メールをまとめて読む「まとめ送り」を好む人もいます。
 =E
-Only when a mail comes in, fml is kicked off. That is event driven.
+Only when mail comes in, fml is kicked off. That is event driven.
 The traffic is intermittent. If you are concerned with the traffic
 burst, you can receive a digest e.g. once per three hours.
 
@@ -767,7 +767,7 @@ and delete the entries in /etc/aliases.
 場合、elena ML の /var/spool/ml/elena/crontab が見本なので
 =E
 Digest delivery is to send articles in one mail periodically not real
-time delivery of a mail when the server receives a mail.
+time delivery of mail when the server receives mail.
 
 	% crontab /var/spool/ml/elena/crontab 
 
@@ -933,7 +933,7 @@ writable であるような設定が必要なことに注意して下さい。最初に fmlserv
 以下ＭＬへのユーザの登録・削除等について述べますが、もしＭＬサーバを作
 るのと同じマシンルからＭＬへメールを出すとすると、設定によっては
 =E
-When you send a mail to a mailing list server on the same machine as
+When you send e-mail to a mailing list server on the same machine as
 one running mailing list servers, your mail header may have NOT
 
 	From: username@domain 
@@ -1079,7 +1079,7 @@ The list of choice is
 		自動登録			auto_regist
 		無視(管理者へ報告だけする)	ignore
 =E
-If a mail comes from not a ML member, what action should be done?
+If mail comes from not a ML member, what action should be done?
 (=> Section .ptr{ACCESS_POLICY})
 =S
 	send back "deny" file to notify "reject"	reject
@@ -1100,7 +1100,7 @@ and
 設定して下さい。『もしメンバー以外からメールが来たら自動登録処理ルーチ
 ン』へいって登録処理が行なわれます。
 =E
-Automatic registration is done when a mail comes to an address form
+Automatic registration is done when mail comes to an address form
 not member and the mode for the address is "auto_regist".
 
 .if LANG == JAPANESE
@@ -1250,7 +1250,7 @@ The permission for post address has the following choice:
 		自動登録			auto_regist
 		無視(管理者へ報告だけする)	ignore
 =E
-If a mail comes from not a ML member, what action should be done?
+If mail comes from not a ML member, what action should be done?
 =S
 	send back "deny" file to notify "reject"	reject
 	automatic registration/subscription		auto_regist
@@ -1837,7 +1837,7 @@ Please see doc/op.jp for more details.
 
 ○ メールの中身のフィルタリングについて
 =E
-*  FILTERING FOR A MAIL BODY
+*  FILTERING FOR MAIL BODY
 .q
 "本文がないメール"や"unsubscribe だけ"のメールをＭＬに流さない。
 MIME/Multipart の場合は最初のブロックの中身を評価の対象にします。
@@ -1874,7 +1874,7 @@ If MIME/Multipart mail is input, fml checks only the first block.
 もしれない;_;。yes を一応推奨
 =E
 Inspect the ML traffic. If the traffic is over some threshold, fml
-regard it as a mail bomb and rejects mails from the sender.
+regard it as mail bomb and rejects mails from the sender.
 .~q
 
 ○ MAX_MAIL_SIZE (default: 未定義 == 無制限) 
@@ -1885,8 +1885,8 @@ regard it as a mail bomb and rejects mails from the sender.
 メールサイズの最大値(デフォールトでは無制限)。貼付ファイルを許すか否か
 でサイズ制限は決まるだろう。ちなみに fml.org では500K bytes にしている。
 =E
-The maximum size of a mail (for both article and command mail). This
-size must depend on the policy that your ML accepts a mail with
+The maximum size of mail (for both article and command mail). This
+size must depend on the policy that your ML accepts mail with
 appended files.
 .~q
 
@@ -2561,7 +2561,7 @@ Append in config.ph (before the last "1;")
 
 	$INCOMING_MAIL_SIZE_LIMIT The upper limit of mail size
 	$USE_DISTRIBUTE_FILTER    Filtering
-	$USE_MTI                  Traffic Monitor against e.g. a mail bomb
+	$USE_MTI                  Traffic Monitor against e.g. mail bomb
 	$UNSUBSCRIBE_AUTH_TYPE    confirmation of unsubscription
 	$USE_LOG_MAIL             logging all mails fml received
 .fi

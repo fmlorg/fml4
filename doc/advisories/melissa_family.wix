@@ -142,7 +142,7 @@ if ($e{'h:content-type:'} =~ /boundary=\"(.*)\"/i ||
 	$DO_NOTHING = 1;
 	&Log("EnvelopeFilter::reject for '$r'");
 	&Warn("Rejected mail by FML EnvelopeFilter $ML_FN", 
-	      "A mail from $From_address\nis rejected for '$r'.\n".&WholeMail);
+	      "Mail from $From_address\nis rejected for '$r'.\n".&WholeMail);
     }
 }
 

@@ -198,7 +198,7 @@ of UNIX and administration policy.
 POP3 で読んできたメールをどの program へ渡せばいいのか？
 例:
 =E
-filtering program which we inject a mail to. Example: 
+filtering program which we inject mail to. Example: 
 
    $POP_EXEC = "/usr/local/fml/fml.pl /var/spool/ml/Elena";
 

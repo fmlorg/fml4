@@ -75,7 +75,7 @@ relay server, you need to reconfigure MTA's on relay machines.
 なお $DEFAULT_RELAY_SERVER が定義されている場合は強制的に全てのメールを
 =E
 You can use $DEFAULT_RELAY_SERVER as a default relay server. fml.pl
-sends a mail to deliver to the default relay server. The server
+sends mail to deliver to the default relay server. The server
 delivers it.
 
 	$DEFAULT_RELAY_SERVER

@@ -11,7 +11,7 @@
 ぞれ独立に動いているので、統一的にクロスポストを処理することができませ
 ん。
 =E
-When a mail is cross-posted over ML's, each ML driver passes them
+When mail is cross-posted over ML's, each ML driver passes them
 through.  Hence the number of mails is amplified since each ML driver
 runs independently. It is too sad;-)
 
@@ -38,7 +38,7 @@ There exist two solutions to avoid this.
 基本方針として「最悪のケースを常に想定する」ので、実装として２を選択し
 ます。
 =E
-When the communication or protocol fails in the case 1, a mail loop
+When the communication or protocol fails in the case 1, mail loop
 may occur over Internet.  In the case 2, we turn back again to the
 current independent delivery. We avoid loops at lease.  We adopt
 scenario 2.
@@ -50,7 +50,7 @@ scenario 2.
 か個人なのか見わける手段はないわけですが:-)
 =E
 Also in scenario 2, FML can interpret member lists for other ML
-drivers though other drivers deliver a mail irrespective of a ML or a
+drivers though other drivers deliver mail irrespective of a ML or a
 person address.  FML needs to know the ML's information to determine
 cross post or not among ML's.
 
@@ -90,7 +90,7 @@ is found firstly in "a" ML member list, the "a" ML driver delivers the
 mail to aoi@chan.panic.  If ML is "b", the driver should not deliver
 it.  This is cross post operation. It is important that ML servers run
 independently. Each mailing list driver determines which address it
-should deliver a mail to.
+should deliver mail to.
 
 ポイントは、このプロセスを全部のＭＬサーバが独立に実行するところです。
 そして

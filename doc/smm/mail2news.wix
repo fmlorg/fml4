@@ -13,7 +13,7 @@ NNTPClient.pm の使い方の例とでもいう方がいいかもしれない。perl 5 での
 み使える機能です。また NNTPClient.pm がインストールされていることが必
 要です。
 =E
-mail2news injects a mail (distributed in a mailing list) to NetNews.
+mail2news injects mail (distributed in a mailing list) to NetNews.
 We use NNTPClient.pm as NNTP engine to implement it. Please see
 contrib/mail2news/.
 

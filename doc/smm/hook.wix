@@ -359,7 +359,7 @@ $COMMAND_HOOK.
 =E.S	Example: to discard an over length mail
 .k	$START_HOOK
 
-We discard a mail with over 1000 lines. Today please use
+We discard mail with over 1000 lines. Today please use
 $INCOMING_MAIL_SIZE_LIMIT for incoming mail size upper limit.
 .xref $INCOMING_MAIL_SIZE_LIMIT
 	

@@ -34,7 +34,7 @@ the limit of a bomb or not.
 =E
 FML 2.2 (after 2.1B) has internal traffic monitor system called "MTI".
 It checks the traffic and detects intermittency (burst) effect of
-traffic against a mail bombing. It is applicable to trap mail loops
+traffic against mail bombing. It is applicable to trap mail loops
 for a bonus:) though several loop checks must reject the loop before
 MTI routines.
 
@@ -52,7 +52,7 @@ burst of mail traffic. This logic is effective except for the case
 burst that traffic from network errors and hosts over UUCP or DIP
 service.  We cannot determine the burst occurs from network errors or
 bombings. We should observe the burst to assume the possibility that
-we regard network errors as a mail bombing.
+we regard network errors as mail bombing.
 
 いづれの場合でも「意図的なアタックを自動検出できるか？」はどの程度 
 fake されたメールが FML につっこまれるかに依存します。これはSMTPに認証
@@ -61,7 +61,7 @@ fake されたメールが FML につっこまれるかに依存します。これはSMTPに認証
 =E
 In all cases, how effect MTI depends on the fake level of injected
 mails.  Since SMTP has no authentication now, we cannot believe
-anything except for the time when a mail kicks off fml.pl.
+anything except for the time when mail kicks off fml.pl.
 
 .S	Mail Traffic Information
 
@@ -90,7 +90,7 @@ Here we use TeX statements to show some mathematical concepts.
 になるが)としよう。
 =E
 Consider a time sequence of mails incoming to fml.pl. Let the time
-when a mail m_i comes and runs fml.pl be t_i, the Date: time of the
+when mail m_i comes and runs fml.pl be t_i, the Date: time of the
 mail be d_i. "i" is an index number. It has the same order as the
 article sequence number ordering.
 
@@ -177,7 +177,7 @@ sequences d_i (Date:) in the same way. So consider
 値は大きくはならないはずである。当然それがうまく判定されるような 
 threshold をうまく選んでおく必要がある。
 =E
-Usually we edit a mail draft and post it on random time sequence.
+Usually we edit mail draft and post it on random time sequence.
 Hence the time of Date: is random. When network errors delay mail
 delivery, Date: is random (E{d} is small) and fml.pl runs in burst
 (E{t} is large). When a real mail bomb attack you, both E{d} and E{t}

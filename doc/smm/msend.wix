@@ -592,9 +592,9 @@ Let actives (delivery list) be like this.
 わけです。
 =E
 Conclusion: FML does not send stored articles somewhere but generates
-a mail with a bundle of articles for a user and sends it to him/her
-each time. It enables the customization for each user. The degree of
-freedom is the same as that of "mget" command.
+mail with a bundle of articles for a user and sends it to him/her each
+time. It enables the customization for each user. The degree of
+freedom is the same as that of "mget" command. 
 
 そのため各個人ごとに送り方を完全にカスタマイズすることが可能になるわけです。
 また送る時の記事のまとめ方も mget コマンドと同じだけの自由度が選べます。

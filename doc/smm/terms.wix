@@ -83,7 +83,7 @@ There will be two patterns of "How to edit the files".
    a.	admin ないし apporove コマンドをfmlのサーバに送り込む
 =E
 1.2	not log in the machine
-   a.	send a mail with several commands to fml server
+   a.	send e-mail with several commands to fml server
 	e.g. "admin add <address>" or "apporove PASSWORD add <address>" ..
 
 という複数の方法があります。これら全部を手動登録という単語でくくってい

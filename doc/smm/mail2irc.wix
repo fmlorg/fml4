@@ -71,7 +71,7 @@ $IRC_SIGNOFF_MSG = "そ、そなの？";
 config.phに付け加える例:
 メーリングリストに来た記事をIRCへリレーする
 =E
-Relaying a mail to IRC and put the mail body to the channel "#test".
+Relaying mail to IRC and put the mail body to the channel "#test".
 
 $IRC_SERVER  = "hikari.sapporo.iij.ad.jp";
 $IRC_PORT    = 6667;

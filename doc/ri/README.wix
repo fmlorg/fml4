@@ -123,7 +123,7 @@ ML is a filtering process, so it consists of
    2. delivery process which process understands SMTP
 
 The delivery (MTA 2) and kick-off (MTA 1) processes can be essentially
-different ones. FML runs on the host which receives a mail submitted
+different ones. FML runs on the host which receives mail submitted
 to ML. MTA 2 (delivery system) can run on another hosts other than MTA
 1. Plural MTA's for delivery are available to accelerate it.
 .fi
@@ -260,12 +260,12 @@ fml-query@ffs.fml.org へ送るとそのメールは fml-support MLへフォワード
 思います。
 .fi
 .if LANG == ENGLISH
-If you want to take a contact with only the author, please send a mail
-to the address <fml-bugs@ffs.fml.org>.
+If you want to contact only the author, please send e-mail to the
+address <fml-bugs@ffs.fml.org>. 
 .#
 .# I recommended you've better to send your questions to fml-users or
 .# fml-query than fml-bugs since I am so busy, so the reply may be
-.# delayed a lot usually. When you send a mail to ML, some experts of ML
+.# delayed a lot usually. When you send e-mail to ML, some experts of ML
 .# may help your questions. If I am not busy, you may receive my reply
 .# soon but in a lot of cases very slowly.
 .#

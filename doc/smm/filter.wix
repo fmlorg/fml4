@@ -45,7 +45,7 @@ To: username@domain (uja) 偶及丟□伙反�礿怜舅�心卅允﹝
 公木動陸反蟈朿旦皿□伙卞侹允﹋忔騷及街が﹌
 =E
 Example: 
-A mail with "To: username@domain (uja)"  is injected to fml.pl.
+Mail with "To: username@domain (uja)"  is injected to fml.pl.
 All others are saved in /var/mail/fukachan.
 〃〃〃〃〃〃〃〃〃〃〃〃〃〃〃〃〃〃〃〃〃〃〃〃〃〃〃〃〃〃〃
 #field   pattern   action  result    string

@@ -62,7 +62,7 @@ have several mail addresses, pay attention!
 
 メーリングリスト(以下適宜メーリングリストをＭＬと略す)とはあるアドレス
 =E
-A mailing list (ML) is mail forwarding mechanism. When you send a mail
+A mailing list (ML) is mail forwarding mechanism. When you send mail
 to the address
 
 		_MAIL_LIST_ 
@@ -259,7 +259,7 @@ _CTK_objective         Get ML objective
 _CTK_guide             Get ML guide (non-members are allowed to use
                     this command)
 
-_CTK_msg               Send a mail to ML administrator
+_CTK_msg               Send mail to ML administrator
 
 _CTK_summary [arg]     Get a summary of ML articles
                     arg: range of the ML articles
