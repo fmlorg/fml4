@@ -2,7 +2,7 @@
 	TODO of fml Mailing List Server Package
 .if LANG == JAPANESE
 	やり残し、やろうかなとおもってること
-	(誰かやってたらパッチください:-)
+	(誰かすでにやってたらパッチください)
 
 				深町 賢一
 .fi
