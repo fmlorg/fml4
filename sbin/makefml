@@ -23,7 +23,7 @@ if ($IN_CHANNEL eq 'stdin') {
     @ARGV = split(/\s+/, <STDIN>);
 }
 elsif (! @ARGV) { 
-    &ExecCmd("info");
+    # &ExecCmd("info");
     &MenuInputLoop if $opt_w;
     exit 0;
 }
