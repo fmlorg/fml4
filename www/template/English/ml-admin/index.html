@@ -5,12 +5,12 @@
 "fml" Configuration Interface for _ML_ mailing list
 </TITLE>
 <META http-equiv="Content-Type"
-        content="text/html; charset=us-ascii">
+	content="text/html; charset=ISO-2022-JP">
 <LINK rev="made" href="mailto:fml-bugs@fml.org">
 <LINK rev="Contents" href="index.html">
+<LINK rev="alternate" lang="en" href="index-e.html">
 <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 </HEAD>
-
 <BODY BGCOLOR="#E6E6FA">
 <!-- =================================================================== -->
 <H2>
@@ -19,68 +19,64 @@
 </CENTER>
 </H2>
 
-<PRE>
-_ML_ mailing list Configration Change Page
-</PRE>
-
 <P>
 <UL>
 <LI><A HREF="_CGI_PATH_/ml-admin/_ML_/menu.cgi?LANGUAGE=Japanese">[Japanese]</A>
-<LI><A HREF="#add.bye">user add/del</A>
-<LI><A HREF="#adminadd.bye">admin user add/del</A>
-<LI><A HREF="#config">_ML_ Configration</A>
-<LI><A HREF="#password">admin user password</A>
-<LI><A HREF="#log">show logfile</A>
+<LI><A HREF="#add.bye"> add/remove a ML member </A>
+<LI><A HREF="#adminadd.bye"> add/remove a remote administrator </A>
+<LI><A HREF="#config">_ML_  ML's setup in detail </A>
+<LI><A HREF="#password"> password for a remote administrator </A>
+<LI><A HREF="#log"> see ML's log </A>
 </UL>
 
 
 <HR>
 <UL>
 
-   <LI>user add/del
+   <LI> add/remove a ML member 
 
 	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
-	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=English>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<TABLE>
 	<TR>
-		<TD ALIGN=right> Email Address:
+		<TD ALIGN=right>  Email address:
 		<TD ALIGN=left> <INPUT NAME=SPECIFIC_MAIL_ADDR SIZE=30>
 		<TABLE>
-			<TD ALIGN=left>Select
+			<TD ALIGN=left> choice:
 			<TD ALIGN=right>
 			<SELECT NAME=MAIL_ADDR SIZE=2 >
 			__EXPAND_OPTION_MEMBER_LIST__
 			</SELECT>
 		</TABLE>
 	<TR>
-		<TD ALIGN=right> add/del:
+		<TD ALIGN=right>  add/remove a ML member:
 		<TD ALIGN=left> 
-		<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
+		<INPUT TYPE=hidden NAME=ML VALUE=_ML_>
 		<SELECT NAME=PROC SIZE=2 >
-		<OPTION VALUE=ADD>Add
-		<OPTION VALUE=BYE>Del
+		<OPTION VALUE=ADD>ADD add a new member 
+		<OPTION VALUE=BYE>BYE remove a member 
 		</SELECT>
 	</TABLE>
 	_____________________________
 	<BR>
 	<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
-	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+	<INPUT NAME=reset-p TYPE=reset VALUE=Reset>
 	</FORM>
 
 
    
    <A NAME=adminadd.bye>
-   <LI>admin user add/del
+   <LI> add/remove a remote administrator 
 	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
-	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=English>
-	<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<INPUT TYPE=hidden NAME=ML VALUE=_ML_>
 
 	<TABLE>
 	<TR>
-		<TD ALIGN=right> Email address:
+		<TD ALIGN=right>  Email address:
 		<TD ALIGN=left> <INPUT NAME=SPECIFIC_MAIL_ADDR SIZE=30>
 		<TABLE>
-			<TD ALIGN=left>Select:
+			<TD ALIGN=left> choice:
 			<TD ALIGN=right>
 			<SELECT NAME=MAIL_ADDR SIZE=2 >
 			__EXPAND_OPTION_ADMIN_MEMBER_LIST__
@@ -88,83 +84,78 @@ _ML_ mailing list Configration Change Page
 		</TABLE>
 
 	<TR>
-		<TD ALIGN=right> Add/Del:
+		<TD ALIGN=right>  add/remove:
 		<TD ALIGN=left> 
 		<SELECT NAME=PROC SIZE=2 >
-		<OPTION VALUE=ADD_ADMIN>Add Admin User 
-		<OPTION VALUE=BYE_ADMIN>Del Admin User
+		<OPTION VALUE=ADD_ADMIN>ADD ADMIN  (add a remote administrator)
+		<OPTION VALUE=BYE_ADMIN>BYE ADMIN  (remove a remote administrator)
 		</SELECT>
 	</TABLE>
 	_____________________________
 	<BR>
 	<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
-	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+	<INPUT NAME=reset-p TYPE=reset VALUE=Reset>
 	</FORM>
 
 <HR>
    <A NAME=config>
-   <LI>Configuration(makefml config)
+   <LI> setup in detail  (makefml config)
 	<BR>
 	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
-	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=English>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=config>
-	<INPUT TYPE=hidden NAME=PTR  VALUE=/>
-	<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
+	<INPUT TYPE=hidden NAME=PTR VALUE=/>
+	<INPUT TYPE=hidden NAME=ML VALUE=_ML_>
 	<INPUT NAME=submit-p TYPE=submit VALUE=GO>
-	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+	<INPUT NAME=reset-p TYPE=reset VALUE=Reset>
 	</FORM>
 
 
 <HR>
 	<A NAME=password>
-	<LI>admin user's password
+	<LI> password for a remote administrator 
 	<BR>
-	This operation changes  for
-	admin or approve command password and GUI menu authorize password
-	<BR>
-	If you use GUI menu ,same password
-	<BR>
-	IF you use CUI menu(makefml htpasswd) , you can set other password.
+	update passwords for admin command, approve command and CGI.
 
 	<!- apply patch by ikeda@meple.or.jp ->
 	<!- http://www.maple.or.jp/~ikeda/diffs/fml/ml-admin_index_html.diff ->
 	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
-	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=English>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=passwd>
 	<INPUT TYPE=hidden NAME=ML VALUE=_ML_>
 	<TABLE>
 	<TR>
-		<TD ALIGN=right> Admin User Email Address:
+		<TD ALIGN=right>  Email address:
 		<TD ALIGN=left> <INPUT NAME=MAIL_ADDR SIZE=30>
 
 	<TR>
-		<TD ALIGN=right> password:
+		<TD ALIGN=right>  password:
 		<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD SIZE=30>
 
 	<TR>
-		<TD ALIGN=right> password again:
+		<TD ALIGN=right>  password again:
 		<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD_VRFY SIZE=30>
 	</TABLE>
 	_____________________________
 	<BR>
 	<INPUT NAME=submit-p TYPE=submit VALUE=Go>
-	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+	<INPUT NAME=reset-p TYPE=reset VALUE=Reset>
 	</FORM>
 
    <HR>
    <A NAME=log>
-   <LI>Show Log file
+   <LI> see ML's log 
 
 	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
-	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=English>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=log>
-	<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
+	<INPUT TYPE=hidden NAME=ML VALUE=_ML_>
 
 	<BR>
-	<INPUT NAME="OPTION" TYPE="radio" VALUE="tail" checked>Last N Line
+	<INPUT NAME="OPTION" TYPE="radio" VALUE="tail" checked> the last N lines 
 	<INPUT NAME="TAIL_SIZE" VALUE=100 SIZE=5>
 	<BR>
-	<INPUT NAME="OPTION" TYPE="radio" VALUE="day">Day
+	<INPUT NAME="OPTION" TYPE="radio" VALUE="day"> one day 
 	<SELECT NAME="YYYY" SIZE=2 >
 	__EXPAND_YYYY__
 	</SELECT>
@@ -175,7 +166,7 @@ _ML_ mailing list Configration Change Page
 	__EXPAND_DD__
 	</SELECT>
 	<BR>
-	<INPUT NAME="OPTION" TYPE="radio" VALUE="all">All
+	<INPUT NAME="OPTION" TYPE="radio" VALUE="all"> all 
 
 	<BR>
 

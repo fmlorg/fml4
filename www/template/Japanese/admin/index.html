@@ -26,9 +26,9 @@
 		<LI><A HREF="#newml">新規ＭＬの作成</A>
 		<LI><A HREF="#add">ＭＬメンバーの登録</A>
 		<LI><A HREF="#bye">ＭＬメンバーの削除</A>
-		<LI><A HREF="#admin.add">ＭＬ管理者の登録</A>
-		<LI><A HREF="#admin.bye">ＭＬ管理者の削除</A>
-		<LI><A HREF="#mlpassword">ＭＬ管理者パスワードの設定</A>
+		<LI><A HREF="#admin.add">リモート管理者の登録</A>
+		<LI><A HREF="#admin.bye">リモート管理者の削除</A>
+		<LI><A HREF="#mlpassword">リモート管理者パスワードの設定</A>
 		<LI><A HREF="#config">ＭＬの詳細設定</A>
 		<LI><A HREF="#destructml">ＭＬの削除</A>
 	</UL>
@@ -65,7 +65,7 @@
 
    <A NAME=add>
    <A NAME=bye>
-   <LI>ＭＬメンバーの登録・削除
+   <LI>ＭＬメンバーの登録/削除
 	<BR>
 	<FORM ACTION="_CGI_PATH_/admin/mlmenu.cgi"
 		TARGET="right" METHOD=POST>
@@ -83,7 +83,7 @@
 
    <A NAME=admin.add>
    <A NAME=admin.bye>
-   <LI>ＭＬ管理者の登録・削除
+   <LI>リモート管理者の登録/削除
 	<BR>
 	<FORM ACTION="_CGI_PATH_/admin/mlmenu.cgi"
 		TARGET="right" METHOD=POST>
@@ -100,7 +100,7 @@
 	</FORM>
 
     <A NAME=mlpassword>
-	<LI>管理者パスワードの設定
+	<LI>リモート管理者パスワードの設定
 	これは
 	「admin と approve コマンドのパスワード」
 	「およびCGIのメニューに入る」
@@ -141,7 +141,7 @@
 	</FORM>
 
    <A NAME=destructml>
-   <LI>ＭＬの消去
+   <LI>ＭＬの削除
 	<BR>	
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>

@@ -2,7 +2,7 @@
 <HTML>
 <HEAD>
 <TITLE>
-_ML_ mailing list configuration
+"fml" Configuration Interface
 </TITLE>
 <META http-equiv="Content-Type"
 	content="text/html; charset=ISO-2022-JP">
@@ -13,36 +13,26 @@ _ML_ mailing list configuration
 </HEAD>
 <BODY BGCOLOR="#E6E6FA">
 <!-- =================================================================== -->
-<H2>
-<CENTER>
-<A HREF="http://www.fml.org/fml/">"fml"</A> _FML_VERSION_ Configuration Interface
-
-<P>
-_ML_ メーリングリストの設定
-</CENTER>
-</H2>
 
 <!-- __START__ -->
-リモート管理者の登録 (_ML_ ＭＬ)
+ make a new ML 
 
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
-<INPUT TYPE=hidden NAME=PROC VALUE=ADD_ADMIN>
+<INPUT TYPE=hidden NAME=PROC VALUE=newml>
 
-Email アドレス:<INPUT NAME=SPECIFIC_MAIL_ADDR SIZE=30>
-
-<BR>
-	現在のメンバーの確認:
-	<SELECT NAME=MAIL_ADDR SIZE=2 >
-	__EXPAND_OPTION_ADMIN_MEMBER_LIST__
-	</SELECT>
-<BR>
+ mailing list name:
+<INPUT NAME=ML SIZE=30>
 
 <BR>
-<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
-<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+<INPUT NAME=submit-p TYPE=submit VALUE=Create>
+<INPUT NAME=reset-p TYPE=reset VALUE=Reset>
 </FORM>
+
+update [choices] in the menu bar
+<A HREF="_CGI_PATH_/admin/menubar.cgi" TARGET=left>
+update menu in the left of screen
+</A>
 
 </BODY>
 </HTML>

@@ -5,118 +5,241 @@
 "fml" Configuration Interface
 </TITLE>
 <META http-equiv="Content-Type"
-	content="text/html; charset=us-ascii">
+	content="text/html; charset=ISO-2022-JP">
+<LINK rev="made" href="mailto:fml-bugs@fml.org">
+<LINK rev="Contents" href="index.html">
+<LINK rev="alternate" lang="en" href="index-e.html">
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 </HEAD>
 <BODY BGCOLOR="#E6E6FA">
 <!-- =================================================================== -->
-<H2>
-<CENTER>
-"fml" Configuration Interface
-</CENTER>
-</H2>
-
-<PRE>
-From here you can control all mailing lists under fml. Your privilege
-is the same as that you can use makefml command on the shell.
-</PRE>
-
 <P>
-<A HREF="_CGI_PATH_/admin/menu.cgi?LANGUAGE=Japanese">[Japanese]</A>
+<UL>
+	<LI> basic setup 
+	<UL>
+		<LI><A HREF="#newml"> make a new ML </A>
+		<LI><A HREF="#add"> ML add a new member </A>
+		<LI><A HREF="#bye"> ML remove a member </A>
+		<LI><A HREF="#admin.add"> add a new remote administrator </A>
+		<LI><A HREF="#admin.bye"> remove a remote administrator </A>
+		<LI><A HREF="#mlpassword"> password for a remote administrator </A>
+		<LI><A HREF="#config"> ML's setup in detail </A>
+		<LI><A HREF="#destructml"> remove a ML </A>
+	</UL>
 
-<HR>Configuration
+	<LI> administration menu 
+	<UL>
+		<LI>
+		<A HREF="#export">make some ML CGI controllable</A>
+	</UL>
 
-<P>
-<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
-<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-<INPUT TYPE=hidden NAME=PROC VALUE=config>
-<INPUT TYPE=hidden NAME=PTR  VALUE=/>
-
-<TABLE>
-	<TR>
-		<TD ALIGN=right> Mailing List:
-		<TD ALIGN=left> <INPUT NAME=ML_DEF SIZE=30>
-		<TABLE>
-			<TD ALIGN=left>Choice:
-			<TD ALIGN=right>
-			<SELECT NAME=ML>
-			__EXPAND_OPTION_ML__
-			</SELECT>
-		</TABLE>
-</TABLE>
-_____________________________
-<BR>
-<INPUT NAME=submit-p TYPE=submit VALUE=GO>
-<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
-</FORM>
-
+	<LI> CGI setup 
+	<UL>
+		<LI><A HREF="#cgiadmin">add a new user which can use CGI</A>
+	</UL>
+</UL>
 
 
 <HR>
-<P>subscribe/unsubscribe
+<CENTER> basic setup </CENTER>
+<UL>
+   <A NAME=newml>
+   <LI> make a new ML 
+	<BR>
+	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<INPUT TYPE=hidden NAME=PROC VALUE=newml>
 
-<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
-<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	 mailing list name:<INPUT NAME=ML SIZE=15>
 
-<P>
-<TABLE>
+	<BR>
+	<INPUT NAME=submit-p TYPE=submit VALUE=Create>
+	<INPUT NAME=reset-p TYPE=reset VALUE=Reset>
+	</FORM>
+
+   <A NAME=add>
+   <A NAME=bye>
+   <LI> add/remove a ML member 
+	<BR>
+	<FORM ACTION="_CGI_PATH_/admin/mlmenu.cgi"
+		TARGET="right" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<INPUT NAME=PROC TYPE="radio" VALUE="add" checked> add a new member 
+	<BR>
+	<INPUT NAME=PROC TYPE="radio" VALUE="bye"> remove a member 
+	<BR>
+	 choose a ML:
+			<SELECT NAME=ML SIZE=2 >
+			__EXPAND_OPTION_ML__
+			</SELECT>
+	<INPUT NAME=submit-p TYPE=submit VALUE=GO>
+	</FORM>
+
+   <A NAME=admin.add>
+   <A NAME=admin.bye>
+   <LI> add/remove a remote administrator 
+	<BR>
+	<FORM ACTION="_CGI_PATH_/admin/mlmenu.cgi"
+		TARGET="right" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<INPUT NAME=PROC TYPE="radio" VALUE="addadmin" checked> add a remote administrator
+	<BR>
+	<INPUT NAME=PROC TYPE="radio" VALUE="byeadmin"> remove a remote administrator
+	<BR>
+	 choose a ML:
+			<SELECT NAME=ML SIZE=2 >
+			__EXPAND_OPTION_ML__
+			</SELECT>
+	<INPUT NAME=submit-p TYPE=submit VALUE=GO>
+	</FORM>
+
+    <A NAME=mlpassword>
+	<LI> password for a remote administrator and CGI. That is for
+	admin commands, approrve commands and CGI menu.
+	If you wanna add a new person, just add a new mail address.
+
+	<FORM ACTION="_CGI_PATH_/admin/mlmenu.cgi"
+		TARGET="right" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<INPUT NAME=PROC TYPE="hidden" VALUE="mladminpasswd">
+	<BR>
+	 choose a ML:
+			<SELECT NAME=ML SIZE=2 >
+			__EXPAND_OPTION_ML__
+			</SELECT>
+	<INPUT NAME=submit-p TYPE=submit VALUE=GO>
+	</FORM>
+
+
+   <A NAME=config>
+   <LI> ML's setup in detail  (makefml config)
+	<BR>
+	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" TARGET="right" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<INPUT TYPE=hidden NAME=PROC VALUE=config>
+	<INPUT TYPE=hidden NAME=PTR VALUE=/>
+	<INPUT TYPE=hidden NAME=ML VALUE=_ML_>
+	 choose a ML:
+			<SELECT NAME=ML SIZE=2 >
+			__EXPAND_OPTION_ML__
+			</SELECT>
+	<INPUT NAME=submit-p TYPE=submit VALUE=GO>
+	</FORM>
+
+   <A NAME=destructml>
+   <LI> remove a ML 
+	<BR>	
+	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<INPUT TYPE=hidden NAME=PROC VALUE=destructml>
+	
 	<TR>
-		<TD ALIGN=right> Mailing List:
+		<TD ALIGN=right>  ML:
 		<TD ALIGN=left> <INPUT NAME=ML_DEF SIZE=30>
 		<TABLE>
-			<TD ALIGN=left>Choice:
+			<TD ALIGN=left>	 choose a ML:
 			<TD ALIGN=right>
-			<SELECT NAME=ML>
+			<SELECT NAME=ML SIZE=2 >
 			__EXPAND_OPTION_ML__
 			</SELECT>
 		</TABLE>
-
 	<TR>
-		<TD ALIGN=right> Email address:
-		<TD ALIGN=left> <INPUT NAME=MAIL_ADDR SIZE=30>
 
-	<TR>
-		<TD ALIGN=right> subscribe/unsubscribe:
-		<TD ALIGN=left> 
-		<SELECT NAME=PROC>
-		<OPTION VALUE=ADD>subscribe
-		<OPTION VALUE=BYE>unsubscribe
-		<OPTION VALUE=ADD_ADMIN>subscribe as ML administrator
-		<OPTION VALUE=BYE_ADMIN>unsubscribe as ML administrator
+	<BR>
+	<INPUT NAME=submit-p TYPE=submit VALUE=Remove>
+	<INPUT NAME=reset-p TYPE=reset VALUE=Reset>
+	</FORM>
+</UL>	
+
+
+<!-- ------------------------------------------------------------------>
+<HR>	
+<CENTER> administration menu </CENTER>
+<UL>
+   <A NAME=export>
+   <LI> 既存の特定の ML を CGI 経由で操作可能にするには
+	以下の 2 ステップからなります。
+	enable some ML CGI controllableし、
+	CGI 操作可能な member を登録して下さい。
+	
+   <UL>
+	<LI> 既存の特定の ML を CGI 経由で操作可能にする
+	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<INPUT TYPE=hidden NAME=PROC VALUE=mladmincgi>
+
+	 mailing list name: <INPUT NAME=ML SIZE=30>
+	<TABLE>
+		<TD ALIGN=left> choice from the current list:
+		<TD ALIGN=right>
+		<SELECT NAME=ML SIZE=2 >
+		__EXPAND_OPTION_ML__
 		</SELECT>
-</TABLE>
-_____________________________
-<BR>
-<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
-<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
-</FORM>
+	</TABLE>
+	_____________________________
+	<BR>
+	<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
+	<INPUT NAME=reset-p TYPE=reset VALUE=Reset>
+	</FORM>
 
+	<LI>     
+	<A HREF="#mlpassword">
+	既存の特定の ML を CGI 操作可能な人の add/remove 
+	</A>
+	<BR>
+	注:  add a new remote administrator と同じ menu です。
+    </UL>
 
-<HR>
-<P>Create a new Mailing List
+<HR>	
+   <A NAME=cgiadmin>
+   <LI>
+	この画面を操作可能な(CGI) administration 者 account の password setup 
+	<BR>
+	追加:  account と password の組を入力すれば追加になります。
+	<BR>
+	削除: 消したい account を入力し、削除モードにしてGOです。
+	<BR>
+	
+	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<INPUT TYPE=hidden NAME=PROC VALUE=cgiadmin_passwd>
+	<INPUT TYPE=hidden NAME=ML VALUE=etc>
+	
+	<INPUT NAME="ACTION" TYPE="radio" VALUE="ADD" checked>追加
+	<INPUT NAME="ACTION" TYPE="radio" VALUE="BYE">削除
 
-<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
-<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-<INPUT TYPE=hidden NAME=PROC VALUE=newml>
+	<BR> Email address  ないし account name:
+		<INPUT NAME=CGI_ADMIN_USER_DEF SIZE=30>
+	<BR>
+		既存の account から choice:
+		<SELECT NAME=CGI_ADMIN_USER SIZE=2 >
+		__EXPAND_OPTION_CGI_ADMIN_MEMBER_LIST__
+		</SELECT>
 
-<TABLE>
-	<TR>
-		<TD ALIGN=right> Mailing List:
-		<TD ALIGN=left> <INPUT NAME=ML SIZE=30>
-</TABLE>
-
-_____________________________
-<BR>
-<INPUT NAME=submit-p TYPE=submit VALUE=Create>
-<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
-</FORM>
+	<TABLE>	
+		<TR>
+			<TD ALIGN=right>  password:
+			<TD ALIGN=left>
+			<INPUT TYPE=password NAME=PASSWORD SIZE=30>
+		<TR>
+			<TD ALIGN=right>  password again:
+			<TD ALIGN=left>
+			<INPUT TYPE=password NAME=PASSWORD_VRFY SIZE=30>
+	</TABLE>
+	_____________________________
+	<BR>
+	<INPUT NAME=submit-p TYPE=submit VALUE=Go>
+	<INPUT NAME=reset-p TYPE=reset VALUE=Reset>
+	</FORM>
+	
+</UL>
 
 
 <HR>
 
 <PRE>
-Copyright (C) 1993-1999 Ken'ichi Fukamachi
-         All rights reserved. 
-
+Copyright (C) 1993-2000 Ken'ichi Fukamachi
+         All rights reserved.
 $Id$
 </PRE>
 </BODY>

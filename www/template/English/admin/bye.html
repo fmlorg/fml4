@@ -18,30 +18,35 @@ _ML_ mailing list configuration
 <A HREF="http://www.fml.org/fml/">"fml"</A> _FML_VERSION_ Configuration Interface
 
 <P>
-_ML_ メーリングリストの設定
+_ML_  mailing list's setup 
 </CENTER>
 </H2>
 
 <!-- __START__ -->
-リモート管理者の登録 (_ML_ ＭＬ)
+ remove a member  (_ML_  ML )
 
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
-<INPUT TYPE=hidden NAME=PROC VALUE=ADD_ADMIN>
+<INPUT TYPE=hidden NAME=ML VALUE=_ML_>
+<INPUT TYPE=hidden NAME=PROC VALUE=BYE>
 
-Email アドレス:<INPUT NAME=SPECIFIC_MAIL_ADDR SIZE=30>
-
-<BR>
-	現在のメンバーの確認:
-	<SELECT NAME=MAIL_ADDR SIZE=2 >
-	__EXPAND_OPTION_ADMIN_MEMBER_LIST__
-	</SELECT>
-<BR>
-
+<P>
+<TABLE>
+	<TR>
+		<TD ALIGN=right> Email address:
+		<TD ALIGN=left> <INPUT NAME=SPECIFIC_MAIL_ADDR SIZE=30>
+		<TABLE>
+			<TD ALIGN=left> choice from the current list:
+			<TD ALIGN=right>
+			<SELECT NAME=MAIL_ADDR SIZE=2 >
+			__EXPAND_OPTION_MEMBER_LIST__
+			</SELECT>
+		</TABLE>
+</TABLE>
+_____________________________
 <BR>
 <INPUT NAME=submit-p TYPE=submit VALUE=Submit>
-<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+<INPUT NAME=reset-p TYPE=reset VALUE=Reset>
 </FORM>
 
 </BODY>

@@ -15,51 +15,49 @@ _ML_ mailing list configuration
 <!-- =================================================================== -->
 <!-- __START__ -->
 <CENTER>
-_ML_ ＭＬのリモート管理者の設定
+_ML_  ML's remote administration setup 
 </CENTER>
-リモート管理者のメールアドレスと、そのパスワードを設定して下さい。
-これは
+setup remote administrator's  Email address and password.
+These are used when
 <UL>
-<LI>admin と approve コマンドのパスワード
-<LI>およびGUIのメニューに入る
+<LI>password for admin /approve commands
+<LI>password for CGI menu
 </UL>
-の際に使われるパスワードです。
-簡単化のため CGI インタフェイスのメニューからは、
-この３つに同じパスワードを設定します。
+To simpify this, password input here is used for these 3 cases.
 <BR>
-CUIの makefml htpasswd を用いることでコマンド用とCGI用と
-別々のパスワードをつけることが可能です。
+If you change passwords, run "makefml admin.cgi config".
 <BR>
-注意: 新しい管理者名を入力すると、管理者の新規登録扱いになります
+Attention: you want to add a new remote administrator, please input
+the mail address in the same way.
 
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" 
 	TARGET="right" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
+<INPUT TYPE=hidden NAME=ML VALUE=_ML_>
 <INPUT TYPE=hidden NAME=PROC VALUE=mladminpasswd>
 
 
-アカウントもしくはEmail アドレス:
+ account / Email address:
 <INPUT NAME=CGI_ADMIN_USER_DEF SIZE=30>
 <BR>
-	既存のリモート管理者リストからの選択:
+	choose the current administrator list:
 	<SELECT NAME=CGI_ADMIN_USER SIZE=2 >
 	__EXPAND_OPTION_CGI_ADMIN_MEMBER_LIST_FOR_EACH_ML__
 	</SELECT>
 
 <TABLE>
 <TR>
-	<TD ALIGN=right> パスワード:
+	<TD ALIGN=right>  password:
 	<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD SIZE=30>
 
 <TR>
-	<TD ALIGN=right> 確認のため同じパスワード:
+	<TD ALIGN=right>  password again:
 	<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD_VRFY SIZE=30>
 </TABLE>
 _____________________________
 <BR>
 <INPUT NAME=submit-p TYPE=submit VALUE=Submit>
-<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+<INPUT NAME=reset-p TYPE=reset VALUE=Reset>
 </FORM>
 
 </BODY>

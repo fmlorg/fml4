@@ -18,22 +18,22 @@ _ML_ mailing list configuration
 <A HREF="http://www.fml.org/fml/">"fml"</A> _FML_VERSION_ Configuration Interface
 
 <P>
-_ML_ メーリングリストの設定
+_ML_  mailing list's setup 
 </CENTER>
 </H2>
 
 <!-- __START__ -->
-リモート管理者の登録 (_ML_ ＭＬ)
+ add a new remote administrator  (_ML_  ML )
 
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
+<INPUT TYPE=hidden NAME=ML VALUE=_ML_>
 <INPUT TYPE=hidden NAME=PROC VALUE=ADD_ADMIN>
 
-Email アドレス:<INPUT NAME=SPECIFIC_MAIL_ADDR SIZE=30>
+Email address:<INPUT NAME=SPECIFIC_MAIL_ADDR SIZE=30>
 
 <BR>
-	現在のメンバーの確認:
+	 verify current members:
 	<SELECT NAME=MAIL_ADDR SIZE=2 >
 	__EXPAND_OPTION_ADMIN_MEMBER_LIST__
 	</SELECT>
@@ -41,7 +41,7 @@ Email アドレス:<INPUT NAME=SPECIFIC_MAIL_ADDR SIZE=30>
 
 <BR>
 <INPUT NAME=submit-p TYPE=submit VALUE=Submit>
-<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+<INPUT NAME=reset-p TYPE=reset VALUE=Reset>
 </FORM>
 
 </BODY>
