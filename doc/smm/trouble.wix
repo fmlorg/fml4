@@ -834,6 +834,34 @@ fml-support Count: 01640
 	・ Becky! ver 1.10
 
 
+.S	References を最後の 値だけにする
+
+in fml-support: 01662
+.q
+  References って書く人が自分の記事の references はこのあたりってのを
+  記すものなんだから、サーバが制御するのはまずいよね、だからすどおし
+  ＃今はそうなってる
+
+って話をしてるんじゃないんだよねぇ;_;
+
+でもこれ表現の自由度を考えると…最後のだけ拾うのって自動じゃできないよ
+うな気がするんだけど？msgid しか来ないっていう仮定の元で
+$SMTP_OPEN_HOOK で最後のだけにしちゃう とかならできるとおもう。
+
+例：
+$SMTP_OPEN_HOOK .= q!;
+	if ($_ = $e{"h:References:"}) {
+	    s/\n(\s)/$1/g;
+	    if (/(<\S+>)\s*$/) { $_ = $&;}
+	    local(@r) = split(/</, $_);
+	    $_ = @r[$#r];
+	    $e{"h:References:"} = /^</ ? $_ : "<$_";
+	}
+!;
+
+.~q
+
+
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
