@@ -12,7 +12,7 @@ $Rcsid   = 'fml 2.0 Exp #: Wed, 29 May 96 19:32:37  JST 1996';
 ######################################################################
 
 require 'getopts.pl';
-&Getopts("d:f:ht:I:D:vTH");
+&Getopts("d:f:ht:I:D:vTHM:L:o:");
 
 
 $opt_h && do { &Usage; exit 0;};
@@ -21,10 +21,17 @@ $DIR             = $opt_D || $ENV{'PWD'};
 $HTTP_DIR        = $opt_d;
 $SPOOL_DIR       = shift;
 $ConfigFile      = $opt_f;
-$debug_v         = $opt_v;
+$verbose         = $opt_v;
 $HTML_THREAD     = $opt_T;
-$USE_MIME        = $opt_H;
+$MIN             = $opt_M > 0 ? $opt_M : 1;
+$LastRange       = $opt_L;
 push(@INC, $opt_I);
+
+# set opt
+for (split(/:/, $opt_o)) { 
+    print STDERR "\$${_} = 1;\n" if $verbose;
+    eval "\$${_} = 1;";
+}
 
 ########## MAIN ##########
 ### WARNING;
@@ -35,7 +42,6 @@ push(@INC, $opt_I);
 require $ConfigFile if -f $ConfigFile;
 require 'libkern.pl';
 require 'libsynchtml.pl';
-require '_dumpvar.pl' if $opt_v;
 
 sub PS { $FML = 'spool2html'; system "ps uw|grep spool2html";}
 
@@ -45,12 +51,18 @@ sub PS { $FML = 'spool2html'; system "ps uw|grep spool2html";}
 ### Here we go!
 $max = &GetMax($SPOOL_DIR);
 
+if ($LastRange) {
+    $MIN = $max - $LastRange > 0 ? $max - $LastRange : 1;
+}
+
 ### TOO OVERHEADED ;_;
 $label = $HTTP_DIR;
 $label =~ s#.+/(\S+)#$1#;
 
-for ($i = 1; $i <  ($max + 100); $i += 100) {
-    print STDERR "fork() [$$] ($i -> ".($i+100).")\n";
+
+
+for ($i = $MIN; $i <  ($max + 100); $i += 100) {
+    print STDERR "fork() [$$] ($i -> ".($i+100).")\n" if $verbose;
     $0 = "spool2html(Parent): $label::Ctl $i -> ". ($i + 100);
 
     if (($pid = fork) < 0) {
@@ -61,12 +73,12 @@ for ($i = 1; $i <  ($max + 100); $i += 100) {
 	exit(0);
     }
 
-    sleep 3;
-
     # Wait for the child to terminate.
     while (($dying = wait()) != -1 && ($dying != $pid) ){
 	;
     }
+
+    sleep 3;
 }
 
 exit 0;
@@ -78,10 +90,12 @@ sub Ctl
 {
     local($id);
 
-    print STDERR "$label::Ctl $_[0] .. $_[1]\n";
+    print STDERR "$label::Ctl $_[0] .. $_[1]\n" if $verbose;
+
+    return if $_[0] > $_[1];
 
     for ($id = $_[0]; $id < $_[1]; $id++ ) {
-	print STDERR "$label::Ctl  $id processing...\n";
+	print STDERR "$label::Ctl  $id processing...\n" if $verbose;
 
 	next unless -f "$SPOOL_DIR/$id";
 
@@ -108,7 +122,7 @@ sub Ctl
 	$Envelope{'stat:mtime'} = (stat("$SPOOL_DIR/$id"))[9]; 
 	&SyncHtml($HTTP_DIR, $id, *Envelope);
 
-	&dumpvar('SyncHtml') if $debug_v;
+	# &dumpvar('SyncHtml') if $verbose;
     }
 }
 
@@ -177,6 +191,8 @@ sub Usage
     -d    $HTTP_DIR;
     -f    config.ph;
     -t    number of day ($HTML_INDEX_UNIT);
+    -M    Minimum (MIN, default 1);
+    -L    the number of Last sequence to process (hence MIN = MAX - $opt_L);
     ;
     SPOOL $SPOOL_DIR;
     ;#;
@@ -199,9 +215,17 @@ eval($evalstr);
 sub GetMax
 {				
     local($dir) = @_;
-    local($i, $try, $right);
+    local($i, $try, $right, $seq);
+
+    # anyway try;
+    if (-f "$dir/../seq") {
+	if (open(F, "$dir/../seq")) { chop($seq = <F>);}
+    }
 
     for ($i = 1; ; $i *= 2) { last unless -f "$dir/$i";}
+
+    # e.g. right for expired directry;
+    if ($i < $seq) { $i = $seq + 1;}
 
     $try  = $i;
     $left = int($i/2); 
