@@ -1,5 +1,5 @@
 		How to edit fml CVS repository
-		$Date: 2001/08/02 14:19:35 $
+		$Date: 2001/08/23 11:39:35 $
 
 CAUTION: you need "BSD make" not gmake.
 
@@ -143,9 +143,9 @@ fml-4-0-2	4.0.2 release
 
 	break from main:current-20010722
 
-   makefml-rdbms-ext branch
+   makefml-rdbms branch	hack makefml to talk with RDBMS
 
-	enable makefml to talk with RDBMS
+	makefml-rdbms-base	break point of the branch
 
 
 *** HOW TO MERGE ***
@@ -164,4 +164,4 @@ fml-4-0-2	4.0.2 release
 
 	% cvs diff 
 
-$FML: README,v 1.27 2001/08/02 14:19:35 fukachan Exp $
+$FML: README,v 1.28 2001/08/23 11:39:35 fukachan Exp $
