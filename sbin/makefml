@@ -2620,6 +2620,9 @@ sub do_test
 
 
 # here eval $local_config since here is the phase evaluating CF;
+#     %config: raw value in $DIR/cf.  $key => raw $value
+# %cur_config: evalued value of them; $key => evaluated $value
+#              since we need value with expanded $DOMAINNAME, for example. 
 sub GetCF
 {
     local($cf, $ml, *config, *cur_config) = @_;
@@ -2752,6 +2755,13 @@ sub GetCF
 	print STDERR "   I assume it is 3. Here we go!\n";
 	$config{'ADDR_CHECK_MAX'} = 3;
 	sleep 3;
+    }
+
+    if ($debug) {
+	while (($k, $v) = each %cur_config) {
+	    print STDERR "    config{$k} => $config{$k}\n";
+	    print STDERR "cur_config{$k} => $v\n";
+	}
     }
 }
 
