@@ -19,7 +19,7 @@ sub Parse
     &GetBuffer(*Config);
 
     $ML        = $Config{'ML_DEF'} || $Config{'ML'};
-    $MAIL_ADDR = $Config{'MAIL_ADDR'};
+    $MAIL_ADDR = $Config{'MAIL_ADDR_DEF'} || $Config{'MAIL_ADDR'};
     $PROC      = $Config{'PROC'};
     $LANGUAGE  = $Config{'LANGUAGE'};
 
