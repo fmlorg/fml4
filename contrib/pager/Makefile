@@ -12,6 +12,6 @@
 
 SOURCES = euc2jiskuten.pl
 
-TARGET_DIR = ${CONTRIB_DIR}/pager
+TARGET_DIR = ${CONTRIB_DIR}/mail2pager
 
 .include "$(FML)/distrib/mk/fml.contrib.mk"
