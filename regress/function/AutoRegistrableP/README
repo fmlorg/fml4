@@ -1,0 +1,11 @@
+regression test of 
+
+fml 2.x
+	&AutoRegistrableP()
+	&NonAutoRegistrableP()
+
+fml 3.x
+	&AutoRegistrableP()
+	&NonAutoRegistrableP()
+	&NotUseSeparateListP
+	&UseSeparateListP	
