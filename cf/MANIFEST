@@ -29,7 +29,8 @@ debug:		 0
 # value: Japanese/English
 LANGUAGE:		Japanese
 
-# &Mesg() tries to translate thie language.
+# &Mesg() tries to translate the given message to this language.
+# value: Japanese/English
 MESSAGE_LANGUAGE:
 
 # ## Sub Section: DNS ##
