@@ -34,7 +34,7 @@ list=/tmp/.fml-install$$
 
 eval umask 022;
 
-DIRS="bin sbin libexec cf etc sys src drafts messages www"
+DIRS="bin sbin libexec cf etc sys src drafts messages www module"
 
 if [ X$MKDOC != Xno -a X$MKDOC != XNO ]
 then

@@ -25,12 +25,13 @@ messages/
 PERL_SOURCES:
 kern/*pl
 proc/lib*.pl
-module/compat/lib*pl
 dist/jcode/jcode.pl
 dist/mimepls/mimer.pl
 dist/mimepls/mimew.pl
 dist/libtraffic/libtraffic.pl 
 contrib/localhack/release-2/member_name/src/libmember_name.pl
+module/compat/lib*pl
+
 
 
 PERL_ARCH_SOURCES:
