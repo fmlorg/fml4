@@ -249,8 +249,14 @@ fml 2.1 が hml 1.6 と同様に目指したものは
    サポートすること
 
 ○ たくさんのドキュメント（複数のフォーマットで）
+	英語版(file.English)はまだ途中のものが多いです_o_
 
+=E
+	English Version(file.English) is now underway _o_
+	
 	PLAINTEXT版はあらかじめ用意されています。
+=E
+	Plaintext version documents are available in the source.
 
 	HTML 版は doc/html の下に用意されいますが、
 	operation manual (旧FAQ) は巨大なのでこれの HTML 版は
