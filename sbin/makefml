@@ -44,20 +44,10 @@ sub System { system $SYSTEM_ARGV;}
 
 sub InitMakeFml
 {
-    ### signal handling
-    $SIG{'ALRM'} = 'TimeOut';
-    $SIG{'INT'} = $SIG{'QUIT'} = $SIG{'TERM'} = 'SignalLog';
-
-    # for log
-    $USER  = $ENV{'USER'} || (getpwuid($<))[0];
-
     # flush;
     select(STDOUT); $| = 1;
 
     &GetTime;
-
-    require 'getopts.pl';
-    &Getopts("dhf:A:O:p:D:v");
 
     # flock(2)
     $LOCK_SH                       = 1;
@@ -65,12 +55,24 @@ sub InitMakeFml
     $LOCK_NB                       = 4;
     $LOCK_UN                       = 8;
 
+    ### signal handling
+    $SIG{'ALRM'} = 'TimeOut';
+    $SIG{'INT'} = $SIG{'QUIT'} = $SIG{'TERM'} = 'SignalLog';
+
+    ### getopt
+    require 'getopts.pl';
+    &Getopts("dhf:A:O:p:D:v");
+
+    ### determine Architechure dependence
+    $COMPAT_ARCH = $opt_A;
+    if ($ENV{'OS'} =~ /Windows_NT/) {
+	$COMPAT_ARCH = "WINDOWS_NT4";
+    }
+   
     # umask 077?
     # if a group mainteints the fml system, umask(007)?;
     # here several people can read but not write;
     umask(002);
-
-    $COMPAT_ARCH = $opt_A;
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") {
 	$USER = $ENV{'USERNAME'};
