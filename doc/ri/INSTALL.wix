@@ -19,9 +19,10 @@
     3.0へのアップグレードの注意(特に自動登録を使っている人へ)
 .url http://www.fml.org/fml/UPGRADE-3.0/
 
-   簡単な install と設定例などについては以下のURLにあります。
-   もう少し詳細なものがこのドキュメントです。
+   簡単なインストールの流れや設定例などについては以下のURLにあります。
+   感じを掴むために先にこっちを読むといいかもしれません。
 .url http://www.fml.org/fml/examples/
+   もう少し詳細なものがこのドキュメント(INSTALL)です。
 
    デザインや内部の実装の説明、HOOKを使った高度なカスタマイズは
    doc/op.jp というファイルをみてください
@@ -41,19 +42,26 @@
 .if LANG == ENGLISH
    EXCUSE FOR MY LIMITED ENGLISH (I WELCOME FIXES). 
 
-   ************** IMPORTANT!!! *******************
+   ***** IMPORTANT!!! *****
    If you use automatic registration and upgrade fml 2.x to fml 3.0, 
    please read UPGRADE file firstly. Especially the first part
 
 .url http://www.fml.org/fml/UPGRADE-3.0-e/index.html
 
-   ***********************************************
+   For easy guideline of installation and fundamental configuration,
+   See
+.url http://www.fml.org/fml/examples/
+
+   For more details of internals, advanced configurations, see
+   doc/op.en		(plain text)
+.url	http://www.fml.org/fml/op-e/index.html
 
    For more details on advanced settings, please see the part III of
    doc/op.en		(plain text)
 .url	http://www.fml.org/fml/op-e/index.html#Configurations
 
    For installation on Windows NT4, please also see INSTALL_on_NT4.
+.url http://www.fml.org/fml/
 
 [Terminology]
    The word "ML" is the abbreviation of "Mailing List" in this document.
@@ -1892,12 +1900,13 @@ $LANGUAGE asked and determined in installation.
 Please see doc/op.jp for more details.
 
 ○ 様々なセキュリティオプションを一気に設定する
-   make secure とやることは同じ
+   make secure とやることは同じ => .ptr{secure-configure}
 =E
 *  set up several parameters related with security.
    If you run "make secure", you can get the same effect.
+   See .ptr{secure-configure} for "more secure".
 
-   => MORE_SECURE => "y"
+   MENU => SECURITY => MORE_SECURE => "y"
 
 ○ メールの中身のフィルタリングについて
 =E
@@ -2513,6 +2522,7 @@ FYI. NT Version uses this trick:)
 なお MetaInfo Sendmail 2.x 以外のMTAを使う場合の NT 上ではこの裏技を使
 います:)
 
+
 .C	HELPなどの取り寄せについてユーザに知らせる方法について
 =E.C	Header information to notify information
 
@@ -2595,6 +2605,7 @@ http://www.fml.org/fml/op/) を見て下さい。
 というファイルを作り、actives や members のように一行一アドレス書いて
 いって下さい。
 
+
 .C	アップグレード時の注意 (fml 2.1 以前からの時)
 =E.C	Upgrade (from before fml 2.1)
 .l	upgrade
@@ -2623,6 +2634,7 @@ elena@baycity.asia でコマンド "# command" を受け付けるようにはなってい
 elena@baycity.asia がコマンド "# command" をコマンドとして理解するよう
 になります。設定は makefml config でもできます。詳細は .ptr{post-or-command-addr} を参照。
 elena と elena-ctl 両方がコマンドとして使える場合については .ptr{post-ac} 参照。
+
 
 .C	セキュリティを強化する設定について
 =E.C	Security Consideration
