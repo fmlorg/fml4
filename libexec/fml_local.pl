@@ -367,8 +367,8 @@ sub FmlLocalEntryMatch
 	($field, $pattern, $type, $exec) = &FmlLocal_get($pat = shift @CF);
 
 	# skip
-	next AND if $pat =~ /^\s*$/o;
 	next AND if $pat =~ /^\#/o;
+	last AND if $pat =~ /^\s*$/o; # ATTENTION!
 
 	# HEADER MATCHING PATTERN
 	if ($field{"$field:"} =~ /$pattern/) {
@@ -383,7 +383,7 @@ sub FmlLocalEntryMatch
 	    next AND;
 	}
 
-	print STDERR "AND\tUNMATCH\t1n" if $debug;
+	print STDERR "AND\tUNMATCH\t1\n" if $debug;
 	$AND_UNMATCH = 1;# must be 'not matched field exists'.
     }# AND;
   }# CF;
@@ -676,6 +676,17 @@ sub Parsing
 sub WholeMail
 {
     "$MailHeaders\n$MailBody";
+}
+
+# eval and print error if error occurs.
+sub eval
+{
+    local($exp, $s) = @_;
+
+    eval $exp; 
+    &Log("$s:".$@) if $@;
+
+    return 1 unless $@;
 }
 
 # Alias but delete \015 and \012 for seedmail return values
