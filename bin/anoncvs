@@ -1,0 +1,34 @@
+#!/bin/sh
+#
+# Copyright (C) 2000 Ken'ichi Fukamachi
+#          All rights reserved. 
+#
+# $Id$
+
+# set -- `getopt d:h:v $*`
+# if test $? != 0; then echo 'Usage: ...'; exit 2; fi
+# for i
+# do
+# 	case $i
+# 	in
+# 	-d)
+# 		DIR=$2; 
+# 		shift;	shift;;
+# 	-h)
+# 		HOST=$2; 
+# 		shift;	shift;;
+# 	-v)
+# 		set -x 
+# 		shift;;
+# 	--)
+# 		shift; break;;
+# 	esac
+# done
+
+# echo cvs -d :pserver:anoncvs@anoncvs.fml.org:/exports/cvsroot $*
+# echo ''
+exec cvs -d :pserver:anoncvs@anoncvs.fml.org:/exports/cvsroot $*
+
+# not reached here
+echo cannot exec cvs -d :pserver:anoncvs@anoncvs.fml.org:/exports/cvsroot $*
+exit 1
