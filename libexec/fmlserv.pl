@@ -4,8 +4,7 @@
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 
-$rcsid   = q$Id$;
-($rcsid) = ($rcsid =~ /Id: (\S+).pl,v\s+(\S+)\s+/ && $1."[$2]");
+# $Id$;
 $Rcsid   = 'fmlserv #: Wed, 29 May 96 19:32:37  JST 1996';
 
 $ENV{'PATH'}  = '/bin:/usr/ucb:/usr/bin';	# or whatever you need

@@ -4,12 +4,7 @@
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 
-### not beatiful yet;_; ...
-
-local($id);
-$id = q$Id$;
-$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
-
+# $Id$;
 
 ### AUTOMATICALLY REPLACED (Agent-Oriented?) ###
 $CONFIG_DIR = ''; # __MAKEFML_AUTO_REPLACED_HERE__
@@ -187,7 +182,9 @@ sub InitMakeFml
 		    'setq',     'do_setq',
 		    'show',     'do_show',
 		    'config',   'do_config',
-		    '5#config ML', 'do configuration of <ML>',
+		    '5#config ML', 'configure the fundamental of <ML>',
+		    'policy',   'do_policy',
+		    '5#policy ML', "set up common policy for all <ML>\'s",
 		    'new',      'do_newml',
 		    'newml',    'do_newml',
 		    '1#newml ML',   'make a new Mailing List <ML>',
@@ -667,10 +664,18 @@ sub OutPutLocalConfig
 	    print CF "\$Envelope{'mode:html'} = 1;";
 	    print CF "\# MAKEFML_OPT_HTML\n";
 	}
-	elsif ($k eq "DISTRIBUTE_ONLY") {
-	    print CF "\$MAKE_FML{'DISTRIBUTE_ONLY'} = 1;\n";
-	    print CF "= \$Envelope{'mode:distribute'} = 1;";
-	    print CF "\# MAKEFML_DISTRIBUTE_ONLY\n";
+	elsif ($k eq "DELIVERY_MODE") {
+	    if ($v eq "distribute") {
+		print CF "\$MAKE_FML{'DELIVERY_MODE'} = '$v';\n";
+		print CF "\&DEFINE_MODE('distribute');";
+		print CF "\# MAKEFML_DELIVERY_MODE\n";
+		print CF "\# ***ATTENTION!***\n";
+		print CF "\# ./include-ctl uses --ctl \"fml.pl --ctl\"\n";
+		print CF "\# option --ctl is stronger than --distribute\n";
+	    }
+	    elsif ($v eq "default") {
+		; # do nothing;
+	    }
 	}
 	elsif ($k eq "SUBJECT_TAG") {
 	    print CF "\$MAKE_FML{'SUBJECT_TAG'} = '$v';\n";
@@ -723,7 +728,7 @@ sub Query
 sub ShowMainMenu
 {
     local(*config, *MAKE_FML) = @_;
-
+    local($delivery_mode, $policy);
     eval($local_config);
     print $@ if $@;
 
@@ -735,6 +740,8 @@ sub ShowMainMenu
     }
 
     &MakeOptionShowMenu(*MAKE_FML);
+    $delivery_mode = &ModeString(*MAKE_FML);
+    $policy        = "";
 
     $MENU = qq#;
     ********************************************************************;
@@ -746,8 +753,8 @@ sub ShowMainMenu
     0 END;
     1 MEMBER CHECK or AUTO REGISTRATION        $ShowMenu{'auto_regist'};
     2 SUBJECT TYPE                             $MAKE_FML{'SUBJECT_TAG'};
-    3 OPTIONAL SETTINGS(e.g. MIME, HTML)       $ShowMenu{'option_summary'};
-    4 Delivery Mode (distribute-only, distribute+command); (UNIMPLEMENTED YET)
+    3 OPTIONAL SETTINGS (e.g. MIME, HTML)      $ShowMenu{'option_summary'};
+    4 Delivery Mode                            $delivery_mode;
     ;
     ;#;
 
@@ -920,8 +927,57 @@ sub OptionQuery
 
 	$CurTag = $tag;
     }
+
+    $CurTag = $tag;
 }
 
+sub ModeString
+{
+    local(*MAKE_FML) = @_;
+    if ($MAKE_FML{"DELIVERY_MODE"} eq "distribute") {
+	"distribute-only";
+    }
+    else {
+	"distribute + commands available";
+    }
+}
+
+sub ShowDeliveryModeMenu
+{
+    &MakeOptionShowMenu(*MAKE_FML);
+    local($_, $mode, $mode1, $mode2);
+    $mode = &ModeString(*MAKE_FML);
+
+    if ($MAKE_FML{"DELIVERY_MODE"} eq "distribute") {
+	$mode1 = "<===";
+    }
+    else {
+	$mode2 = "<===";
+    }
+
+    $_  = "\n";
+    $_ .= "DELIVERY MODE (CURRENT MODE is $mode)\n";
+    if ($mode1) {
+	$_ .= sprintf(" address %-10s for distribution only\n", $ml);
+	$_ .= sprintf(" address %-10s for commands\n", "${ml}-ctl");
+    }
+    elsif ($mode2) {
+	$_ .= sprintf(" address %-10s for both distribute and commands\n",$ml);
+	$_ .= sprintf(" address %-10s for commands\n", "${ml}-ctl");
+    }
+
+    $_ .= "\n";
+    $_ .= "-------------------------------------------------------\n";
+    $_ .= "  ENTRY                           Current Configuration\n";
+    $_ .= "-------------------------------------------------------\n";
+    $_ .= "0 END\n";
+    $_ .= "1 Distribute Only                  $mode1\n";
+    $_ .= "2 Distribute + Commands (default)  $mode2\n";
+
+    $_  =~ s/\n/\n$CurTag/g;
+
+    print ($MENU{'DELIVERY_MODE_OPTIONS'} = $_);
+}
 
 sub DeliveryQuery
 {
@@ -930,11 +986,11 @@ sub DeliveryQuery
 
     ### MAIN ###
     while (1) {
-	&ShowOptionMenu(*MAKE_FML);
+	&ShowDeliveryModeMenu(*MAKE_FML);
 
 	$tag = $CurTag;
 	$CurTag .= "   ";
-	$r = &Query("OPTIONS ", "1-2", "[1-2]", "0");
+	$r = &Query("Delivery Mode ", "1-2", "[1-2]", "0");
 
 	$CurTag .= "   ";
 
@@ -942,14 +998,49 @@ sub DeliveryQuery
 	    last;
 	}
 	elsif ($r == 1) {
-	    $r = &Query("Distribute Only", "y/n", "y|n", "n");
-	    $MAKE_FML{"DISTRIBUTE_ONLY"} = $r eq "y" ?  1 : 0;
+	    $MAKE_FML{"DELIVERY_MODE"} = "distribute";
+	}
+	elsif ($r == 2) {
+	    $MAKE_FML{"DELIVERY_MODE"} = "default";
+	    # loop once again;
 	}
 
 	$CurTag = $tag;
     }
+
+    $CurTag = $tag;
 }
 
+sub PolicyQuery
+{
+    local($ml, *MAKE_FML) = @_;
+    local($r, $buf);
+
+    while (1) {
+	&ShowDeliveryModeMenu(*MAKE_FML);
+
+	$tag = $CurTag;
+	$CurTag .= "   ";
+	$r = &Query("Delivery Mode ", "1-2", "[1-2]", "0");
+
+	$CurTag .= "   ";
+
+	if ($r == 0) {
+	    last;
+	}
+	elsif ($r == 1) {
+	    $MAKE_FML{"DELIVERY_MODE"} = "distribute";
+	}
+	elsif ($r == 2) {
+	    $MAKE_FML{"DELIVERY_MODE"} = "default";
+	    # loop once again;
+	}
+
+	$CurTag = $tag;
+    }
+
+    $CurTag = $tag;
+}
 
 sub ResetVariables
 {
@@ -997,8 +1088,8 @@ sub GenCrontab
     local($uid);
 
     print STDERR "\n";
-    print STDERR "   Crontab for all ${USER}'s ML's is saved in\n";
-    print STDERR "   $ML_ETC_DIR/crontab/$USER\n";
+    print STDERR "Crontab for all ${USER}'s ML's is saved in";
+    print STDERR " $ML_ETC_DIR/crontab/$USER\n";
 
     open(TAB, "> $ML_ETC_DIR/crontab/$USER") || 
 	(&Warn("cannot open $ML_ETC_DIR/crontab/$USER"), return);
@@ -1471,22 +1562,13 @@ sub TestInit
 	 'Precedence', 'Lines');
 }
 
-sub do_config
+sub GetCF
 {
-    local($ml) = @_;
-
-    local($cf, $local_config, $config);
-    local(@config, %config);
-
-    print "---Configure $ml mailing list ... \n";
-
-    &ResetVariables;
-
-    $cf = "$ML_DIR/$ml/cf";
+    local($cf, *config) = @_;
 
     # GET PRESENT CONFIG;
     # without LOCAL_CONFIG;
-    open(CF, $cf) || die ("cannot find $cf");
+    open(CF, $cf) || die ("cannot open cf[$cf]");
     while (<CF>) {
 	next if /^\#/;
 	next if /^\s*$/;
@@ -1512,15 +1594,30 @@ sub do_config
     # print $local_config if $debug;
     eval($local_config);
     print $@ if $@;
+}
 
+sub do_config
+{
+    local($ml) = @_;
+    local($cf, $local_config, $config, @config, %config);
 
-    ### MAIN ###
+    # start;
+    print "---Configure $ml mailing list ... \n";
+
+    # Variable Settings;
+    &ResetVariables;
+    $cf = "$ML_DIR/$ml/cf";
+
+    # evaluate "$ML_DIR/$ml/cf";
+    &GetCF($cf, *config); # set %config, eval %MAKE_FML in it;
+
+    ### MAIN LOOP ###
     while (1) {
 	$CurTag = "    ";
 
 	&ShowMainMenu(*config, *MAKE_FML);
 
-	#($menu, $query, $pat, $default)
+	#Query($menu, $query, $pat, $default)
 	$r = &Query("Menu ", "number", "\\d+", "0");
 
 	$CurTag = "\t";  
@@ -1540,11 +1637,14 @@ sub do_config
 	elsif ($r == 4) {
 	    &DeliveryQuery($ml, *MAKE_FML);
 	}
+	elsif ($r == 5) {
+	    &PolicyQuery($ml, *MAKE_FML);
+	}
     }
 
 
     # set local_config -> %MAKE_FML;
-    print $local_config;
+    # print $local_config;
     $eval = q%eval $local_config;%;
     eval($eval);
     print $@ if $@;
@@ -1569,6 +1669,10 @@ sub do_config
 	close(CF);
 
 	print "Configuration is saved in $cf\n";
+    }
+    else {
+	&Warn("Cannot open cf[$cf]");
+	return;
     }
 
     # make ml/config.ph

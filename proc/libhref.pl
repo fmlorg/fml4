@@ -5,9 +5,7 @@
 # Public License. see the file COPYING for more details.
 
 
-local($id);
-$id = q$Id$;
-$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
+# $Id$;
 
 
 sub HRefInit { require 'jcode.pl'; &SocketInit;}

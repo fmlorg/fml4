@@ -3,9 +3,7 @@
 # Public License. see the file COPYING for more details.
 
 
-local($id);
-$id = q$Id$;
-$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
+# $Id$;
 
 # if $SUBJECT_HML_FORM = 1;
 #   [Elena:100]
