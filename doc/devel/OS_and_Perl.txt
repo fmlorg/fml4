@@ -10,6 +10,13 @@ FreeBSD 3.4-RELEASE		5.005_03 built for i386-freebsd
 BSD/OS 2.0			4.036 (but broken)
 BSD/OS 2.1			4.036 (but broken)
 BSD/OS 3.1			4.036 (but broken)
+Solaris 2.6			none
+
+
+# not UNIX-like
+Windows NT4			none
+Windows 2000			5.6.0 ?
+Mac OS X			?	
 
 ---
 searched by
