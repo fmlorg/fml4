@@ -376,6 +376,12 @@ party." mails and this temporary ML is used for a few weeks.
 	[歴史] この形式はもともとOFF会用MLなんかに便利です。
 		例: 「出席します」メールがそのまま流れる。
 		(こういう場合「出席します」以外のメールはほとんどない)
+
+注意: 2002/04/01 以降の 4.0 current
+
+	$CONFIRMATION_SUBSCRIBE_NEED_YOUR_NAME を 0 にすると
+	you-mail-address の部分が必須でなくなります。
+
 .fi
 .if LANG == ENGLISH
 .fi

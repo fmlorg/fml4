@@ -640,6 +640,12 @@ sub BufferSyntax
     if ($buffer =~ /$CONFIRMATION_SUBSCRIBE\s+(\S+.*)/) { # require anything;
 	$name = $1;
     }
+    # 0 by default
+    elsif ((! $CONFIRMATION_SUBSCRIBE_NEED_YOUR_NAME) && 
+	$buffer =~ /$CONFIRMATION_SUBSCRIBE/) {
+       $name = $main'From_address; #';
+       $name =~ s/\@/ /g;
+    }
     else {
 	&Log("confirm buffer SYNTAX ERROR");
 	&Log("wrong buffer \"$buffer\"");
