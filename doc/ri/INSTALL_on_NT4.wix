@@ -5,6 +5,19 @@
 				深町 賢一
 				fukachan@sapporo.iij.ad.jp
 
+   NT4.0 でも Path 名表記は当然異なりますが基本的に同じです。
+   ntinstall.cmd というのがあるのでそれを使って下さい。Unix 版との相違点
+   については INSTALL_on_NT4 を見て下さい。このドキュメントはあくまでも
+   Unix版の makefml の使い方について述べたものです。
+   注意: ntinstall.cmd はマウスでひっぱたいて動くような気がするけど
+   makefml.cmd は MS-DOS prompt で使うものす。
+=E
+   For NT version, you should see this INSTALL.English and 
+   INSTALL_on_NT4.English, which is on the difference between 
+   UNIX and Windows NT4.0.
+   ATTENTION! You can use ntinstall.cmd by mouse, but user makefml.cmd
+   in MS-DOS prompt.
+
 ______________________________
 #.index
 ______________________________

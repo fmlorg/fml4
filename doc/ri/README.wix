@@ -39,8 +39,8 @@ FML includes
 	distributer
 	user command interface
 	remote administration command interface
-	listserv/majordomo style interface (just interface)
-	mailing list server via pop3 (not need MTA->exec FML)
+	listserv/majordomo style interface (emulation interface)
+	mailing list server via POP3 (not need MTA->exec FML)
    etc ...	
 
 
@@ -286,11 +286,11 @@ fml 2.1 のターゲットマシン/テスト環境は
 Unix 上でのインストールは INSTALL というファイルを参照して下さい。
 
 sys/arch/ src/arch/ の下にはベータテスト版の WINDOWS NT 4.0 用の依存コー
-ドが入っています。NT でも同じ makefml を使ってインストールをします。基
-本的に同じですが、いくつか Unix version との違いがあります。それについ
-ては INSTALL_on_NT4 に捕捉が書いてあるので、INSTALL と INSTALL_on_NT4 
-両方を参照して下さい。
-
+ドが入っています。NT 上の perl, sendmail などが何となく動いてるような
+動いてないような変なところはいろいろあるので、まぁ動いたららっき〜と思っ
+てください。Unix version との違いについてINSTALL_on_NT4 に捕捉が書いて
+あるので、INSTALL と INSTALL_on_NT4 両方を参照して下さい。
+注意:なおNT上の perl sendmail bind についてぼくに聞かれても困ります。
 
 
 .C	FML 2.1 の機能の概要

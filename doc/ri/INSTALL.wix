@@ -11,9 +11,10 @@
 
 
    このドキュメントで説明しているのは基本的なことに絞っています。
-   よりすすんだ設定については doc の下にある op というファイルや 
-   http://www.fml.org/fml/op/ の part III「インストールとカスタマイズ」
-   を見て下さい。
+   よりすすんだ設定については 
+	doc の下にある op というファイル
+	http://www.fml.org/fml/op/ 
+   の part III「インストールとカスタマイズ」を見て下さい。
 
    なお以下のドキュメント中ではメーリングリストをＭＬと略しています
 =E
@@ -24,14 +25,6 @@
 	FML-package-source-tree/doc/op	(plain)
 	http://www.fml.org/fml/op/	(html)
 
-   NT4.0 でも Path 名表記は当然異なりますが、基本的に同じです。
-   ntinstall.cmd というのがあるのでそれを使って下さい。Unix 版との相違点
-   については INSTALL_on_NT4 を見て下さい。このドキュメントはあくまでも
-   Unix版の makefml の使い方について述べたものです。
-=E
-   For NT version, you should see this INSTALL.English and 
-   INSTALL_on_NT4.English, which is on the difference between 
-   UNIX and Windows NT4.0.
 
 .~HTML_PRE
 __________________________________________
