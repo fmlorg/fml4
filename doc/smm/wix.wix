@@ -52,7 +52,7 @@ WIX は 行の先頭が . で始まっている行をコマンドとみなします。次に示すよ
 ションのようにはカウントしません。
 =E
 A WIX command is a line with the first character ".", which command is
-.command syntax such as:
+The command .key syntax such as:
 
 [章立て/構造]
 =E
@@ -101,7 +101,7 @@ XRef uses this labels and the pointer to Chapter.Section.
 .label でラベルづけした Chapter.Section への Cross Reference です。
 この Cross Reference は分中では
 =E
-.xref is expanded to the following
+The keyword  .xref is expanded to the following
 
 	see also 10.3 
 
