@@ -65,10 +65,16 @@ sub Init
     # /cgi-bin/ in HTML
     $CGI_PATH = $CGI_PATH || '/cgi-bin/fml';
 
-    # 3.0B
-    # $DefaultConfigPH = "$EXEC_DIR/default_config.ph";
+    # safe tmp buffer
+    $TmpDir = "/tmp/fmlcgi$$";
+    -d $TmpDir || mkdir($TmpDir, 0700);
 }
 
+
+sub CleanUp
+{
+    -d $TmpDir && rmdir($TmpDir);
+}
 
 sub ShowHeader
 {

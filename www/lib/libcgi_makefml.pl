@@ -119,7 +119,7 @@ sub MakefmlInputTranslate
 sub Control
 {
     local($ml, $command, @argv) = @_;
-    local($tmpbuf) = "/tmp/makefml.ctlbuf.$$";
+    local($tmpbuf) = "$TmpDir/makefml.ctlbuf.$$";
 
     &P("---Control($ml, $command, @argv)") if $debug;
 

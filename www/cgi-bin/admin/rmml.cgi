@@ -29,4 +29,6 @@ if ($ErrorString) { &Exit($ErrorString);}
 
 if ($ErrorString) { &Exit($ErrorString);}
 
+&CleanUp;
+
 exit 0;

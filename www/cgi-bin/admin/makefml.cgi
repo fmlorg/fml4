@@ -28,4 +28,6 @@ if (&SecureP) { &Command;}
 
 &Finish;
 
+&CleanUp;
+
 exit 0;

@@ -45,4 +45,6 @@ else {
     }
 }
 
+&CleanUp;
+
 exit 0;
