@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>
+The Design and Implementation of "fml" Mailing List Server
+</TITLE>
+<META http-equiv="Content-Type"
+#ifdef JAPANESE
+	content="text/html; charset=ISO-2022-JP">
+#else
+	content="text/html; charset=us-ascii">
+#endif
+<LINK rev="made" href="mailto:fml-bugs@fml.org">
+<LINK rel="stylesheet" 
+	    type="text/css" href="fml.css">
+<LINK rev="Contents" href="index.html">
+#ifdef JAPANESE
+<LINK rev="alternate" lang="en" href="3.0-new-features-e.html">
+#else
+<LINK rev="alternate" lang="ja" href="3.0-new-features.html">
+#endif
+</HEAD>
+<BODY BGCOLOR="#E6E6FA">
+
+#ifdef JAPANESE
+<A HREF="3.0-new-features-e.html">[English] is here.</A>
+#else
+<A HREF="3.0-new-features.html">[Japanese] is here.</A>
+#endif
+
+<H3>
+#ifdef JAPANESE
+	3.0の特徴の highlight (2.2.1と3.0の主な違い)
+#else
+	3.0 highlight features (difference between 2.2.1 and 3.0)
+#endif
+</H3>
+
+#ifdef JAPANESE
+<PRE>
+	
+○ メッセージの多国語化 (3.0 new)
+   ようするに日本語でエラーなどが返る
+
+○ 自動登録のメンバーリストの扱い方を変更 (3.0 new)
+   members と actives を区別する。
+
+   新ハンドラ auto_subscribe
+   互換性のため従来のauto_registもそのまま使える
+   <A HREF="UPGRADE-3.0/index.html">3.0への移行の注意を参照</A>
+
+○ MD5 checksum によるループ検出 (3.0 new, optional)
+
+○ メモリ仕様効率の改善 (3.0 new)
+   ユーザの目にはきっと見えない部分
+
+○ フィルタリングに付け加わったもの
+    ContentHandler() (optional) <t-nakano@imasy.or.jp>
+        multipartメールを内容に応じてメールの受けとり拒否、 棄てるなど
+        様々なコントロールを行なう特殊なフィルタ
+        例: html mail を拒否する
+            (平文と同じ内容のHTMLパートもついている無意味なメール)
+
+    昔あった $HTML_MAIL_DEFAULT_HANDLERの拡張/上位互換
+
+    (一部のウィルスチェック)
+
+</PRE>
+#else
+<PRE>
+* Message Language Extension (3.0 new)
+  Japanese error messages
+
+* change actives/members treatment of automatic subscribe (3.0 new)
+   <A HREF="UPGRADE-3.0-e/index.html">Caution for upgrade to 3.0</A>
+
+* MD5 check sum loop detection (3.0 new, optional)
+
+* fix memory usage (3.0 new)
+
+* new filtering rules added
+    reject HTML mail (plaintext + the same content html part)
+    handle multipart mail several ways (reject some content but allow others..)
+    (a few virus checks)
+
+</PRE>
+#endif
+
+<PRE>
+Copyright (C) 1993-1999 Ken'ichi Fukamachi
+         All rights reserved. 
+
+$Id$
+</PRE>
+</BODY>
+</HTML>
