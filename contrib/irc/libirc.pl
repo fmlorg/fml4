@@ -21,8 +21,11 @@ if ($0 eq __FILE__) {
 	die("cannot fork\n");
     }
     elsif (0 == $pid) {
-	$NetIRC'LOGFILE = "$ENV{'PWD'}/log"; #';
-	eval q#sub Log { &NetIRC'Log(@_);}#; #';
+	# new irc_subr;
+	&irc_subr'Import(); #';
+
+	eval q#sub Log { &irc_subr'Log(@_);}#; #';
+	print STDERR $@ if $@;
 
 	# program name
 	$Prog = $0;
@@ -48,7 +51,7 @@ if ($0 eq __FILE__) {
 	    shutdown(S, 2);
 
 	    sleep 3;
-	    &Log("$Prog restarting ...");
+	    &Log("$Prog restart");
 	}
     }
 
@@ -72,7 +75,7 @@ else {
 
 package irc;
 
-sub Log { main'Log(@_);}
+sub Log { &main'Log(@_);}
 
 sub GetTime
 {
@@ -104,7 +107,7 @@ sub main'IrcParseArgv #'
 {
     ### getopts
     require 'getopts.pl';
-    &Getopts("df:I:t:hL:H:");
+    &Getopts("df:I:t:hL:H:S");
 
     if ($opt_h) {
 	$s = $0;
@@ -121,6 +124,7 @@ sub main'IrcParseArgv #'
 	;
 	-d       debug mode;
 	-h       this message;
+	-S       use syslog;
 	;#;
 	$s =~ s/;//g;
 	print STDERR $s, "\n";
@@ -128,8 +132,9 @@ sub main'IrcParseArgv #'
     }
 
     # now 'irc' name space;
-    $debug = $NetIRC'debug = $main'debug = $opt_d ? 1 : 0;
-
+    $debug = $main'debug = $opt_d ? 1 : 0; #';
+    $USE_SYSLOG = $opt_S ? 1 : 0;
+    
     $SetProcTitle = $opt_t;
 
     # load config.ph
@@ -139,10 +144,13 @@ sub main'IrcParseArgv #'
     # include path
     push(@INC, $opt_I);
 
-    # import -> @irc::STAT_HOST
+    # import -> @irc::IRCSTAT_HOST
     if ($opt_H) {
-	@STAT_HOST  = split(/:/, $opt_H);
-	$STAT_UNIT  = $#STAT_HOST + 1;
+	@IRCSTAT_HOST  = split(/:/, $opt_H);
+	$IRCSTAT_UNIT  = $#IRCSTAT_HOST + 1;
+    }
+    elsif (@IRCSTAT_HOST) {
+	$IRCSTAT_UNIT  = $#IRCSTAT_HOST + 1;
     }
 }
 
@@ -173,6 +181,12 @@ sub main'IrcInit  #'
 
     ### set up socket
     &SocketInit;
+
+    ### FYI:
+    if (@IRCSTAT_HOST) {
+	&Log("Configuring ircstat to scan");
+	for (@IRCSTAT_HOST) { &Log("host $_");}
+    }
 }
 
 
@@ -182,9 +196,13 @@ sub InitConnection
     for ("USER $IRC_USER * * :$IRC_NAME",
 	 "NICK $IRC_NICK",
 	 "PING FML-IRC-FIRST",
-	 "JOIN $IRC_CHANNEL"
 	 ) {
 	push(@x, $_);
+    }
+
+    # not require to join a channel under ircstat mode.
+    if ($IRC_CHANNEL) {
+	push(@x, "JOIN $IRC_CHANNEL");
     }
 
     unshift(@Queue, @x);
@@ -311,20 +329,26 @@ sub main'IrcMainLoop  #'
     local($rout, $wout, $eout);
     local($buf, $wbuf, $reset, $count);
 
+    # important function pointer
+    # If you controls e.g. 30 sec granuality, please define your function.
+    # This function provides the commands, pushd the queue or ... for
+    # each mode.
+    $FP_GET_NEXT_BUFFER = $FP_GET_NEXT_BUFFER || 'GetNextBuffer';
+
     # server not recognize me!
     $TrapPattern = 'not registered';
 
     ### ircstat
     if ($mode eq 'ircstat') {
-	$RecvYes   = 1;
-	$StatQuery = 0;
+	$QueueStack = 0;
 	$StatCount = 0;
 	$LastRecv  = time;
 
-	$STAT_UNIT || die("$mode: -H host is required\n");
+	$IRCSTAT_UNIT ||
+	    die("$mode: -H host/\$IRC_IRCSTAT_HOST is required\n");
 
 	# host to monitor
-	$NextStatHost = $STAT_HOST = $STAT_HOST[$StatCount++ % $STAT_UNIT];
+	$IRCSTAT_HOST = $IRCSTAT_HOST[$StatCount++ % $IRCSTAT_UNIT];
     }
 
     # server timeout
@@ -340,20 +364,27 @@ sub main'IrcMainLoop  #'
 
     $lasttime_input = time;
     for (;;) {
+	undef $buf;
+
 	if ($reset) {
 	    $GlobalErrorCount++;
 	    last;
 	}
 
-	$0 = "--$mode $SetProcTitle";
+	$0 = "--$mode $SetProcTitle $IRC_SERVER";
 
 	($nfound, $timeleft) =
 	    select($rout=$rin, $wout=$win, $eout=$ein, $IRC_TIMEOUT);
 
 	# logs time
-	if ($nfound != 0) { 
+	if ($nfound < 0) { 
+	    $reset = 1;
+	    &Log("select => -1") if $debug;
+	}
+	elsif ($nfound > 0) { 
 	    $lasttime_input = time;
 	}
+	# nfound == 0 is 'now $IRC_TIMEOUT expired'.
 	elsif (time - $lasttime_input > $IRC_SERVER_TIMEOUT) {
 	    &SendS("QUIT :$IRC_SIGNOFF_MSG");
 	    &Log("no input time lasts over $IRC_SERVER_TIMEOUT sec.");
@@ -365,13 +396,17 @@ sub main'IrcMainLoop  #'
 	    sysread(S, $buf, 4096) || do { 
 		if ($!) { &Log("S sysread: $!");} 
 		$reset = 1;
+		&Log("sysread(S) fails") if $debug;
 	    };
 
 	    if ($debug) {
 	        &GetTime(time);
 		for (split(/\n/, $buf)) {
-		    if (/$TrapPattern/) { $reset = 1;}
-		    print STDERR "----- $Now> $_\n";
+		    if (/$TrapPattern/) { 
+			&Log("trap \$TrapPattern") if $debug;
+			$reset = 1;
+		    }
+		    print STDERR "--- $Now> $_\n" if $debug;
 		}
 	    }
 	}
@@ -381,6 +416,7 @@ sub main'IrcMainLoop  #'
 	    sysread(STDIN, $buf, 4096) || do { 
 		if ($!) { &Log("STDIN sysread: $!");}
 		$reset = 1;
+		&Log("sysread(STDIN) fails") if $debug;
 	    };
 
 	    for (split(/\n/, $buf)) {
@@ -392,10 +428,15 @@ sub main'IrcMainLoop  #'
 
 	### analyze buffer
 	# ircstat
-	if ($mode eq 'ircstat' && $StatQuery) {
+	if ($debug && ($mode eq 'ircstat')) {
+	    &Log("QueueStack = $QueueStack". ($buf ? ": buf" : " :no buf"));
+	}
+	if ($mode eq 'ircstat' && $QueueStack) {
+	    undef $RecvYes;
+
 	    # wait for reply we expect
 	    if ($buf) {
-		$RecvYes = &NetIRC'StatLog(*buf); #';
+		$RecvYes = &irc_subr'StatLog(*buf); #';
 	    }
 
 	    if ((time - $LastRecv) > 60) {
@@ -403,16 +444,20 @@ sub main'IrcMainLoop  #'
 	    }
 	    
 	    if ($RecvYes) {
-		$StatQuery = 0;
+		print STDERR "--- RecvYes=$RecvYes => \$QueueStack--\n"
+		    if $debug > 10;
+
+		$QueueStack > 0 ? $QueueStack-- : ($QueueStack = 0);
 		$LastRecv  = time;
 
 		# host to monitor
-		$STAT_HOST = $STAT_HOST[$StatCount++ % $STAT_UNIT];
-		$StatCount = $StatCount % $STAT_UNIT;
-		undef $NextStatHost;
+		$IRCSTAT_HOST = $IRCSTAT_HOST[$StatCount++ % $IRCSTAT_UNIT];
+		$StatCount = $StatCount % $IRCSTAT_UNIT;
 
 		# debug :-)
-		push(@Queue, "PRIVMSG $IRC_CHANNEL :$RecvYes");
+		if ($debug_ircstat && $IRC_CHANNEL) {
+		    push(@Queue, "PRIVMSG $IRC_CHANNEL :$RecvYes");
+		}
 	    }
 	    else {
 		# next;
@@ -426,13 +471,13 @@ sub main'IrcMainLoop  #'
 	$GlobalErrorCount = 0 if $count > 5;
 
 	# wait
-	sleep 2; # RFC1459 defines "1 message per 2 secs". (theory)
+	sleep 2; # RFC1459 defines "1 message per 2 secs". (though theoretical)
 	sleep int(log(length(@Queue) + 3)); # experimental (3 for 'e').
 
 	# write the buffer to server
-	$wbuf = &GetNextBuffer($mode);
+	$wbuf = &$FP_GET_NEXT_BUFFER($mode);
 	&GetTime(time);
-	print STDERR "--wbuf <$wbuf> ($Now)\n" if $debug;
+	print STDERR "<<< write_buffer {$wbuf} ($Now)\n" if $debug;
 	&SendS($wbuf) if $wbuf;
 
 	# counter
@@ -469,8 +514,8 @@ sub GetNextBuffer
 	    # 59,58,57
 	    if (((59 - $sec) % 30) < 3*$IRC_TIMEOUT) {
 		sleep(((59 - $sec) % 30) + 1); # align at 0 sec:-)
-		$StatQuery = 1;
-		"LUSERS $STAT_HOST";
+		$QueueStack++;
+		"LUSERS $IRCSTAT_HOST";
 	    }
 	    else {
 		$NULL;
@@ -491,9 +536,19 @@ sub main'IrcImport #'
 {
     $irc'debug = $main'debug;
 
-    for (IRC_SERVER, IRC_PORT, IRC_CHANNEL, IRC_USER, IRC_NAME, IRC_NICK, 
-	 IRC_SIGNOFF_MSG) {
-	eval "\$irc'$_ = \$main'$_;";
+    for (IRC_SERVER, 
+	 IRC_PORT, 
+	 IRC_CHANNEL, 
+	 IRC_USER, 
+	 IRC_NAME, 
+	 IRC_NICK, 
+	 IRC_SIGNOFF_MSG,
+
+	 IRC_SYSLOG_FACILITY,
+	 IRC_SYSLOG_HOST,
+	 IRC_SYSLOG_LEVEL,
+	 ) {
+	eval "\$irc'$_    = \$main'$_;";
     }
 }
 
@@ -537,7 +592,40 @@ sub main'Write2Irc #'
 }
 
 
-package NetIRC;
+package irc_subr;
+
+
+sub Import
+{
+    for (LOGFILE, 
+	 USE_SYSLOG, 
+	 debug,
+
+	 IRC_SERVER, 
+	 IRC_PORT, 
+	 IRC_CHANNEL, 
+	 IRC_USER, 
+	 IRC_NAME, 
+	 IRC_NICK, 
+	 IRC_SIGNOFF_MSG,
+
+	 IRC_SYSLOG_FACILITY,
+	 IRC_SYSLOG_HOST,
+	 IRC_SYSLOG_LEVEL,
+	 ) {
+	eval "\$irc_subr'$_ = \$irc'$_;";	
+    }
+
+    if (! $LOGFILE) {
+	$LOGFILE = $ENV{'PWD'}."/log";
+    }
+
+    &Touch($LOGFILE) unless -f $LOGFILE;
+}
+
+
+sub Touch { open(APP, ">> $_[0]") || &Log("cannot touch $_[0]");}
+
 
 sub GetTime
 {
@@ -568,10 +656,13 @@ sub GetTime
 sub Log 
 { 
     local($str, $s) = @_;
-    local($from) = $USER;
     local(@c)    = caller;
 
     &GetTime(time);
+
+    if ($USE_SYSLOG) { 
+	&main'SysLog($str); #';
+    }
 
     # existence and append(open system call check)
     if (-f $LOGFILE && open(APP, ">> $LOGFILE")) {
@@ -614,20 +705,57 @@ sub Write2
 }
 
 
-### ircstat
+################################################################
+### ircstat ###
 sub StatLog
 {
-    local(*buf) = @_;
-    local(@x) = split(/\n/, $buf);
+    local(*bin) = @_;
 
-    for (@x) {
+    for (split(/\n/, $bin)) {
 	if (/.*:.*\s+(\d+\s+user\w+)/) {
-	    &Log($_ = "$irc'STAT_HOST: $1"); #';
+	    &Log($_ = "$irc'IRCSTAT_HOST: $1"); #';
+	    print STDERR "--- StatLog: $_\n" if $debug > 10;
+	    undef $bin;
 	    return($_ ? $_ : 1);
 	}
     }
 
     0;
 }
+
+
+package main; # require main space since main::openlog is defind ;D
+
+
+#	do openlog($program,'cons,pid','user');
+#	do syslog('info','this is another test');
+#	do syslog('mail|warning','this is a better test: %d', time);
+#	do closelog();
+#	
+#	do syslog('debug','this is the last test');
+#	do openlog("$program $$",'ndelay','user');
+#	do syslog('notice','fooprogram: this is really done');
+#
+#	$! = 55;
+#	do syslog('info','problem was %m'); # %m == $! in syslog(3)
+sub SysLog 
+{
+    local($s) = @_;
+
+    if ($] =~ /^5\./) {
+	eval "use Sys::Syslog;";
+	&Log($@) if $@;
+    }
+    else {
+	require 'syslog.pl';
+    }
+
+    $syslog'host = $irc'IRC_SYSLOG_HOST if $irc'IRC_SYSLOG_HOST; #';
+    
+    &openlog($Prog, 'pid', $IRC_SYSLOG_FACILITY || 'user');
+    &syslog($IRC_SYSLOG_LEVEL || 'info', $s);
+    &closelog();
+}
+
 
 1;
