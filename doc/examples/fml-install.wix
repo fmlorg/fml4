@@ -25,7 +25,7 @@ Connected to ftp.iij.ad.jp.
 	.... だ〜 ...
 
 % tar zxf fml-current.tar.gz
-% cd fml-2.2F-snapshot3
+% cd fml-3.0
 
   (できるディレクトリ名はその時時で変わる。
    名前は『fml-バージョン番号-スナップショット番号』のようになっている)
@@ -89,10 +89,14 @@ Done.
 -- Enjoy Internetworking!
 
 ○ ＭＬを作る (例: elena ＭＬとしよう)
+=E
+** create mailing list (suppose "elena" ML)
 
 % /usr/local/fml/makefml newml elena
 
 	... メッセージ(省略) ...
+=E
+	...
 
 % su root
 Password: 
@@ -102,16 +106,26 @@ Password:
 # exit
 
 ○ 自分を登録してみる
+=E
+** add myself to the mailing list
 
 % /usr/local/fml/makefml elena::add 自分のメールアドレス
 
 	... メッセージ(省略) ...
+=E
+	...
 
 ○ テスト
+=E
+** test
 
 テストメールを elena MLに投げてみるなどする
+=E
+send test mail to "elena" ML 
 
 ○ 必要なら本運用の前にカウンターやログをリセットする。
+=E
+To remove log of test mails, please remove the following files.
 
 % cd /var/spool/ml/elena
 % rm -fr seq summary log spool
