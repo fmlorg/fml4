@@ -51,16 +51,8 @@ makefml newml を実行した際に各ＭＬのHOMEに用意されるテンプレートのファ
 のいづれかです。埋め込まれているものを messages/ 以下にひっぺがす作業
 は少しずつ進んでいます。
 
-.S	問題点
 
-特定少数の場所の返事を変えたい時にどうするか？ですが、今の対処法法は良
-くないでしょう。将来は
 .xref messages.customize
-
-	/var/spool/ml/elena/messages.conf
-
-みたいな設定ファイルで制御するようにしようかとおもっています（未実装）
-
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

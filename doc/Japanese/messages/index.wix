@@ -5,4 +5,5 @@
 .~HTML_PRE
 
 .include overview.wix
+.include mesgle.wix
 .include howto.wix
