@@ -8,12 +8,17 @@
 #
 
 
-sub DataBaseMIBPrapare
+# DataBaseMIBPrepare( \$mib, action_strings, \%attr )
+sub DataBaseMIBPrepare
 {
-    my ($action, $mib) = @_;
+    my ($mib, $action, $x) = @_;
+
+    # canonicalize action to lower case
+    $action =~ tr/A-Z/a-z/;
 
     # manipulate which address ?
-    $mib->{'_address'}        = $From_address;
+    &Log("MIBPrepare.attr($x->{'address'} || $From_address)") if $debug;
+    $mib->{'_address'} = &TrivialRewrite($x->{'address'} || $From_address);
 
     # fundamental information
     $mib->{'MAIL_LIST'}       = $MAIL_LIST;
@@ -98,6 +103,8 @@ sub Log { &main::Log(@_);}
 sub main::DataBaseCtl
 {
     local($e, $mib, $result, $misc) = @_;
+
+    &Log("debug: DataBaseCtl($mib->{'ACTION'})");
 
     # Leightweight Directory Access Protocol
     if ($mib->{'METHOD'} =~ /^LDAP$/i) {
