@@ -21,6 +21,10 @@ I think "principle of least surprise" is most important in upgrade.
 
 4.0 の主な新機能とアップグレードの際の注意についてまとめます。
 
+3.0 と 4.0 は機能の追加はあっても、内部構造の変更はほとんどありません。
+そのため PGP 関連を除き操作性は 3.0 との相違はわずかといえます。
+
+
 .S	fml 4.0 works with perl 5 only 
 
 .if LANG == JAPANESE
