@@ -1,22 +1,26 @@
 .C	コマンドライン オプション
 .l	clo
-.k	コマンドラインオプション
+.k	コマンドライン オプション
 
-.S	コマンドライン オプション -\S+
+.S	コマンドラインについて
 
 コマンドラインといっても、/etc/aliases から呼ばれるinclude file の
 	"|/usr/libexec/fml/fml.pl $DIR $LIBDIR -option" 
 のオプションの話のことです。
 デバッグの時に shell 上で手動実行する時でも同様です。
 
-makefml 等で変数は config.ph の中を書き換えるので、通常設定をいじるの
-は config.ph だけにして、デバッグ以外の目的では使わない方が無難です。
+makefml は config.ph の中の変数を書き換えるので、通常設定をいじる時は
+config.ph の中にすべての設定を書くようにして下さい。コマンドラインはデ
+バッグ以外の目的では使わない方が無難です。
 
-＊＊＊注意＊＊＊
+コマンドラインは使い方によってはとっても便利ですが、よくわからない場合
+は使わないで下さい。
+
+			＊＊＊注意＊＊＊
 なお makefml で作る include-ctl というファイル中には --ctladdr という
 オプションがついていますが、これは外さないで下さい。
 
-
+.S	コマンドライン シンタックス
 
 SYNOPSIS:
    fml.pl   [ options ] $DIR [ options ]  [ $LIBDIR [ options ] ]
@@ -58,7 +62,7 @@ DESCRIPTION
 とかできるわけです
 
 例：
-"|/usr/libexec/fml/fml.pl /Baycity /Baycity/lib -d -sUSE_MIME -sDUMPVAR"
+"|/usr/local/fml/fml.pl /Baycity /Baycity/lib -d -sUSE_MIME --DUMPVAR"
 
 デバッグモード かつ $USE_MIME =1; で 変数のダンプも行なう。
 
@@ -66,52 +70,31 @@ DESCRIPTION
 .S	ロングラインオプション --\S+=\S+
 .k	--MAIL_LIST=mailing-list-name@domain 
 
+例:
 	--MAINTAINER=fukachan@sapporo.iij.ad.jp
 
 $MAINTAINER の値を fukachan@sapporo.iij.ad.jp で Overwrite します。
 config.ph の後評価されるので、ロングラインオプションを使って ある値だ
 けを変更することが可能です。
 
-複数のMLがある時に便利だと思います。
-一番便利な使い方は、config.ph をひとつ用意して、コピーして使い回し、
-アドレスだけを 
-
-	--MAIL_LIST=mailing-list-name@domain 
-
-で変更する などの使い方でしょう。
-ML作成の二つ目以降では、普通アドレスしか変えないものですから:-)
-
 
 .S	設定ファイルとコマンドラインオプション
 
 各ＭＬの場所に config.ph を置く代わりにfmlのライブラリが置いてある場所
-にocnfig.ph もしくは sitedef.ph をひとつだけ置いてそれだくを保守するの
+にocnfig.ph もしくは sitedef.ph をひとつだけ置いてそれだけを保守するの
 も便利です。この場合は
 
    1	(もしあれば) 共用directory の config.ph  を loading
    2	(もしあれば) 共用directory の sitedef.ph を loading
    3	その後コマンドラインオプションを評価
 
-なので、例えばコマンドの設定パス($TAR $UUENCODE)等はマシンが同じなら
-一回設定すれば後は同じなので、コマンドラインオプションでＭＬ名を決めると
-かすると設定が一瞬で終りますね:-) 
-
-例：
-
-mkdir して、cp してコマンドラインを書き換えるとはい、おしまひ
-
-例２：
-
-あと共用の $START_HOOK なんかもあるでしょう。sitedef.ph の $START_HOOK 
-でＭＬ共通のヘッダ変換
-
-	Subject: は Origina-Subject: へ保存
-	Subject: から情報を減らす[ML名 数字]を消したSubject:に変換
-
-とかしますよね？(^^;)
+なので、例えばコマンドの設定パス ($TAR $UUENCODE) 等はマシンが同じなら
+一回設定すれば後は同じなので、コマンドラインオプションでＭＬ名を決める
+とかすると設定が一瞬で終るという応用もありえますね:-)
+＃これをやると makefml でＭＬ名等の config はできない点に注意↑。
 
 
-.S	簡易モード設定 （ロングラインオプション）--\S+
+.S	簡易モード設定 (ロングラインオプション) --\S+
 .l	--mode
 .k	--mode
 .k	&DEFINE_MODE('mode')
@@ -132,298 +115,72 @@ mkdir して、cp してコマンドラインを書き換えるとはい、おしまひ
 になります。なお、コマンドラインの --mode は config.ph で指定する 
 $Envelope{"mode:$mode"} と同じ意味になります。
 
-		＊＊＊注意＊＊＊
+例:
+		fml.pl --html
 
-config.ph はすべての場合に共通に読み込まれます。そのため配送のモードの
-設定 (特に --distribute, --distribute_with_member_check のこと)につい
-ては、コマンドラインの時と config.ph に書いた時では異なる可能性があり
-ます。その場合はコマンドラインオプションを使っている方がわかりやすいで
-しょう。
 
-配送のモード以外の指定に関してはコマンドラインでもconfig.phどちらでも
-特に問題はないはずです。
+.S	配送モードの指定に関する注意
 
+現在の makefml ではすべての設定を config.ph の値を書き直すことで行ない
+ます。そのためコマンドラインオプションはいじりません。
 
-例：	
-	"| fml.pl  --distribute $DIR " 
+ひとつだけ例外があります。コマンド用のアドレス listname-ctl は 
+include-ctl を呼びますが、この include-ctl の中には
 
-は $DIR/config.ph での $Envelope{'mode:distribute'} = 1; と同じ。
+		--ctladdr 
 
-しかし、もし include ファイルでなく &DEFINE_MODE('distribute'); を 
-config.ph に書いてしまうと、コマンド用に用意されたアドレスも配送専用に
-なってしまいます。
+という
 
-makefml が作るコマンドサーバ用の include ファイルは --ctladdr というコ
-マンドラインオプションがついています。ctladdr モード指定は配送モードの
-設定より強いので、distribute と ctladdr の両方が指定された場合 ctladdr 
-の方に従いコマンドサーバになるというトリックが使われています。
+	コマンド用のアドレス宛のメールを処理するという意味を
+	fml.pl へ伝えるためのコマンドラインオプション
 
-難しいと思う人はコマンドラインオプションで指定するのが良いでしょう。
-makefml はこのトリックを使っているので makefml の作ったファイルを手で
-いじる際には注意して下さい。
+を使っています。この --ctladdr は消さないで下さい。
 
+makefml を使っている限りでは気にする必要はありません。場合によってはコ
+マンドラインオプションを使っている方がわかりやすい場合がありうるでしょ
+う。makefml に頼らないという人は使い易い方を選択すれば良いと思います。
 
-.k	--distribute
-.l	--distribute
- --distribute	
+配送のモード以外の指定に関してはコマンドラインでも config.ph どちらで
+も特に問題はないはずですので、config.ph の最後で &DEFINE_MODE() を使え
+ばいいでしょう。
 
-	distribgute only 
-	スプールして再配送しているだけ
+例：	リレー用のアドレスを用意する
 
-	再配送してスプールするために使うアドレスに使う場合は
-	このモードを使うようにするべきである。
-	
-	例： /etc/aliases
-	ip-connection: "|$FML/fml.pl $DIR --distribute"
+この場合 どっか/listname/config.ph で
 
-	#ip-connections ML のようなものの受け口に使う場合には
-	#このモードを使うようにするべきである。
+	&DEFINE_MODE('post=anyone');
 
+のように書きます。makefml を使えば対話的にこのように↑この部分を書き加
+えてくれます。この時 makefml が準備するのは
 
-.k	--distribute_with_member_check
-.l	--distribute_with_member_check
- --distribute_with_member_check
+	listname 	をだれでも投稿できるアドレス
+	listname-ctl 	を登録されているメンバーのためのコマンドサーバ
 
-	メンバーチェックをしてメンバーであればスプールして配送する
-	コマンドは使えない。
+です。もちろんリレーの場合には /etc/aliases に listname-ctl を登録せず
+listname というアドレスでの再配送だけに専念するのが良いでしょう。例え
+ば ip-connection とかです。
 
-	--distribute は再配送専用(誰から来てもOKなのはそのため)、
-	--distribute_with_member_check をつけると
-		メンバーチェックをする
-		コマンドは使えない配送専用のサーバ
-	という違いがあります。
 
-	listname-ctl を明示的に使うので、listname はコマンドを使えなくする
-	場合に使うとよいでしょう。
-	makefml は明示的に -ctl を使う設定で設定ファイルを作るが、
-	デフォールトは backward compat のためにコマンドは使える点に注
-	意して下さい。
 
-	なおもし、メンバー以外からメールが来たら管理者に知らせるだけ
-	です。自動登録ルーチンとかには自動的に入ったりはしません。
-	それは -ctl 宛に出し直してもらうべきでしょう。
+さて以下では理屈を説明します。config.ph はすべての場合に常に読み込まれ
+るファイルです。そのため makefml が作るコマンドサーバ用の include-ctl 
+というファイルには "--ctladdr" というコマンドラインオプションがついて
+います。
 
+もしこの ctladdr 指定がないと配送モード指定 
 
-.k	--mladdr=uja@domain	
- --mladdr=uja@domain	
+	&DEFINE_MODE('post=anyone'); 
 
-	config.ph がなくても
+により listname も listname-ctl も配送専用になってしまいます。そのため
 
-	MAIL_LIST  = uja@domain
-	MAINTAINER = uja-request@domain
+		--ctladdr 
 
-	等アドレス設定をよきにはからう:-)
-	＃とりあえず -request なのは USENET 依頼の伝統芸なだけ
+で listname-ctl 宛にきたメールの場合起動する fml.pl はコマンド処理に専
+念するという宣言を ctladdr はしているわけです。
 
-.k	--tag=subject-tag-definition
-.k	--subjecttag=subject-tag-definition
-  --subjecttag=subject-tag-definition
-  --tag=subject-tag-definition
 
-Subject のTAGを定義する。fml のデフォールトは「使いもせず情報を減らす」
-タグはつけない。
-
-	--tag='(:)'
-
-		Subject: (Elena:100)
-
-	--tag='[:]'
-
-		Subject: [Elena:100]	(HMLタイプ)
-
-	--tag='( )'
-
-		Subject: (Elena:100)
-
-	--tag='[ ]'
-
-		Subject: [Elena:100]
-
-
-	--tag='[,]'
-
-		Subject: [Elena,100]
-
-	--tag='(,)'
-
-		Subject: (Elena,100)
-
-
-なお、モード指定中でTAGを定義している場合は後で評価された内容が優先さ
-れるので注意。例： HML Emulation mode  (--hml)
-
-これらのTAGは $SUBJECT_FREE_FORM の変数を定義すれば自由にカスタマイズ
-できるのですが、それをあらかじめ定義しておくことで便利なユーザインター
-フェイスになるようにしたものです。
-
-config.ph では
-
-	&DEFINE_SUBJECT_TAG("(:)");
-
-のように呼び出してあげて下さい。
-.xref &DEFINE_SUBJECT_TAG
-
-
-.k	--auto
-.l	--auto
- --auto
-	投稿者がメンバーでない場合自動的にMLに登録する
-
-.k	--check
-.l	--check
- --check 
-	投稿者がMLのメンバーか否かチェックを行う(default)
-
-.k	--moderated
-.l	--moderated
-
- --moderated
-	メールは一回管理者へフォワードされる。
-	管理者が査読してOKとみなしたらＭＬへ投げる。
-	Approval: password フィールドをヘッダにつけてＭＬに
-	投げればメールは配送される。
-	よってＭＬに投稿できるのはパスワードを知っている人に限られる。
-	パスワードはリモート管理のし方と同様に保守して下さい。
-
-.k	--fml	
- --fml
-	MAINTAINER = uja-admin@domain 
-	admin syntax を使う
-
-.k	--hml
- --hml 
-	hml 1.6 compatible mode 
-	例えば Subject: [Elena:100] シンタックス等
-
-.k	 --fmlserv
- --fmlserv		
-
-	CONTROL_ADDRESS = fmlserv@domain
-
-	コマンドインターフェイスとして 
-	fmlserv@domain があることが必要
-
-.k	--listserv
-.k	--majordomo
- --listserv
- --majordomo
-
-	は  --fmlserv と同一である。
-
-.k	--remote
- --remote
-.k	--ra
- --ra
-	Remote Administration Mode
-	リモート管理モード(パスワードを要求する)
-	具体的には
-		$REMOTE_ADMINISTRATION = 1;
-		$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1;
-	をセットしている
-
-.k	--html
- --html
-
-	最後に SyncHtml を呼出し Html 化する
-
-	var/htdocs/Ｎ通ごとにdirectoryを作り階層化して保存
-
-	例：
-	var/htdocs/100/index.html 
-	
-	この index.html の中では 逆順 つまり １００、９９、…
-	のように URLが並ぶ
-
-.k	--mime
- --mime
-	$USE_MIME = 1;
-
-.k	--force:field=value
- --force:field=value
-
-	MLの配送時 field の値を強制的に value に設定する
-	＃注意： field name は小文字である
-
-	例： 
-
-	reply-to: を常にMLにしてしまう
-	--force:reply-to=uja@domain
-
-config.ph では
-
-	$Envelope{"fh:reply-to:"} = 'uja@domain'; と同じ
-
-便利なように、
-
-	&DEFINE_FIELD_FORCED('reply-to') = 'uja@domain';
-
-というマクロも用意されている。
-.k	&DEFINE_FIELD_FORCED()
-.k	DEFINE_FIELD_FORCED()
-
-.k	--oh:field
-.k	--original:field
- --original:field	
-
-	＃ キーワード original, org, oh は等価
-
-	MLの配送時 field の値をオリジナルのものを使うように設定する
-	＃注意： field name は小文字である。また、force と違いオリジナ
-	＃ルを使うのだから =value という部分はないことに注意
-
-	例： 事情により To: Cc: のみはオリジナルのものに戻して配送したい
-
-	--oh:to --oh:cc
-
-config.ph では $Envelope{"oh:to:"} = 1; とおなじ。便利なように、
-
-	&DEFINE_FIELD_ORIGINAL('to');
-
-というマクロも用意されている。
-.k	&DEFINE_FIELD_ORIGINAL()
-.k	DEFINE_FIELD_ORIGINAL()
-
-.k	--permit:variable
- --permit:variable
-	$Permit{"variable"} = 1;
-
-
-例：
-	From: を強制的に fml-maintainer@phys.titech.ac.jp に設定して
-	フォワードをする。
-	＃この場合配送先は $MAIL_LIST_DIR/fml-query/actives で決まる。
-
-	perl $FML/fml.pl $MAIL_LIST_DIR/fml-query \
-	--distribute \
-	--mladdr=fml-query@phys.titech.ac.jp \
-	--force:from=fml-maintainer@phys.titech.ac.jp
-
-
-ロングラインオプションによる変数の設定：
-
-.k	--variable
- --variable
-	$variable = 1;
-
-.k	--variable=value
- --variable=value
-	$variable = $value;
-
-例：
-	$MAINTAINER を fml-admin@uja にする
-	＃ config.ph での $MAINTAINER = 'fml-admin@uja'; と同じ
-
-	perl $FML/fml.pl $MAIL_LIST_DIR/fml-query \
-	--distribute \
-	--mladdr=fml-query@phys.titech.ac.jp \
-	--force:from=fml-maintainer@phys.titech.ac.jp
-	--MAINTAINER=fml-admin@uja
-
-例：
-	デバッグモードをオン！
-	perl $FML/fml.pl $MAIL_LIST_DIR/fml-query --debug
-
-.k	--debug
+.S	コマンドラインの一覧
+.xref	command-line-option-index
 
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp

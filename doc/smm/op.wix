@@ -140,6 +140,8 @@
 .include fred.wix
 .include pager.wix
 
+.include cloindex.wix
+
 .include app/fmlR1.wix
 .include app/vars.wix
 .include app/misc.wix
