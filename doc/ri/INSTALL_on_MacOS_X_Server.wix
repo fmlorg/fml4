@@ -2,8 +2,9 @@
 
 	INSTALL guide on Mac OS X Server
 
-このファイルはfmlのインストールについて Unix 版との相違点について記述
-しています。インストールの大枠は INSTALL を見て下さい。
+このファイルは Mac OS X Server 上で fml をセットアップする際に、Unix 
+版とどこが異なるかという相違点について記述しています。Mac OS X Server 
+は基本的に BSD なので、インストールの大枠は INSTALL と同様です。
 =E
 This file describes the difference between fml on UNIX and on Mac OS X
 Server. Please see INSTALL for the install flow.
@@ -32,9 +33,9 @@ difference with INSTALL between Mac OS and usual UNIX-like system.
 .S	推奨されるシステム構成について
 =E.C	Recommendation
 
-デフォルトのものを使っても動かすことはできます。しかしデフォルトで
-インストールされているソフトウエアは古いので新しいものにすることが推奨
-されます。
+デフォルトのソフトウエアを使っても fml を動かすことはできます。しかし
+デフォルトでインストールされているソフトウエアは古いバージョンのような
+ので新しいものにアップグレードして下さい。
 =E
 You can use fml on default OS. But we recommend upgrade of some
 programs.
@@ -42,12 +43,14 @@ programs.
 .S	/etc/sendmail.cf
 .l	/etc/sendmail.cf
 
-sendmail を使う場合には /etc/sendmail.cf の設定が必要です。fmlのドキュ
+sendmail を使う場合には /etc/sendmail.cf の設定が必要です。fml のドキュ
 メントでは設定を /etc/aliases に書くということになっていますが、デフォー
-ルトでは /etc/aliases というファイルを見ていません。修正の仕方は
+ルトの sendmail.cf では /etc/aliases というファイルを見ていません。
 =E
 Default sendmail des not see /etc/aliases. You need to modify
 /etc/sendmail.cf.
+
+修正の仕方は
 
 1. 最低限なおしてそのまま使う
 2. この際なので一から作りなおす。例えばCFなどを使って作る。
@@ -92,10 +95,12 @@ Installation of Mac OS X server differs little from usual UNIX like
 system. Please see INSTALL file without the following some
 differences.
 
-INSTALL はUNIXでのシェルやMS-DOS prompt上で走らせるコマンドや入力につ
-いて書いています。このOS上では Terminal.app を開いてINSTALLに書かれて
-いるコマンドをうつ(例えば: make install)というような操作をすることにな
-ります。
+INSTALL ドキュメントの UNIX でのシェル上での操作を、Mac OS X Server 上では 
+
+	Terminal.app を開いてINSTALLに書かれているコマンドをうつ
+	(例えば: make install)
+
+と読みかえて下さい。
 =E
 You need terminal to input answers to some questions. Please use
 Terminal.app
@@ -145,8 +150,8 @@ for example, what it is "niload".
 =E.C	How to use "niload"
 .l	niload
 
-(参考までに)一応コマンドラインでもpasswdやgroupをいじることができます。
-詳しくはマニュアルを参照して下さい。
+(参考までに)一応コマンドラインでもpasswdやgroupを変更することができま
+す。詳しくはマニュアルを参照して下さい。
 ＃インストーラとか書こうと思う人がいたら参考になるかもしれません:)
 
 .S	niload でアカウント(passwd)の設定をいじる
