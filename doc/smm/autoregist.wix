@@ -1,5 +1,6 @@
 .C	自動登録
 .l	auto-regist
+.l	autoregist
 
 .S	Introduction
 .k	自動登録のIntroduction
@@ -560,6 +561,7 @@ $AUTO_REGISTRATION_HOOK = q#
 #;
 
 WELCOMEのメールの Reply-To: を管理者宛にする
+
 
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
