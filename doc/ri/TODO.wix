@@ -24,11 +24,14 @@
 
 う〜ん、ＭＬをまたぐものたちはむつかしいなぁ/うまくはまらないかも…?
 
-   proc/libcrosspost.pl 
-   libexec/fmlserv.pl
+not_needed:
    libexec/mead.pl
 
- obsolete ?
+done (?): require more check ?
+	   proc/libcrosspost.pl 	
+	   libexec/fmlserv.pl
+
+obsolete ?
    contrib/whois/submit.pl 
 
 
