@@ -721,8 +721,12 @@ sub ParseMultipart
 
 	# encoded ?
 	if ($mpbcb{'enc'} eq 'base64') {
+	    # the file location
 	    $xf = "$dir/${file}_$mp_count.$mpbcb{'suffix'}";
 	    &DecodeAndWriteFile(*e, $pb, $pe, $xf);
+
+	    # file name without directory
+	    $xf = "${file}_$mp_count.$mpbcb{'suffix'}";
 	    &TagOfDecodedFile(*mpbcb, $xf);
 	}
 	# plain ?
