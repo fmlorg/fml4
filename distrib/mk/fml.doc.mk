@@ -14,3 +14,11 @@ GEN_PLAIN_DOC = $(SH) $(DIST_DOC_BIN)/genplaindoc.sh
 
 DOC_GENERATOR_D = $(SH) $(FML)/distrib/doc/bin/depend_wrapper.sh
 DOC_CONV        = $(DOC_GENERATOR)
+
+
+
+
+op: var/doc/op.jp
+
+var/doc/op.jp: doc/smm/*wix
+	env FML=${FML} $(SH) distrib/bin/DocReconfigure.op
