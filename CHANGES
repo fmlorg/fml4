@@ -3,6 +3,13 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/07/21
+
+  clean up databases
+	add PostgreSQL and MySQL example
+
+	PostgreSQL と MySQL のおもちゃモデルの例を追加しました。
+
 2000/07/20
 
    nuke C/ since it is obsolete. 
