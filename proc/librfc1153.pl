@@ -65,7 +65,7 @@ sub Rfc1153Custom
 
     ########## CUSTOMIZE BELOW ##########
     $issue     = $RFC1153_ISSUE    || 1;
-    $listname  = $RFC1153_LISTNAME || "UJA";
+    $listname  = $RFC1153_LISTNAME || $ML_FN || "UJA";
     $vol       = $RFC1153_VOL      || $year;
     $IssueSeq  = $RFC1153_SEQUENCE_FILE  || 
 	"$FP_VARLOG_DIR/IssueSeq"; # file to remember count;
