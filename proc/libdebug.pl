@@ -73,10 +73,39 @@ sub StdinLog
 }
 
 
-###
+### memory trace 
+sub MTrace
+{
+    for (ADMIN_COMMAND_HOOK,
+	 AUTO_REGISTRATION_HOOK,
+	 COMMAND_HOOK,
+	 DISTRIBUTE_CLOSE_HOOK,
+	 DISTRIBUTE_FILTER_HOOK,
+	 DISTRIBUTE_START_HOOK,
+	 FML_EXIT_HOOK,
+	 HEADER_ADD_HOOK,
+	 HTML_TITLE_HOOK,
+	 HTML_TITLE_HOOK,
+	 MODE_BIFURCATE_HOOK,
+	 MSEND_HEADER_HOOK,
+	 MSEND_OPT_HOOK,
+	 MSEND_START_HOOK,
+	 REPORT_HEADER_CONFIG_HOOK,
+	 RFC1153_CUSTOM_HOOK,
+	 SMTP_CLOSE_HOOK,
+	 SMTP_OPEN_HOOK,
+	 START_HOOK) {
+	eval("\$$_ .= q#&MStat;#");
+    }
+}
+
 package fmldebug;
 sub main'MStat #";
 {
+    local($xpkg, $xfile, $xln) = @_;
+    local($pkg, $file, $ln) = caller;
+    $file =~ s#.*/##;
+
     open(STAT, "ps -u -p $$|"); 
     while (<STAT>) { 
 	next if /USER/;
@@ -87,7 +116,9 @@ sub main'MStat #";
 	$q = $x[5] - $px[5];
 	$px[4] = $x[4];
 	$px[5] = $x[5];
-	printf STDERR "%1s %4d\t%4d\n", ($touch ? "+" : ""), $p, $q;
+	printf STDERR "%1s %4d\t%4d  sum=<%4d %4d> (%s:%d %s:%d)\n", 
+	($touch ? "+" : ""), $p, $q, $x[4], $x[5], 
+	$xfile, $xln, $file, $ln;
     }
     close(STAT); 
 
