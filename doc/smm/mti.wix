@@ -431,6 +431,24 @@ If defined, fml uses "tie" function in MTI sub system irrespective of
 dbmopen(). This is used only on perl 5. What you use depends on
 your operating system. Please see your OS manuals and perl.
 
+.S	警告の negative cache
+
+１時間に１度しか警告メールを管理者に通知しない。mail bombのそれぞれの
+メールに対しそれぞれ警告メールを出すと自分で自分に爆撃してしまうことに
+なってしまう。
+=E
+negative cache to warn the burst traffic to maintainers
+
+.S	DB type
+
+	$MTI_TIE_TYPE
+
+$MTI_TIE_TYPE に DB_File などを定義すると perl 5 の tie を使った hash 
+へのバインディングを行なう。perl 4 では使えない(当り前:-) 使える引数は
+OSに依存する。各自マニュアルを参考にe.g. DB_File, NDBM_File, ...
+=E
+use "tie" function in MTI sub system.
+
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi
 .#          All rights reserved. 
