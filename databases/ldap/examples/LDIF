@@ -1,7 +1,12 @@
+#  search_base: cn=elena, dc=fml, dc=org
+# query_filter: (objectclass=*)
+
 dn: cn=elena, dc=fml, dc=org
 cn: elena@fml.org
 o: fml.org
 objectclass: maillist
-maildrop: fukachan@fml.org
-maildrop: rudo@nuinui.fml.org
-maildrop: kenken@nuinui.fml.org
+member: fukachan@fml.org
+member: fukachan@sapporo.iij.ad.jp
+active: fukachan@fml.org
+active: fukachan@sapporo.iij.ad.jp
+admin: fukachan@sapporo.iij.ad.jp
