@@ -4215,6 +4215,7 @@ sub MakeConfigPH
 	return $NULL;
     }
 
+    my($status);
     if (&ValidatePerlScriptP($new_ph)) {
 	print STDERR "\t(rename($new_ph, $config_ph)\n\t" if $debug;
 	if (rename($new_ph, $config_ph)) {
@@ -4228,6 +4229,12 @@ sub MakeConfigPH
 	    &Error("config.ph IS NOT UPDATED.");
 	    return $NULL;
 	}
+    }
+    else {
+	&Log("$config_ph is broken perl script");
+	&Error("$config_ph is broken perl script");
+	&Error("config.ph IS NOT UPDATED.");
+	return $NULL;	
     }
 
     # warning
