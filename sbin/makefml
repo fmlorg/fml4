@@ -5116,9 +5116,15 @@ sub do_log
 	}
 
 	# rewind and show 
-	seek($file, $p, 2); # is it portable ??? 
-	while (<$file>) { $c-- ; last if $c == $lines;}
-	while (<$file>) { print $_;}
+	if (seek($file, $p, 2)) { # is it portable ??? 
+	    while (<$file>) { $c-- ; last if $c == $lines;}
+	    while (<$file>) { print $_;}
+	}
+	else {
+	    seek($file, 0, 0); # rewind it to the top
+	    while (<$file>) { print $_;}
+	}
+
 	close($file);
     }
 }
