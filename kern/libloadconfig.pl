@@ -337,14 +337,15 @@ sub COPY_FIELD
 { 
     my ($old, $new) = @_; 
 
-    # already %Envelope is ready.
+    # already %Envelope is ready to use.
     if ($LoadConfigurationDone || $Envelope{"h:${old}:"}) {
-	my ($xsrc, $xnew);
+	my ($xold, $xnew);
 	$xnew = &FieldCapitalize($new);
 	$xold = &FieldCapitalize($old);
 	$Envelope{"h:${xnew}:"} = $Envelope{"h:${xold}:"};
     }
     else { # in *.ph files
+	# XXX pass real operation to the later function
 	# XXX while (($old,$new) = each %HdrFieldCopy) { ... } later
 	$HdrFieldCopy{ $src } = $new;
     }
