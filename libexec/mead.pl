@@ -14,7 +14,7 @@
 
 ### VERY FUNDAMENTAL CONFIG ###
 $ErrorCodePat = '55\d|5\.\d\.\d';
-$TrapWord     = 'unknown \S+|\S+ unknown|\S+ not known';
+$TrapWord     = 'unknown \S+|\S+ unknown|\S+ not known| not found';
 
 # regexp
 $RE_SJIS_C = '[\201-\237\340-\374][\100-\176\200-\374]';
@@ -57,7 +57,7 @@ sub Parse
 
 
     while (<STDIN>) {
-	$SavedBuffer .= $_ if $. < 1024;
+	$SavedBuffer .= $_ if $InputLines++ < 1024;
 
 	chop;
 
@@ -132,6 +132,9 @@ sub Parse
 
 		&ExtractAddr($_);
 		next;
+	    }
+	    elsif (/^X\-MLServer:/i) { # this is the commnd mail from fml.
+		$NotSavedBuffer = 1;
 	    }
 	    # 822 folding
 	    elsif (/^\s+/ && $gobble) {
@@ -371,6 +374,9 @@ sub AnalWord
     if (/service unavailable/i)       { $reason = 'us';}
     if (/address\w+ unknown|unknown address/i) { $reason = 'ua';}
 
+    # postfix
+    if (/host not found/i) { $reason = 'uh';}
+
     # qmail
     if (/couldn\'t find any host/) { $reason = 'uh';}
     if (/can\'t accept addresses/) { $reason = 'ua';}
@@ -493,8 +499,14 @@ sub AddrCache
 
     $k = sprintf("%s %s\t%s\t", $time, $addr, $_);
 
-    &Log("cache: <$addr> reason=$reason");
-    &Debug("AddrCache => $AddrCache{$k}, \"r=$reason\"") if $debug;
+    if (&ValidAddressP($addr)) {
+	&Log("cache: <$addr> reason=$reason");
+	&Debug("AddrCache => $AddrCache{$k}, \"r=$reason\"") if $debug;
+    }
+    else {
+	&Log("warn: cache: <$addr> is invalid (ignored)");
+	return;
+    }
 
     if ($reason) {
 	$AddrCache{$k} = "r=$reason";
@@ -589,7 +601,7 @@ sub DeadOrAlive
     if ($now - $last > $CHECK_INTERVAL) {
 	&MLEntryOn($ML_DIR);	# set %ml'ML
 	&Debug("check time comes") if $debug;
-	&Log("dead-or-alive-p() time comes");
+	&Log("info: dead-or-alive-p() time comes");
     }
     else {
 	&Debug("check time comes not yet") if $debug;
@@ -842,6 +854,7 @@ sub Mail
 
     if (! $maintainer) {
 	&Debug("Mail: maintainer is not defined for ML <$ml>");
+	&Log("error: maintainer for ml='$ml' not found");
 	return $NULL;
     }
 
@@ -850,7 +863,8 @@ sub Mail
 	    &SearchPath("exim", "/usr/local/exim/bin");
 
     if (! $sendmail) {
-	&Die("cannot find $sendmail");
+	&Log("error: cannot find sendmail=$sendmail");
+	return $NULL;
     }
 
     open(MAIL, "| $sendmail -t") || &Die("cannot execute $sendmail");
@@ -869,6 +883,11 @@ sub Mail
 
 sub SaveMail
 {
+    if ($NotSavedBuffer) {
+	&Log("info: fml command mail (ignored)");
+	return;
+    }
+
     &Log("warn: unanalyzable error mail");
 
     if ($SAVE_UNANALYZABLE_ERROR_MAIL ||
@@ -912,6 +931,14 @@ sub Action
     ### report     $Template{$ml} (command template)
     ###            $MakeFmlTemplate{$ml} (e.g. "makefml bye $ml $addr");
 
+    if (&ml::ValidMLP($ml)) {
+	&Log("info: ml='$ml' is valid");
+    }
+    else{
+	&Log("warn: ml='$ml' is invalid");
+	# return;
+    }
+
     if (&ValidAddressP($addr)) {
 	if ($mode eq 'auto') {
 	    &MakeFml("$ACTION $ml $addr", $addr, $ml);
@@ -937,7 +964,7 @@ sub Action
 
     # record the addr irrespective of succeess or fail
     # to avoid a log of warning mails "remove ... but fails" ;-)
-    &Log("log: remove <$addr>");
+    &Log("info: remove <$addr>");
     &DoCacheOn("#remove $addr");
 }
 
@@ -1017,7 +1044,7 @@ sub Init
     require 'getopts.pl';
     &Getopts("dD:e:S:hC:i:l:M:m:E:p:z:k:f:");
     $opt_h && die(&Usage);
-    $debug = $opt_d ? 1 : 0;
+    $debug = $opt_d ? 100 : 0;
 
     # program directory
     $EXEC_DIR = $opt_E;
@@ -1169,6 +1196,8 @@ sub Debug
 {
     my ($s) = @_;
 
+    return if $debug < 100;
+
     open(DEBUG, ">> /tmp/debugbuf");
     print DEBUG $s, "\n";
     close(DEBUG);
@@ -1191,6 +1220,16 @@ sub Debug
     &main'Debug(@_); #';
 }
 
+
+sub ValidMLP
+{
+    my ($mladdr) = @_;
+
+    # compare 
+    $mladdr =~ s/-admin@.*$//;
+
+    $Valid{$mladdr} ? 1 : 0;
+}
 
 sub main'MLEntryOn #';
 {
@@ -1228,6 +1267,7 @@ sub main'MLEntryOn #';
 	    $debug = $ml_debug;
 	    &Debug("\$ML{$MAINTAINER} = $ml;") if $debug_ml;
 
+	    $Valid{$ml} = 1;
 	    $ML{$MAINTAINER} = $ml;
 	    $MAA{$ml} = $MAINTAINER; # ML Admin Address
 	    $CA{$ml}  = $CONTROL_ADDRESS || $MAINTAINER;
