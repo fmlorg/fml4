@@ -7,7 +7,8 @@
 
 .# .__repl_include__
 .include overview.wix
-.include pgp.wix
+.include pgp2.wix
+.include pgp5.wix
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

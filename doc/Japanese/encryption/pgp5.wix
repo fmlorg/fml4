@@ -1,0 +1,7 @@
+.C	PGP5
+
+.S	test
+
+.q
+% pgpe -r PGP-ML -f -ats test.txt | mail -s "TEST" PGP-ML
+.~q

@@ -26,15 +26,11 @@ PLAINTEXT は
 
 .S	fml CGI専用サーバを作らないと駄目ですか？
 
-だめではないです。しかしdocument は fml GUI 専用サーバを作る前提で書か
-れています。もっと高度な権限の使い分けは、専用サーバを動かすことができ
-た後で考えればいいでしょう とおもいます。
+いいえ。INSTALL_CGI を見て下さい。
+document 本編は fml GUI 専用サーバを作る前提ですが、
+付録で suexec を使う例が説明されています。
 
-apache の詳しい knowhow は専門書なり専門家(?)なりに聞いてみて下さい。
-例: apache 自体は nobody, CGIは各ユーザ権限とか suexec なり cgiwrap ?
-＃僕はそこまで詳しくないので）
-
-default では apache が CGI を実行する時は
+default （fml CGI 専用）では apache が CGI を実行する時は
 
 	/usr/local/apache/conf/httpd.conf 
 
@@ -55,6 +51,16 @@ default では apache が CGI を実行する時は
    なっていること
 
 を確認します。
+
+
+.S	apache で SSL がちゃんとうごいているか？
+
+apache で SSL を有効にしてスタートすれば apache/logs/error_log に
+
+[Wed Nov 10 23:27:07 1999] [notice] Apache/1.3.9 (Unix) mod_ssl/2.4.8 OpenSSL/0.9.4 configured -- resuming normal operations
+
+のように SSL が動いてるぜといいます。いってないなら
+apache の作成に失敗している可能性大です。
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
