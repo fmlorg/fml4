@@ -796,13 +796,17 @@ sub ShowProfile
     for $key (keys %addr) {
 	my ($a, $ml) = split(/\s+/, $key);
 
-	my ($profile);
+	# ignore the first case
+	next if $SumUp{$a} < 2;
+
+	my ($profile, $profile_sum);
 	for $when (0 .. 7) {
+	    $profile_sum++ if $Profile{$a}{$when};
 	    $profile .= $Profile{$a}{$when} || '0';
 	    $profile .= " ";
 	}
 
-	&Log("prof: <$a> sum=$SumUp{$a} [$profile]");
+	&Log("prof: <$a> total=$SumUp{$a} profile_sum=$profile_sum [$profile]");
     }
 }
 
