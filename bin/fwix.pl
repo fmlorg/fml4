@@ -1325,8 +1325,14 @@ sub HtmlExpand
 
     print STDERR "HtmlExpand::($_, $s, $file, $mode);\n" if $debug;
 
-    /~HTML_PRE/ && ($s = "</PRE>\n") && ($In_PRE = 0);
-    /HTML_PRE/  && ($s = "<PRE>")    && ($In_PRE = 1);
+    if (/~HTML_PRE/) {
+	$s = "</PRE>\n";
+	$In_PRE = 0;
+    }
+    elsif (/HTML_PRE/) {
+	$s = "<PRE>";
+	$In_PRE = 1;
+    }
 
     $s;
 }
@@ -1336,6 +1342,10 @@ sub HtmlExpand
 sub ConvSpecialChars
 {
     local(*s) = @_;
+
+    if ($opt_v) {
+	print STDERR "&ConvSpecialChars(\n$s\nIn_PRE=$In_PRE\n   )\n";
+    }
 
     ### special character convertion
     &jcode'convert(*s, 'euc'); #';
