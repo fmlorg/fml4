@@ -1,0 +1,93 @@
+#################################################################
+# #ではじまる行はコメントです（つまり設定としては無効）
+# 適当に きりはぎして /etc/alisaes に設定してください。
+# 
+#################################################################
+
+###### もしプロバイダが ML, ML-request, owner-ML の３つしか
+###### アドレスをくれないとしたら、
+###### ML          ML投稿用アドレス
+###### ML-request  管理者
+###### owner-ML    ここも普通管理者なのだが…
+###### どうするのがよいのだろうか？よくわからない…
+
+# 注意：
+# どんな場合でも最低限の必須アドレスはおそらくこの３つです。
+# ${ml}: :include:${INCLUDEDIR}/include
+# ${ml}-request: ${ml}-admin
+# owner-${ml}: $USER
+
+
+#################################################################
+### fml のもっとも標準的な設定
+### 投稿者がMLのメンバーチェックであるか否か？をチェックします。
+### ML itself
+
+${ml}: :include:${INCLUDEDIR}/include
+
+### 管理者のアドレス。
+### お手軽なコマンドラインオプションによるモード設定では
+### --fml オプションをつけると -admin つきが管理者アドレスになる
+### つけないと 次の項目の -request つきのものが管理者アドレスである
+
+${ml}-admin: $USER
+
+### USENET 以来の伝統として ml-request は作っておいたほうがよい
+### 普通管理者アドレスがわからない場合 
+### ML名に -request をつけた先が問い合わせ先と慣習的にそう思うため
+### なくてもかまわないが、あるほうがよい。
+### ML-request is a receipt of ML
+### It is O.K where ML-request is an alias of MAINTAINER
+
+### -request と両方あるのが望ましいが、
+### プロバイダ等で -request はもらえるが -admin が使えない
+### 場合もありうることを考慮して
+###       伝統の -request が簡易モード設定のデフォールト
+
+${ml}-request: ${ml}-admin
+
+### ML のコマンド専用アドレス
+### ML-command-server, NOT REQUIRED but just recommended
+
+${ml}-ctl: ${ml}
+
+### 管理者のアドレス。
+### sendmail にMLの管理者を教えるためのものと思ってもらえばよい
+### owner-ml は fml では特に使うわけではないのでなくてもたぶん構わない
+### owner-Elena: your-username (Sendmail R8)
+
+owner-${ml}: $USER
+
+
+#################################################################
+##### 応用編
+
+### 再配送してスプールしさえすればいいアドレス
+### ガイド要求にも答える必要もない場合
+### 例： ip-connection ML 
+
+${ml}: :include:${INCLUDEDIR}/include-distribute
+
+### リモート管理設定 プロバイダではいるのかもしれない…
+
+${ml}: :include:${INCLUDEDIR}/include-remote
+
+### 自動登録モード
+### 投稿者がMLのメンバーでない場合、自動的に登録します
+
+${ml}: :include:${INCLUDEDIR}/include-auto
+
+
+
+############################################################
+### ML コマンド専用サーバが fmlserv の場合
+
+fmlserv: :include: ${INCLUDEDIR}/include-fmlserv
+
+fmlserv-admin: ${USER}
+
+### Compatibility
+majordomo: fmlserv
+listserv:  fmlserv
+
+

@@ -1,0 +1,80 @@
+#.FML HEADER
+# NEW FORMAT FOR FURTHER EXTENTION
+# e.g. fukachan@phys r=relayserver m=3u s=skip 
+# r= relayserver
+# m= matomeokuri parameter is time and option
+# s= skip. can post from this address but not delivered here.
+#
+# the same obsolete format is compatible with new format and as follows:
+# e.g. fukachan@phys relayserver matome 3u
+#.endFML HEADER
+fukachan@axion.phys.titech.ac.jp 
+fukachan  s=skip 
+tsubai@axion.phys.titech.ac.jp 
+f43595a@nucc.cc.nagoya-u.ac.jp 
+#	makoto@cc.win.or.jp
+# makoto@win.or.jp
+makoto@hby.toshiba.co.jp  s=skip 
+makoto@mailhost.hby.toshiba.co.jp  s=skip 
+# mz-relay@hby.toshiba.co.jp	tsbgw.isl.rdc.toshiba.co.jp
+# mz-relay@mailhost.hby.toshiba.co.jp	isl.rdc.toshiba.co.jp
+yabuuchi@hby.toshiba.co.jp 
+# s32634@geoph.s.u-tokyo.ac.jp 
+yata@kodemari.issp.u-tokyo.ac.jp 
+t91124kk@sfc.keio.ac.jp 
+##BYE okazaki@cel.melco.co.jp   
+miyu@dais.is.tohoku.ac.jp 
+kmiya@rd.nttdata.jp  s=skip 
+kmiya@mm.rd.nttdata.jp 
+kon@netg.ksp.fujixerox.co.jp 
+##BYE u-chan@qr.cas.uec.ac.jp 
+mizuno@orient.center.nitech.ac.jp 
+# sekika-t@phaeton.cs.uec.ac.jp 
+sha@harlgw92.harl.hitachi.co.jp 
+MXF03116@niftyserve.or.jp 
+sasami@exelion.phys.titech.ac.jp 
+fujieda@oscar.info.waseda.ac.jp 
+odam@himiko.cc.saga-u.ac.jp 
+##BYE ikeda@agusa.nuie.nagoya-u.ac.jp 
+yuki@is.s.u-tokyo.ac.jp 
+#	ikoba@san.hudson.co.jp
+#	ikoba@gb.hudson.co.jp
+#	shinobu@spica.ee.uec.ac.jp 
+##BYE uido@solan.chubu.ac.jp   
+t-sugiya@csis.oita-u.ac.jp 
+#	JCC02032@niftyserve.or.jp
+naka@cadcam.fvd.fujitsu.co.jp 
+#	miyu@shiratori.ecei.tohoku.ac.jp
+s1012011@u-aizu.ac.jp 
+HHC00417@niftyserve.or.jp 
+13531912@people.or.jp 
+hiro@ori.hitachi-sk.co.jp 
+#	tt36379@secc.ecc.u-tokyo.ac.jp   
+iso@generic.ics.teikyo-u.ac.jp 
+kuboneko@kudpc.kyoto-u.ac.jp 
+#	nakamura@ws101.csce.kyushu-u.ac.jp
+# yamazaki@FNEsun4.fne.fujitsu.co.jp
+##BYE sawamura@asc.slsi.sony.co.jp
+##BYE i8913005@edu.cc.uec.ac.jp
+Elena@phys.titech.ac.jp  m=3 
+kazu@sic.co.jp 
+rodo@trex.cc.kogakuin.ac.jp 
+tama@aloe.ibbsal.or.jp 
+#	g1k104@cfi.waseda.ac.jp 
+# makoto@himeko-lab.win.or.jp
+makoto@st.rim.or.jp 
+noriyuki@aitech.ac.jp 
+t93141tk@sfc.keio.ac.jp 
+##BYE g340563@secc.ecc.u-tokyo.ac.jp
+matsue@edu.nes.nec.co.jp 
+# g340563@komaba.c.u-tokyo.ac.jp   
+# VED02157@niftyserve.or.jp
+# u-mikage@kintaro.kecc.ecc.u-tokyo.ac.jp
+#	makoto@tsurumi.toshiba.co.jp
+h931315b@eds.ecip.nagoya-u.ac.jp 
+wakatono@shogun.rim.or.jp 
+695l1108@cfi.waseda.ac.jp 
+sekikawa@undine.msi.co.jp 
+mikage@st.rim.or.jp 
+92a284@cc.saga-u.ac.jp 
+katoh@pclsp2.kuicr.kyoto-u.ac.jp

@@ -1,90 +1,25 @@
-¡ô rcsid = q$Id$;
+$@$3$N(Jdir$@$K$O!$(JSchwalben Chor($@El5~9)6HBg3XCK@<9g>'CD(J) ML $@$G$N(Jfml$@$N(J
+$@%$%s%9%H!<%kNc$K4X$9$k(Jdocument$@72$,<}$a$i$l$F$$$^$9!%(J
 
-libsch.pl¤È¤¤¤¦¤Î¤¬fml.pl¤Ø¤Îº¹Ê¬¥Õ¥¡¥¤¥ë¤Ç¤¹¡£
-fml.pl¤ÎÃæ¤Ç¡Ê1.1.2.13¤Ê¤é£³£¸¹ÔÌÜ¡Ë¤Ë
-require 'libsch.pl';
-¤òÉÕ¤±Â­¤·¤Æ²¼¤µ¤¤¡£
-¸å¤Ï²¼¤Î¥«¥¹¥¿¥Þ¥¤¥º¤ÎÀâÌÀ¤Èfml.plËÜÂÎ¤ÎÀâÌÀ¤òÆÉ¤ó¤ÇÀßÄê¤·¤Æ²¼¤µ¤¤¡£
+auto-return.doc  
+            $@%U%!%$%k$N<h$j4s$;$K$O!$(Jget$@%3%^%s%I$r;H$($PNI$$$,!$(J
+          $@=i?4<T%f!<%6!<8~$1$*$h$SIQHK$K<h$j4s$;$i$l$k2DG=@-$N$"$k%U%!%$%k(J
+          $@$K4X$7$F$O!$@lMQ$N(Jaddress$@$r$D$/$C$F!$$=$3$K$J$s$i$+$N%a!<%k$rAw$k(J
+          $@$@$1$G!$;XDj$5$l$?%U%!%$%k$rJVAw$9$k$h$&$K2~B$$7$?Nc!%(J
+            $@$^$?!$%a%s%P!<%A%'%C%/$r$9$k>l9g$H$7$J$$>l9g$N2~B$Nc$,$"$k!%(J
+example-install.doc
+            $@$^$?!$J#?t#M#L(J(14$@<o(J)$@$N<h$j07$$$r(J1$@$D$N(Jfml$@$G4IM}$9$k$h$&$K(J
+          $@%$%s%9%H!<%k$7$?Nc$N(Jdocument$@$,$"$k!%(J
+config.ph.example
+            config.ph$@$NNc(J
+libsch.pl
+            auto-return$@$N$?$a$N(Jlibrary
+patch.sed
+            auto-return$@$N$?$a$K(Jfml.pl$@$K;\$9(Jsed$@HG$N(Jpatch
+            ($@:G?7$N(Jfml.pl$@$KBP1~$7$F$$$k$H$O8B$i$J$$$N$G!$<j$G(Jpatching$@$9$k(J
+             $@$3$H$r$*4+$a$7$^$9!%(J:-))
 
-³ÈÄ¥µ¡Ç½¤Ï¼¡¤ÎÄÌ¤ê¤Ç¤¹¡£Ê£¿ô¤Î¥µ¡¼¥Ð¤ò¥»¥Ã¥È¤·¤Æ¤âÆ±¤¸¤Ç¤¹¤¬¡¢¤³¤Î¥µ¡¼
-¥Ð¤Ï°ì¤Ä¤Î¥µ¡¼¥Ð¤Ç¤¹¤Ù¤Æ¤ò¤³¤Ê¤·¤Þ¤¹¡£
-
-¡¦schwalben-info¤Èschwalben-list¤Ë¥á¡¼¥ë¤¬Íè¤¿¤é°Ê²¼¤ÇÀßÄê¤¹¤ë¥Õ¥¡¥¤¥ë
-¤òÁ÷¤êÊÖ¤¹¡£
-
-¡¦schwalben-all¤Î¤è¤¦¤Ê¥¢¥É¥ì¥¹¤Î¾ì¹ç¤½¤ì¤¾¤ì¤Î¡É¡Ý¤Û¤²¤Û¤²¡É¤Î¤è¤¦¤Ê 
-extension¤ò¤â¤Ä¥Õ¥¡¥¤¥ë¤ª¤è¤Ó¥Ç¥£¥ì¥¯¥È¥ê¤òÍÑ¤¤¤Æ£Í£Ì¥µ¡¼¥Ðµ¡Ç½¤ò¼Â¹Ô
-¤¹¤ë¡£¡É¡¼¤Û¤²¡É¤ÏÀßÄê¤¹¤ì¤Ð¤¤¤¯¤é¤Ç¤âÁý¤ä¤»¤ë¡£
-
-¡¦libsch.pl¤ÏfmlËÜÂÎ¤È¤Îº¹Ê¬¥Õ¥¡¥¤¥ë¤Ç¤·¤«¤Ê¤¤¤Î¤ÇÊÌ¡¹¤Ë¥á¥¤¥ó¥Æ¥Ê¥ó¥¹¡¢
-¥ô¥¡¡¼¥¸¥ç¥ó¥¢¥Ã¥×¤ò¹Ô¤Ê¤¦¤³¤È¤¬¤Ç¤­¤ë¡£
-
-
-
-fml.pl¤ÎÎã¡§
-¡Ä¡Ä¡Ä¤¾¤í¤¾¤í¡Ä¡Ä¡Ä
-require 'libsch.pl';¢«¡Ý¡Ý¤³¤Î¹Ô¤òÉÕ¤±Â­¤·¤Æ²¼¤µ¤¤¡£
-
-if($ML_MEMBER_CHECK) { 
-¡Ä¡Ä¡Ä
-°Ê²¼Î¬
-
-
-
-libsch.pl¤ÎÃæ¤ÎÀèÆ¬¤Ë¤¢¤ë¥«¥¹¥¿¥Þ¥¤¥º¥Ñ¡¼¥È¤ÎÀâÌÀ¡§
-¡ô¼ÂºÝ¤Î¥³¡¼¥É¤Ë¤ÏÀâÌÀ¤¬¥³¥á¥ó¥È¤¬¤â¤Ã¤È¤¢¤ê¤Þ¤¹¤¬ÂÐ±þ¾ì½ê¤Ï¤ï¤«¤ê¤Þ¤¹
-¤è¤Í¡©
-
-##### Custumization #####
-
-¡ûschwalben-info@cs.titech.ac.jp¤ÏSchwalben¤Ë´Ø¤¹¤ëºÇ¿·¾ðÊó¤Î¥¢¥É¥ì¥¹
-¤½¤ì¤Î¥¢¥É¥ì¥¹¡¢¥Õ¥¡¥¤¥ë¡¢Á÷¤êÊÖ¤¹¥á¡¼¥ë¤Î¥µ¥Ö¥¸¥§¥¯¥È¤ÎÀßÄê
-
-$INFOADDR     = "schwalben-info@phys.titech.ac.jp";
-$INFO         = "$DIR/info";
-$INFOSubject  = "Schwalben Chor Info";
-
-¡ûschwalben-list@cs.titech.ac.jp¤Ë´Ø¤¹¤ë¥¢¥É¥ì¥¹¡¢¥Õ¥¡¥¤¥ë¡¢Á÷¤êÊÖ¤¹¥á¡¼
-¥ë¤Î¥µ¥Ö¥¸¥§¥¯¥È¤ÎÀßÄê¡Ê¾å¤ÈÆ±ÍÍ¡Ë
-
-$LISTADDR     = "schwalben-list@phys.titech.ac.jp";
-$ALLLIST_FILE = "$DIR/alllist";
-$LISTSubject  = "Schwalben Chor All List";
-
-¡ûschwalben-all¤Î¤è¤¦¤Ê»È¤¨¤ë¥¢¥É¥ì¥¹¤ÎÀßÄê¡£¤â¤·¤³¤Î¥ê¥¹¥È¤Ë¤Ê¤¤¥¢¥É
-¥ì¥¹¤¬»È¤ï¤ì¤ë¤È¥í¥°¤ò¤È¤ê¥æ¡¼¥¶¡¼¤Ë¤Ï·Ù¹ð¤Î¥á¡¼¥ë¤òÊÖ¤¹¡£
-
-@addr = ('all', 'top', 'sec', 'bari', 'bass', 'student', '1987');
-
-fml¤ÏÂ¿¤¯¤ÎÀßÄê¥Õ¥¡¥¤¥ë¤ä¥í¥°¤ò¤È¤ë¥Õ¥¡¥¤¥ë¤ò»È¤¦¤¬°ì¤Ä¤Î¥µ¡¼¥Ð¤Ç¤¹¤Ù
-¤Æ¤ò¤³¤Ê¤¹³ÈÄ¥¤È¤·¤Æ
-schwalben-all¤Î¥¢¥É¥ì¥¹¤ËÂÐ¤·	
-spool-all	schwalben-all ¥¢¥É¥ì¥¹ÍÑ¤Î¥¹¥×¡¼¥ë
-summary-all	¥µ¥Þ¥ê¥Õ¥¡¥¤¥ë
-actives-all	schwalben-all ¥¢¥É¥ì¥¹¤ÇÇÛÉÛ¤¹¤ë¥¢¥É¥ì¥¹¥ê¥¹¥È
-members-all	schwalben-all ¥¢¥É¥ì¥¹¤ËÅê¹Æ¤Ç¤­¤ë¥á¥ó¥Ð¡¼¥ê¥¹¥È
-seq-all		schwalben-all ¥¢¥É¥ì¥¹¤Ç¤ÎÅê¹Æ¤Î¥á¡¼¥ë¥«¥¦¥ó¥È
-
-¡É¤Û¤²¡Ý¤Û¤²¤Û¤²¡É¤Î·Á¤Î¥Õ¥¡¥¤¥ë¤Ï¾å¤Î@addr¤Î¥ê¥¹¥È¤Î¸õÊä¤¹¤Ù¤Æ¤Ë¤Ä¤¤
-¤ÆÂ¸ºß¤¹¤ë¡£¡ôÂ¸ºß¤·¤Ê¤±¤ì¤Ð¾¡¼ê¤Ëºî¤ë¡£
-
-# configuratrion for each available MailingList Address and the files
-$ML_THREAD = "\
-    \$SPOOL_DIR	        = \"\$DIR/spool-\$ADDR\";\
-    \$MEMBER_LIST 	= \"\$DIR/members-\$ADDR\";\
-    \$ACTIVE_LIST 	= \"\$DIR/actives-\$ADDR\";\
-    \$SUMMARY_FILE 	= \"\$DIR/summary-\$ADDR\";\
-    \$SEQUENCE_FILE 	= \"\$DIR/seq-\$ADDR\";\
-";
-
-
-
-ÉÕÏ¿¡§¼ÂÁõ¤Ë¤Ä¤¤¤Æ
-
-$SPOOL_DIRÅù¤ÏËÜÍèconfig.ph¤ÇÄêµÁ¤µ¤ì¤Æ¤¤¤Þ¤¹¤¬¤½¤ì¤ò
-£ô£ï¡§¥Õ¥£¡¼¥ë¥É
-¤ò²òÀÏ¤·¤¿¸å¤Ë¡¢Ä´¤Ù¥¢¥É¥ì¥¹¤´¤È¤ËÄêµÁ¤·Ä¾¤·¤Æ£Í£Ì¤ÎÇÛÉÛ¥ë¡¼¥Á¥ó¤ËÅÏ¤¹
-¤È¤¤¤¦¤À¤±¤ÎÂåÊª¤Ç¤¹¡£
-¥ë¡¼¥Á¥óÅù¤Ï¤¹¤Ù¤Æ£æ£í£ìËÜÂÎ¤Î¤â¤Î¤ò»È¤¤¤Þ¤¹¡£libsch.pl¤Ë¤Ä¤¤¤Æ¤Ï
-¾å¤Î¥«¥¹¥¿¥Þ¥¤¥º¤À¤±¤Ç¤¹¡£¤½¤ì°Ê¾å¤ÎÊÑ¹¹¤Ïlibsch.pl¤òÄ¾ÀÜ¤¤¤¸¤Ã¤Æ²¼¤µ
-¤¤¡£
+$@$3$N(Jdir$@$NFbMF$K4X$9$k$*Ld$$9g$o$;$O!$(J
+	schwalben-request@cs.titech.ac.jp
+    $@$b$7$/$O(J
+	fml-support@phys.titech.ac.jp $@$X!%(J

@@ -1,0 +1,9 @@
+########## FAX SERVER ##########
+$START_HOOK = q#
+	require 'libfax.pl';
+	$DO_NOTHING = 1;
+#;
+
+&DEFINE_MODE('post=anyone');
+
+1;

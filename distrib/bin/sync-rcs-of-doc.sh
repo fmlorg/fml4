@@ -1,11 +1,7 @@
 #!/bin/sh
 
-for x in doc/ri/* doc/smm/*.wix doc/ri/*
-do 
-	if test -f $x
-	then
-		(echo update faq | ci -l $x; echo " ")
-	fi
-done
+echo -n "--info [sync-rcs-of-doc] "; pwd
+
+fvs ci doc/ri/*.wix doc/smm/*.wix
 
 exit 0

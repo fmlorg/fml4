@@ -1,0 +1,17 @@
+MKDIR        = mkdirhier
+
+CONTRIB_DIR  = $(UPDIR)/distrib/contrib
+
+LOCATION     = $(CONTRIB_DIR)/`cat  .location`
+SOURCES      = `cat  .sources`
+
+clean:
+	gar *~ _* mget* core
+
+DISTRIB: distrib
+
+distrib: 
+	@ echo "$(MKDIR) $(LOCATION)"
+	@ $(MKDIR) $(LOCATION)
+	@ echo "cp -p $(SOURCES) $(LOCATION)"
+	@ cp -p $(SOURCES) $(LOCATION)

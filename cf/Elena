@@ -1,0 +1,60 @@
+DIR		/home/axion/fukachan/work/spool/EXP
+
+DOMAINNAME	phys.titech.ac.jp
+FQDN		axion.phys.titech.ac.jp
+MAIL_LIST	Elena@$DOMAINNAME
+ML_FN		(Elena Lolabrigita ML)
+XMLNAME	 	X-ML-Name: Elena
+XMLCOUNT	X-Mail-Count
+
+MAINTAINER	Elena.Lolobrigita@axion.phys.titech.ac.jp
+COMPAT_FML15	0
+
+
+LIBRARY_DIR:			var/spool/library
+LIBRARY_ARCHIVE_DIR:		archive
+
+CONTROL_ADDRESS	pollyanna@$FQDN
+
+ML_MEMBER_CHECK 	0
+
+REMOTE_ADMINISTRATION:  1
+
+
+LOCAL_CONFIG:
+
+$AGAINST_NIFTY = 1;
+$SUPERFLUOUS_HEADERS = 1;
+$USE_FLOCK = 1;
+$USE_LIBMIME = 1;
+
+# $debug_caller++;
+
+$START_HOOK = q#
+    &use('ftp');
+&Ftp(*Envelope, $Envelope{'Body'}); 
+$DO_NOTHING = 1;
+#;
+
+undef $START_HOOK;
+
+$COMMAND_HOOK = q#
+	if (/ftpmail/) {
+		&use('ftp');
+		$_ = join(" ",@Fld);
+		$_ =~ s/ftpmail//;
+		&Ftp(*e, $_);
+		next GivenCommands;
+	}
+#;
+
+
+$FTP_HELP_FILE = "$DIR/doc/master/help";
+
+$FTP_DIR = "$DIR/src";
+
+# $LOAD_LIBRARY = "libftpmail.pl";
+
+
+@DenyProcedure = ('');
+

@@ -1,0 +1,49 @@
+<TITLE>
+例１
+</TITLE>
+<PRE>
+Path: phys.titech!is.titech!cs.titech!wnoc-tyo-news!news.u-tokyo.ac.jp!news.tisn.ad.jp!s.u-tokyo!kuis-news!motonori
+From: motonori@kuis.kyoto-u.ac.jp (Motonori NAKAMURA)
+Newsgroups: fj.mail,fj.wanted
+Subject: Re: [WANTED] tiny tiny ML server.
+Date: 16 Mar 1994 10:43:42 GMT
+Organization: Dept. of Information Science, Kyoto University, JAPAN
+Lines: 32
+Distribution: fj
+Message-ID: <2m6nsu$eh3@hemp.imel.kyoto-u.ac.jp>
+References: <CMoLyF.5M1@rins.ryukoku.ac.jp> <CMqyIq.CFE@rins.ryukoku.ac.jp> <2m6gbu$b4v@hemp.imel.kyoto-u.ac.jp>
+NNTP-Posting-Host: lab4gw1.kutsuda.kuis.kyoto-u.ac.jp
+Xref: phys.titech fj.mail:890 fj.wanted:2752
+
+In article <2m6gbu$b4v@hemp.imel.kyoto-u.ac.jp>,
+	motonori@kuis.kyoto-u.ac.jp (Motonori NAKAMURA) says:
+
+>> 　とでもすれば、Reply-To 部分の書き換えはできるのでしょうか。
+> 
+> 書き換えは削除&挿入で実現することになるので，
+
+これでは，最初からついていた Reply-To: が尊重されていないね，
+という意見がローカルであったので，対処してみました．
+＃ こうしてだんだん複雑になっていく…
+
+                                              中村 素典＠情報.京大
+                                              motonori@kuis.kyoto-u.ac.jp
+
+#! /bin/sh
+
+/bin/awk '\
+BEGIN {skip = 0; rplto = 0;}\
+/^$/ {if (!rplto){ print "Reply-To: hoge-ml@funi.ac.jp"; rplto = 1;}}\
+/^$/, NR == 0 {print; next;}\
+/^Reply-To:/ {print; rplto = 1; next;}\
+/^Received:/ {skip = 1; next;}\
+/^Return-Receipt-To:/ {skip = 1; next;}\
+/^[     ]/ && skip == 1 {next;}\
+{skip = 0};\
+/^From:/ {\
+        print "Precedence: list";\
+        print;\
+        next;\
+}\
+{print;}'\
+| /usr/lib/sendmail -oi -fhoge-request@funi.ac.jp hoge-recipients

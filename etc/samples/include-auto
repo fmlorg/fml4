@@ -1,0 +1,27 @@
+# ここには ３とおり書いてあります。 どれかひとつを選んで
+# /etc/aliases に書いてください。
+
+# どんなメールが来ても自動登録
+#"|$EXECDIR/fml.pl $MLDIR --auto"
+#  or when using without config.ph
+#"|$EXECDIR/fml.pl $MLDIR --auto --mladdr=$MAIL_LIST $OPTIONS"
+
+"|$EXECDIR/fml.pl $MLDIR --auto --mladdr=$MAIL_LIST $OPTIONS "
+
+
+# Subject に subscribe というキーワードが必要な自動登録
+# そのキーワードがないとエラーで登録はされない
+#"|$EXECDIR/fml.pl $MLDIR --autosubject"
+#  or when using without config.ph
+#"|$EXECDIR/fml.pl $MLDIR --autosubject --mladdr=$MAIL_LIST $OPTIONS"
+
+
+"|$EXECDIR/fml.pl $MLDIR --autosubject --mladdr=$MAIL_LIST $OPTIONS "
+
+# メール本文にに subscribe というキーワードが必要な自動登録
+# そのキーワードがないとエラーで登録はされない
+#"|$EXECDIR/fml.pl $MLDIR --autobody"
+#  or when using without config.ph
+#"|$EXECDIR/fml.pl $MLDIR --autobody --mladdr=$MAIL_LIST $OPTIONS"
+
+"|$EXECDIR/fml.pl $MLDIR --autobody --mladdr=$MAIL_LIST $OPTIONS "

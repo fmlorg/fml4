@@ -1,0 +1,73 @@
+Newsgroups: fj.questions.unix
+Path: phys.titech!is.titech!nirvana.cs.titech!wnoc-tyo-news!news.iij.ad.jp!iijnet!nihgw!nihgw!jun
+From: jun@nih.go.jp (Jun Ishikawa)
+Subject: Re: [Q] RMAIL => folders (MH)
+In-Reply-To: s7091411@ipc.akita-u.ac.jp's message of Sat, 1 Oct 1994 08:22:01 GMT
+Content-Type: text/plain; charset=ISO-2022-JP
+Message-ID: <JUN.94Oct3180604@hilite.nih.go.jp>
+Sender: news@nihgw.nih.go.jp
+Nntp-Posting-Host: hilite.nih.go.jp
+Organization: National Institutes of Health (NIH) Tokyo, Japan
+References: <S7091411.94Oct1172201@octet.ipc.akita-u.ac.jp>
+Mime-Version: 1.0
+Distribution: fj
+Date: Mon, 3 Oct 1994 09:06:03 GMT
+Lines: 57
+
+In article <S7091411.94Oct1172201@octet.ipc.akita-u.ac.jp> s7091411@ipc.akita-u.ac.jp (TERUI Tomohiro) writes:
+
+> に移行しました。つきましては、RMAIL で蓄えたメールを Mail Handler の 
+> folder に転送するにはどうしたら良いのでしょうか？
+
+すでに解決されているかも知れませんが、babyl2mhというのがあります。
+短いperlスクリプトなので以下につけます。
+
+--
+     石川　淳            国立予防衛生研究所
+     (Jun Ishikawa)      生物活性物質部
+     jun@nih.go.jp       遺伝生化学室
+
+--- cut here ---
+#!/usr/local/bin/perl
+# incorporate an RMAIL babyl file into an MH folder
+#
+# usage: babyl2mh +folder babyl-file
+#
+# V. Khera <khera@cs.duke.edu> 17-JUL-1991
+
+# where to find rcvstore
+$rcvstore = "/usr/local/lib/mh/rcvstore";
+
+#
+# pull out command line args
+#
+die "usage: babyl2mh +folder babyl-file\n" unless @ARGV == 2;
+
+$folder = shift;
+# make sure folder name starts with a "+"
+(substr($folder,0,1) eq "+") || (substr($folder,0,0) = "+");
+$bfname = shift;
+
+print "Incorporating RMAIL file $bfname into MH folder $folder\n";
+
+#
+# read in babyl file.
+#
+$/ = "\037";	# this separates the records in a babyl file
+$* = 1;		# records are multi-lines
+
+open(BABYL,$bfname) || die "Couldn't open $bfname\n";
+
+$_ = <BABYL>;	# discard header.
+
+$msgnum = 0;
+
+while (<BABYL>) {
+  chop;		# get rid of delimeter
+  s/\f(.|\n)*\*\*\* EOOH \*\*\*\n//;	# remove duplicate header information
+  open(RCVSTORE,"|" . $rcvstore . " $folder");
+  print RCVSTORE $_;
+  $msgnum++;
+  print "Message $msgnum done.\n";
+}
+--- cut here ---

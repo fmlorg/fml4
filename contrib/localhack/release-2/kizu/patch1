@@ -1,0 +1,19 @@
+*** 1.1	1997/04/24 04:34:47
+--- fml.pl	1997/04/25 01:41:24
+***************
+*** 825,831 ****
+        if (! $has_special_char) { next getline unless /^$addr/i;}
+  
+        # This searching algorithm must require about N/2, not tuned,
+!       if (1 == &AddressMatch($_, $address)) {
+  	  close(FILE);
+  	  return 1;
+        }
+--- 825,831 ----
+        if (! $has_special_char) { next getline unless /^$addr/i;}
+  
+        # This searching algorithm must require about N/2, not tuned,
+!       if (&AddressMatch($_, $address, 1)) {
+  	  close(FILE);
+  	  return 1;
+        }

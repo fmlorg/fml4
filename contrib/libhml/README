@@ -1,0 +1,208 @@
+libremote.pl 
+
+かつては、Backward Compatibility のため ここにありましたが、いまでは正
+式なライブラリとして入っています。
+
+■FILES
+
+README
+libremote.pl(../../libremote.pl へ)
+help-admin
+FmlRemoreControl
+
+■使い方： 
+help-admin のコマンドが使えます。
+ファイルのカスタマイズはこのパラメータをいじってください。
+
+	# Please customize below
+	$ADMIN_MEMBER_LIST	= "$DIR/members-admin";
+	管理者メンバーの登録ファイル	
+
+	$ADMIN_HELP_FILE	= "$DIR/help-admin";
+	管理者コマンドのヘルプファイル
+
+■インストール：
+
+０．ライブラリ（libsmtp.pl等）のある場所へ libremote.plをおく。
+
+１．アドミンコマンドを使いたいＭＬサーバの config.ph に次のコードを書
+き加える
+
+---------- modification of config.ph ----------
+
+# Please customize below
+$ADMIN_MEMBER_LIST	= "$DIR/members-admin";
+$ADMIN_HELP_FILE	= "$DIR/help-admin";
+
+##### HOOKS: ML-specific hooks e.g. "# list"
+
+$COMMAND_HOOK =q#
+    $PASSWD_FILE = "$DIR/etc/passwd";
+    $REMORE_AUTH = 1;
+    if(/^admin$/io) {
+	require 'libremote.pl';
+	  if(1 == &CheckMember($From_address, $ADMIN_MEMBER_LIST)) {
+	      &Logging("ADMIN: REQUEST: " . join(" ", @Fld)) if($debug);
+	      &AdminCommand(@Fld) || do {
+                  &Log("&AdminCommand return nil, ends");
+		  last GivenCommands;
+	      };
+	      next GivenCommands;
+	  }
+	  $_cf{'return'} .= "ADMIN: You are not member\n";
+	  &Log("ADMIN: ILLEGAL ADMIN COMMANDS REQUEST from ($From_address)");
+	  next GivenCommands;
+      }
+#;
+
+---------- modification of config.ph ----------
+
+コメント：
+
+$REMORE_AUTH = 1; は passwd が必要な設定です。０にすれば AUTH をおこな
+わない設定です
+
+ログファイル ってＭＬ本体と管理者コマンドって同じファイルを使ってるん
+ですよね。分けた方がいいのかなぁ？？？
+
+もし変えたいなら
+libhml.pl で こうなってますんでいじってください
+      if(/^admin$/io) {
+	  # if you would like to change logfile for admin commands.
+	  # $LOGFILE	= "$DIR/log-admin"; 
+
+
+■Ｃｌｉｅｎｔ インターフェイス
+
+FmlRemoreControl はリモートでＭＬをコントロールするためのインターフェ
+イスです。
+Bourne Shell script です。
+先頭の ML というとこをろＭＬのアドレスにして使って下さい。
+INPUT したコマンドをＭＬに投げます。
+
+INPUT> ls
+
+    は
+
+% echo "# admin ls" | mail -v $ML
+
+と同じです
+
+■パスワードファイルの設定
+
+passwdの作り方かかなくて、もうしわけないです。
+
+＜初期パスワードのつくりかた＞
+passwdの文字列を uja とすると（１１という数字に意味はない、なん
+か適当は数字です、ＤＥＳのアルゴリズムの番号です）
+% perl -e 'print crypt("uja", 11)' 
+のOUTPUT をencrypted passwdとして使って下さい
+
+etc/passwd の中身のシンタックス（デフォールト）は
+mail-address	encrypted-passwd 
+です。
+ 
+初期パスワードをなんらかの形で相手に与えてすぐに変えてもらうこ
+とが重要でしょう
+＃できればメールでなく電話とかがいいんだろうなぁ
+ 
+mailの エラー時 ヘッダしか普通はpostmasterにはいきません。
+本文にパスワードを書くようにしたのはそのためですが、
+運悪くいってしまうかもしれません。気をつけて下さい。
+＃securityはｓｍｔｐもｔｅｌｎｅｔもどっこいどっこいってか;-)
+
+% chmod 600    etc/passwd
+% chown 管理者 etc/passwd
+もわすれずに
+
+
+■パスワードファイルの設定の例（および改造例）
+Written by oota@pes.com1.fc.nec.co.jp. 
+
+  パスワードファイルの設定は下記の順番で行ないます。
+
+(1) rootになる
+
+(2) fml用パスワードファイルの作成
+
+  SVR4の場合は、
+
+pwmerge /etc/shadow /etc/passwd >etc/passwd
+
+を実行してマージされたパスワードファイルを作って下さい。
+
+(3) オーナーの変更
+
+  chmod 管理者 etc/passwd 
+
+を実行して マージされたパスワードファイルのオーナーを変更して下
+さい。
+
+(5) rootから抜ける
+
+(6) 不要なエントリの削除
+
+  etc/passwd ファイルにはそのマシンを利用する人全員のエントリが
+入っています。管理者以外は不要ですので削除して下さい。また、fml
+は最初の2つのフィールド(アカウント名とパスワード)しか見ませんの
+で、残りのフィールドは全て削除して下さい。最終的には
+
+foo:woeakfaslf
+
+というエントリ(アカウント名も暗号化されたパスワードも仮のもので
+す)だけにしてください。
+
+(7) 管理者エントリ名の変更
+
+  etc/passwdファイルにはアカウント名で管理者の名前が入っています。
+fmlがパスワードを比較する時にはメールアドレスで比較しますので、
+アカウント名をメールアドレス名に変更して下さい。例えば、
+
+foo:woeakfaslf
+
+となっていた場合には、
+
+foo@machine.bar.hogehoge.co.jp:woeakfaslf
+
+というように変更して下さい。
+
+
+■パスワードの変更
+
+  etc/passwdに設定されているパスワードはアカウントに付いているパ
+スワードと同じものです。このままではセキュリテイ的にまずいので、
+パスワードの変更を行なって下さい。下記の内容をメールで投稿して下
+さい。
+
+#admin pass 旧パスワード
+#admin passwd 新パスワード
+
+続いて再度
+
+ echo #admin pass 新パスワード | peG
+
+として下さい。正常にパスワードが変更されていれば、管理者宛にメー
+ルが来ますので確認して下さい。
+
+------------------------------------------------------------------
+また、上記の作業を行なう為には、libremote.pl の変更が必要です。
+
+%diff libremote.pl libremote.pl~
+
+46c46
+<               $_cf{'return'} .= "554 Illegal Passwd $to\n";
+---
+>               $_cf{'return'} .= "554 Illegal Passwd\n";
+286,287c286
+< #     local($a, $b) = split(/\s+/, $_, 99);
+<       local($a, $b) = split(/:/, $_, 99);
+---
+>       local($a, $b) = split(/\s+/, $_, 99);
+329c328
+<       local($a, $b) = split(/:/,$_);
+---
+>       local($a, $b) = split;
+331c330
+<           print OUT "$a:$passwd\n";
+---
+>           print OUT "$a $passwd\n";

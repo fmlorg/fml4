@@ -1,0 +1,36 @@
+#!/bin/sh
+
+X=0
+PrevSeq=0
+Seq=0
+FILE=""
+
+PrevSeq=`cat prev_seq`
+PrevSeq=`expr $PrevSeq + 1`
+Seq=`cat seq`
+
+if [ $PrevSeq -gt $Seq ]
+then
+	exit 0
+fi
+
+if [ $PrevSeq -le $Seq ]
+then
+(	FILE="$PrevSeq-$Seq"
+	echo 	./vote.pl -S $FILE
+
+	/usr/local/bin/jperl ./vote.pl -D `pwd` -S $FILE
+	/bin/cp seq prev_seq
+
+	while [ $PrevSeq -le $Seq ]
+	do
+		echo " "
+		echo " "
+		cat  "spool/$PrevSeq"
+		PrevSeq=`expr $PrevSeq + 1`
+	done
+#)|/usr/ucb/mail Elena@phys.titech.ac.jp
+)|/usr/ucb/mail -s "Contest daily summary" contest-question@axion.phys.titech.ac.jp
+fi
+
+exit 0

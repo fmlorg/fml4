@@ -1,0 +1,126 @@
+		WWWでメールを操作するライブラリ
+
+----------------
+YOU -> SMTP  -> FIREWALLをこえ -> www-mail <-> HTTP →どっかのサーバ
+                                   ↓
+	SMTP		←おくりかえし
+----------------
+
+ファイル：
+libhttp.pl	fml.pl で呼ぶインターフェイス（単独でも動く）
+
+	% echo "http://www.phys.titech.ac.jp/uja" | perl libhttp.pl
+
+	これで
+	http://www.phys.titech.ac.jp/uja/index.html の中身が出力される。
+
+バグ：	メールでやりとりするクライアントも作るべきです。まだα
+
+インストール： fml-source/lib/SID にある sid.pl を使うといいでしょう。
+	SID は Listserv like な fml へのインターフェイスです。
+	SID のインストールは FAQ をみてくださいませ。
+
+＿＿＿＿＿＿＿＿以下はObsoleteです＿＿＿＿＿＿＿＿＿＿＿＿
+インストール： fml.pl の MAIN を次のように書き換える。
+＃ＪＩＳへコンバートする部分 "/usr/sony/bin/jconv -j "は適当に書き換え
+てね
+
+----------------------------------------------------------------------------
+#################### MAIN ####################
+# including libraries
+require 'config.ph';		# a config header file
+require 'libsmtp.pl';		# a library using smtp
+require 'liblock.pl' unless $USE_FLOCK;
+
+# a little configuration before the action
+umask (077);			# rw-------
+$CommandMode  	= '';		# default CommandMode is nil.
+$GUIDE_REQUEST 	= 0;		# not member && guide request only
+
+chdir $DIR || die "Can't chdir to $DIR\n";
+
+&InitConfig;			# initialize date etc..
+&Parsing;			# Phase 1(1st pass), pre-parsing here
+&GetFieldsFromHeader;		# Phase 2(2nd pass), extract headers
+
+require 'libhttp.pl';
+$ANSWER = "";
+
+$RETURN = "$DIR/http$$";	# for timeout?
+open(OUT, "|/usr/sony/bin/jconv -j > $RETURN") || die("Cannot jconv");
+
+foreach $request (split(/\n/, $MailBody, 9999)) {
+    next if($request =~ /^$/o);
+    if($request =~ /^uso$/oi) {
+	$request = "http://www.phys.titech.ac.jp/uja/NishiharaKumiko.html";
+    }
+
+    &Logging("$request ($From_address)");
+    print OUT "\n-------\n";
+    print OUT "REQUEST:$request\n\n";
+    print OUT &Http($request);
+
+}
+
+close(OUT);
+
+&SendFile($Reply_to ? $Reply_to : $From_address,
+	  "WWW-MAIL $ML_FN", $RETURN);
+
+unlink $RETURN;
+
+exit 0;				# the main ends.
+#################### MAIN ENDS ####################
+----------------------------------------------------------------------------
+
+
+解説：
+
+% echo "http://axion" | mail  www-mail@phys.titech.ac.jp
+
+とかするとどうなるかわかるでしょう…
+
+ようするに 
+
+YOU -> SMTP  -> FIREWALLをこえ -> www-mail <-> HTTP →どっかのサーバ
+                                   ↓
+	SMTP		←おくりかえし
+
+です。
+
+>＞問題点： URL が書けないといけない:-)
+>・・・・書けない;_;
+
+	HTTP をねらえ！科学講座 第１回（♪な〜ぜかなな〜ぜかな）
+
+% echo "http://axion/uja/Elena.html" | mail  www-mail@phys.titech.ac.jp
+
+たとえば、↑とすると、こんなのがかえってくるわけで
+
+---------------------------------
+…略…
+
+</UL>
+好きな声優：
+<A HREF= NishiharaKumiko.html>西原久美子</A>
+かなぁ(^^;)
+<DT>
+
+…略…
+
+---------------------------------
+
+次は、HREF の後の文字でＵＲＬを最後だけ置き換えればいいんです
+
+% echo "http://axion/uja/Elena.html" | mail  www-mail@phys.titech.ac.jp
+
+                           ↑この最後の部分を
+
+% echo "http://axion/uja/NishiharaKumiko.html" | mail  www-mail@phys.titech.ac.
+jp
+
+もぉ帰りたいので、また次回、それじゃまたね〜（♪な〜ぜかなな〜ぜかな）
+
+＃深ちゃん				fukachan@phys.titech.ac.jp
+ヒルストリートみなきゃ…
+http://www.phys.titech.ac.jp/uja/Elena.html

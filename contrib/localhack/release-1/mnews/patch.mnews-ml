@@ -1,0 +1,247 @@
+--- config.ph.org	Wed Nov  8 07:55:00 1995
++++ config.ph	Wed Nov  8 07:56:34 1995
+@@ -13,6 +13,9 @@
+ ######################################################################
+           ##### configurations you custums(required) #####
+ 
++$SUN_OS_413    = 1;
++$FACE_MARK     = '(^_^)/~';
++
+ # Header variables of your Mailing List 
+ # The mail Header has "To: $MAIL_LIST $ML_FN" in Mail Header
+ # and additional fields for convenience 
+@@ -20,8 +23,8 @@
+ # X-Mail-Count: Count of ML article
+ 
+ $MAIL_LIST     = 'mnews@leo.chubu.ac.jp';
+-$ML_FN         = '(Elena Lolabrigita ML)';
+-$XMLNAME       = 'X-ML-Name: Elena';
++$ML_FN         = '(mnews Mailing List)';
++$XMLNAME       = 'X-ML-Name: mnews ML';
+ $XMLCOUNT      = 'X-Mail-Count';
+ 
+ # Maintainer Email Address
+@@ -34,7 +37,7 @@
+ # This address is used only for only-command-oriented Server. 
+ # e.g. "Elena-ctl" may not require @phys.titech.ac.jp for usefulness
+ 
+-$CONTROL_ADDRESS = 'pollyanna';
++$CONTROL_ADDRESS = 'mnews-request';
+ 
+ ######################################################################
+ ################### Hereafter "Advanced Settings" ####################
+@@ -45,7 +48,7 @@
+ # choice of member check, lock algorithm and debug option
+ # my preference :-) is 0 1 1 1 0 0 0 0(may be a release version)
+ 
+-$debug         = 1;            # global debug option. if non-nil, debug mode.
++$debug         = 0;            # global debug option. if non-nil, debug mode.
+ 				# In debug mode, NOT sendmail in distributing
+ 
+ ### AUTO REGISTRAION and around it
+@@ -61,38 +64,41 @@
+ $AUTO_REGISTERD_UNDELIVER_P = 0;# when auto-registered, the mail own is 
+ 				# delivered or not? if 1, not delivered
+ 
+-$AUTO_REGISTRATION_LINES_LIMIT = 0;
++$AUTO_REGISTRATION_LINES_LIMIT = -1;
+ 				# When Auto-registration
+ 				# not distribute if lines < this value
+ 				# "built-in default is 8"
+ 				# (suppose body is 3, signature is 4)
+ 
+ 				## require special syntax for auto-registration
+-$REQUIRE_SUBSCRIBE = "";	# e.g.  "subscribe"
+-$REQUIRE_SUBSCRIBE_IN_BODY = 0;	# body is "subscribe" when 1
++$REQUIRE_SUBSCRIBE = "subscribe";	# e.g.  "subscribe"
++$REQUIRE_SUBSCRIBE_IN_BODY = 1;	# body is "subscribe" when 1
+ 
+ 
+ ### HEADER CUSTOMIZATION
+ 
+-$SUPERFLUOUS_HEADERS = 0;	# preserve more header fields
++$SUPERFLUOUS_HEADERS = 1;	# preserve more header fields
+ 
+ 				## MIME support
+-$USE_LIBMIME   = 0;		# when use MIME Extension in libMIME.pl
++$USE_LIBMIME   = 1;		# when use MIME Extension in libMIME.pl
++$MIME_DECODED_ARTICLE = 1;	# do MIME decoding, then spool
+ $LIBMIMEDIR    = "$DIR/contrib/MIME";
+ 				# location in libMIME.pl
+ 
+ 				## SUBJECT FORM
+-$STRIP_BRACKETS = 0;		# Strip e.g. [ML:fukachan] in Subject
+-$SUBJECT_HML_FORM = 0;		# if non-nil , Subject: [ID:User] Subject
++$STRIP_BRACKETS = 1;		# Strip e.g. [ML:fukachan] in Subject
++$SUBJECT_HML_FORM = 1;		# if non-nil , Subject: [ID:User] Subject
+ 				# like the form of "Subject" in hml 1.6.
+-$BRACKET       = 'Elena';	# Subject: [$BRACKET:$ID] ...
++$BRACKET       = 'mnews';	# Subject: [$BRACKET:$ID] ...
+ 
+ 				## OBSOLETE ERRORS-TO against NIFTY
+-$AGAINST_NIFTY = 0;		# Against illegal implementation, use Erros-To
++$AGAINST_NIFTY = 1;		# Against illegal implementation, use Erros-To
+ 
+ 				# O A SO BI :-)
+ # $STAR_TREK_FORM = 0;		# e.g. Subject: [0408.0010]
+ 
++$USE_ORIGINAL_MESSAGE_ID = 1;	# save original Message-ID
++
+ 
+ ### IPC to speak to Sendmail via SMTP PORT
+ # Configuration for Smtp library
+@@ -115,16 +121,18 @@
+ $COMMAND_SYNTAX_EXTENSION = 1;	# if non-nil, convert "#member" -> "# member"
+ 				# in libfml.pl
+ 
+-$COMMAND_CHECK_LIMIT = 3;	# the first 3 lines is checked for
++$COMMAND_CHECK_LIMIT = 1;	# the first 3 lines is checked for
+ 				# mistakes whether the command mode or not?
+ 				# at &Parsing in fml.pl, 
+ 
++$USE_WARNING = 1;		# コマンドで単なるシンタックスエラーの警告
++
+ 				## WHOIS if you use
+ $USE_WHOIS     = 0;			# Use Whois library
+ $DEFAULT_WHOIS_SERVER = "localhost";	# where is the default whois server?
+ 
+ 				## MATOME OKURI
+-$USE_RFC934    = 0;		# inMatomeokuri, use mh/burst for the split
++$USE_RFC934    = 1;		# inMatomeokuri, use mh/burst for the split
+ 
+ 				## ARCHIVING: 
+ 				# @StoredSpool_DIR is obsolete
+@@ -161,13 +169,13 @@
+ 
+ ### HOOKS: ML-specific hooks e.g. "# list"
+ 
+-$COMMAND_HOOK =q#
+-      if(/list/io) {
+-	  &Log("List");
+-	  &SendFile($to, "List $ML_FN", "$DIR/list");
+-	  next GivenCommands;
+-      }
+-#;
++##$COMMAND_HOOK =q#
++##      if(/list/io) {
++##	  &Log("List");
++##	  &SendFile($to, "List $ML_FN", "$DIR/list");
++##	  next GivenCommands;
++##      }
++###;
+ 
+ 
+ 
+@@ -188,17 +196,18 @@
+ $MEMBER_LIST   = "$DIR/members"; 	# member list
+ $ACTIVE_LIST   = "$DIR/actives"; 	# active member list
+ 
+-$OBJECTIVE_FILE = "$DIR/objective"; 	# objective file
+-$GUIDE_FILE    = "$DIR/guide";		# the guide file of our Mailing List 
+-$HELP_FILE     = "$DIR/help";		# the help file for useful commands
+-$DENY_FILE     = "$DIR/deny";		# attention to illegal access
+-$WELCOME_FILE  = "$DIR/guide";		# could be "$DIR/welcome"
++$OBJECTIVE_FILE = "$DIR/=objective"; 	# objective file
++$GUIDE_FILE    = "$DIR/=guide";		# the guide file of our Mailing List 
++$HELP_FILE     = "$DIR/=help";		# the help file for useful commands
++$DENY_FILE     = "$DIR/=deny";		# attention to illegal access
++$FAIL_FILE     = "$DIR/=fail";		# attention to illegal access
++$WELCOME_FILE  = "$DIR/=welcome";	# could be "$DIR/welcome"
+ $WELCOME_STATEMENT = 
+ 	"Welcome to our $ML_FN\n         You are added automatically";
+ 					# Subject of the reply mail for welcome
+ 
+ $LOGFILE       = "$DIR/log";		# activity log file
+-$MGET_LOGFILE  = "$DIR/log";		# log file for mget routine
++$MGET_LOGFILE  = "$DIR/log_mget";	# log file for mget routine
+ $SUMMARY_FILE  = "$DIR/summary"; 	# article summary file
+ $SEQUENCE_FILE = "$DIR/seq";		# sequence number file
+ 
+@@ -208,7 +217,7 @@
+ $MSEND_RC      = "$DIR/MSendrc";	# Matome Okuri ver.2 rc file
+ 
+ # Global Variables
+-$Subject       = '';			# Subject field
++$Subject       = '(No Subject in original)';	# Subject field
+ $From_address  = 'not.found';		# Address of "From" field
+ $User          = 'not.found';		# username, the first 15 characters
+ $Date          = 'not.found';		# when posted to ML
+@@ -224,7 +233,7 @@
+ $LOCK_NB       = 4;
+ $LOCK_UN       = 8;
+ 
+-##### Configure automatically generated is below #####
++##### Configure #####
+ # System commands following 4.3 BSD. Please check when it does not work.
+ # used in libfml.pl and split_and_sendmail.pl
+ # ./Configure must generate below :-)
+@@ -242,9 +251,67 @@
+  
+ 
+ #macro:s for  in /etc/sendmail.cf
+-$Envelope{'macro:s'}	= "";
++$Envelope{'macro:s'} = 'localhost';
++
++$PRECEDENCE     = 'bulk';
++@NEWSYSLOG_FILES = ("$MSEND_RC.bak", "$MEMBER_LIST.bak", "$ACTIVE_LIST.bak",
++                    "${LOGFILE}_archive", "${LOGFILE}_matome");
++
++$SKIP_FIELDS = '|X-Nsubject|X-Confirm-Reading-To';
++
++$START_HOOK = q#
++    if ($CONTROL_ADDRESS && ($Envelope{'mode:chk'} =~ /$CONTROL_ADDRESS/i)) {
++        if ($Envelope{'Body'} =~ /subscribe/io
++              && $Envelope{'Body'} !~ /unsubscribe/io) {
++            &use('utils');
++            &AutoRegist(*Envelope);
++            $DO_NOTHING = 1;
++        }
++        $Envelope{'mode:uip'} = 'on'
++    } elsif ($Envelope{'mode:uip'}) {
++        &Logging("Unsupport Command Mail");
++        &SendFile($From_address, 
++                  "Unsupport Command Mail this Address $ML_FN", $FAIL_FILE);
++        $DO_NOTHING = 1;
++    } else {
++        &Distribute;
++        $DO_NOTHING = 1;
++    }
++#;
++
++$SMTP_OPEN_HOOK = q#
++    $Envelope{'h:To:'}       = $Envelope{'h:to:'}
++          || $Envelope{'h:apparently-to:'} || "$MAIL_LIST $ML_FN";
++    $Envelope{'h:Reply-To:'} = $Envelope{'h:reply-to:'} = $MAIL_LIST;
++    if ($USE_LIBMIME && $Envelope{'MIME'}) {
++        &use('MIME');
++        $Envelope{'h:Subject:'} = &DecodeMimeStrings($Envelope{'h:Subject:'});
++    }
++#;
+ 
++$HEADER_ADD_HOOK = q#
++    if ($Envelope{'x-nsubject:'}) {
++        if ($STRIP_BRACKETS) {
++            $_ = $Envelope{'x-nsubject:'};
++            local($r)  = 10;
++
++            s/\[$BRACKET:\d+\]\s*//g;
++
++            while (s/Re:\s*Re:\s*/Re: /gi && $r-- > 0) { ;}
++
++            $Envelope{'x-nsubject:'} = $_;
++        }
++        if ($USE_LIBMIME && $Envelope{'MIME'}) {
++            &use('MIME');
++            $Envelope{'x-nsubject:'} =
++                  &DecodeMimeStrings($Envelope{'x-nsubject:'});
++        }
++        $body .= "X-Nsubject: [$BRACKET:$ID] $Envelope{'x-nsubject:'}\n";
++    }
++#;
+ 
++$TRF_NAME_HOOK = q#
++    $name =~ s/umura@solan\.chu/umura@nn.solan./oi;
++#;
+ 
+-1;
+ 1;

@@ -1,0 +1,34 @@
+#!/bin/sh
+
+DIR='/home/axion/fukachan/work/spool'
+
+chdir /home/axion/fukachan/work/spool/Cache
+
+rm -f Cache
+
+cat Config.fml | while read a b c
+do
+	F="$DIR/$b/members"
+
+	if [ "X$c" = "X" ]; then
+		# $c null
+		file="actives-$b"
+	else
+		file="actives-$c"
+	fi
+
+	if [ -f $F ]
+	then
+		echo $a
+		cp $F $file
+		echo "$a $file" >> Cache
+
+	else
+		echo " "
+		echo "Not found: [$a] 	$F"
+	fi
+
+	chmod 600 actives-*
+done
+
+exit 0;

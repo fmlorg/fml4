@@ -1,0 +1,29 @@
+alpha test version (注意！)
+
+０ 	hylafax をインストールする。
+	ghostscript 等も同様にインストールする。
+	＃ここは各自頑張って下さい。聞かれても困るだけなので
+
+１	libfax.pl を fml.pl 等と同じ場所へ copy して下さい。
+
+２	makefml newml mail2fax 
+
+で mail2fax という架空のＭＬを作ります。
+
+３	そして mail2fax の config.ph に
+
+
+	########## FAX SERVER ##########
+	$START_HOOK = q#
+		require 'libfax.pl';
+		$DO_NOTHING = 1;
+	#;
+
+	&DEFINE_MODE('post=anyone');
+
+をつけたしてください。
+
+4	default 
+
+    $FORMATTER = "/usr/local/mail2fax/a2ps -a4 -ns -nb -no -nt -j1.2 -p";
+    $SENDFAX   = "/usr/local/bin/sendfax -m -n -D -R ";

@@ -1,0 +1,17 @@
+--- msend.pl	Sun Jun  8 02:24:27 1997
++++ msend.pl	Fri May 23 21:52:30 1997
+@@ -304,7 +303,13 @@
+       # in this stage; possible addr form is "addr [rms]=\S+ [rms]=\S+ ... "
+       # we permit and use only "addr m= r= " and "addr m= ".
+       next line if /\ss=/io; # options [sm]= are not exclusive each other --;;
+-      next line unless /\sm=/io; # for MatomeOkuri ver.2;
++
++      if ($_cf{'opt:A'} && !/\sm=/io) { # already comments stripped
++	  $_ .= " m=".($MSEND_MODE_DEFAULT || 'gz');
++      }
++      elsif (/\sm=/io) { # for MatomeOkuri ver.2
++	  next line;
++      }
+ 
+       printf STDERR "msend::rcpt:\t%-30s %s\n", $rcpt, $opt if $debug;
+ 

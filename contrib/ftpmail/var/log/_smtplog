@@ -1,0 +1,46 @@
+socket ok
+connect ok
+220-axion.phys.titech.ac.jp Sendmail 8.6.11+2.4W/3.1W-yokyun2.1a ready at Fri, 13 Oct 1995 22:15:07 +0900
+220 ESMTP spoken here
+HELO axion.phys.titech.ac.jp<INPUT
+250 axion.phys.titech.ac.jp Hello localhost [127.0.0.1], pleased to meet you
+MAIL FROM: fukachan@axion.phys.titech.ac.jp<INPUT
+250 fukachan@axion.phys.titech.ac.jp... Sender ok
+RCPT TO: fukachan@phys.titech.ac.jp<INPUT
+250 fukachan@phys.titech.ac.jp... Recipient ok
+DATA<INPUT
+354 Enter mail, end with "." on a line by itself
+------------------------------
+Date: Fri, 13 Oct 95 22:15:07  JST
+From: fukachan@axion.phys.titech.ac.jp
+Subject: fml Status report (Ftpmail mode test ML)
+To: fukachan@phys.titech.ac.jp
+X-MLServer: fml[1.6.0.2](1.6beta) :smtp[1.6.0.1] :ftpmail[1.1.1.0] :utils[1.6.0.1]/ libftp 0.9.1 
+
+
+>>> # ls-lR
+Cannot find ls-lR(|.gz|.Z)
+
+>>> # cd old
+	Cannot chdir /./old
+
+	*** Pseudo Ftpmail Mode Ends. ***
+
+	See you!   
+
+************************************************************
+If you have any questions or problems,
+   please make a contact with fukachan@axion.phys.titech.ac.jp
+       or 
+   send a mail with the body '# help' to 
+   Elena@axion.phys.titech.ac.jp
+or Elena@axion.phys.titech.ac.jp@axion.phys.titech.ac.jp (preferable)
+
+e.g. 
+(shell prompt)% echo # help |Mail Elena@axion.phys.titech.ac.jp@axion.phys.titech.ac.jp
+
+************************************************************
+------------------------------
+250 WAA08340 Message accepted for delivery
+QUIT<INPUT
+221 axion.phys.titech.ac.jp closing connection

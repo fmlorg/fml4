@@ -1,0 +1,98 @@
+[ 利用可能なコマンド ] ftpmail サーバに対して以下のコマンドが利用できます。
+
+*ftpmail に関するドキュメントの返送(help)
+
+# help
+
+	このドキュメントが返送されます。
+
+*返送先メールアドレスの変更(mail)
+
+# mail your.mail.address
+ あるいは
+# reply-to your.mail.address
+
+	ftpmail の返送先のデフォルトはメールの From: 行です。
+	（FromよりReply-To は優先、よって
+	      your.mail.address > reply-to > from 
+	です）
+	返送先を変更したい場合に利用して下さい。
+
+*Anonymous FTP サイトの選択(ftp/connect)｛注意！：実装していません｝
+
+# ftp anonymous.ftp.site
+ あるいは
+# connect anonymous.ftp.site
+
+	Anonymous FTP site を指定(変更)します。引数を省略した場合は、
+	ftp.kuis.kyoto-u.ac.jp が選択されます。ftp コマンドを利用しな
+	かった場合 ftp.kuis.kyoto-u.ac.jp がデフォルトとなっています。
+	このコマンドは一つのリクエストメール中で複数回利用できるので、
+	コマンド列の途中で Anonymous FTP サイトを切替える事が可能です。
+
+	不必要なトラフィックを避けるため、必要なファイルが ftp.kuis に
+	アーカイブされているかどうか必ず確認し、ftp.kuis に既に有るファ
+	イルを他のサイトから取り寄せることは絶対にしないで下さい。
+
+*カレントディレクトリの変更(cd/chdir)
+
+# cd /directory/name
+ あるいは
+# chdir /directory/name
+
+	アクセスを行なうディレクトリを変更します。ディレクトリは ~ftp か
+	らのパスで指定します。chdir/cd では現在のディレクトリからの相対パ
+	スを指定することはできません。
+	(ディレクトリ名の先頭に / がない場合には / が補われます。)
+
+	引数なしで cd のようにすると top directory へ戻ります。
+
+	注意：	cd .. とか cd ../directory はできます。
+	こっちでこういうことは↑はできますが、
+	get の引数でファイル名以外を指定しないで下さい。
+
+*ファイルの転送要求(get/send)
+
+# get	file
+# send	file
+# getfile	file
+
+	取り寄せたいファイル名を指定します。
+	
+	chdir/cd で指定したデフォルトディレクトリがパラメータ中にある
+	場合は、それを除いた部分でファイルを探そうとします。
+	例：
+
+	cd os/bsd/4.4-lite
+	get uja
+
+	みたいに使います。
+
+*Special Effect
+
+# ls 
+# ls-lR
+
+(top dir)/ls-lR.gz をおくりかえす。
+
+
+*リクエストの終了(quit/exit)
+
+# quit
+ あるいは
+# exit
+
+	コマンドシーケンスを終了させます。メールの最後にシグネチャがある
+	場合にはコマンドとして処理されないようにするため、必ず quit/exit
+	をコマンド列の最後に記述して下さい。
+
+---------------------------
+# $Id$
+# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1997 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.

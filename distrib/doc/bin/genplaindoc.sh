@@ -1,19 +1,39 @@
 #!/bin/sh
 
-perl doc/ri/conv-install.pl < doc/ri/INSTALL.wix > doc/smm/install-new.wix 
+### SUBROUTINE
+gendoc ()
+{
 
-# /var/tmp/.fml/INFO is also a wix format
-for x in doc/ri/*.wix /var/tmp/.fml/INFO
-do
+	FORMATTER="perl bin/fwix.pl "
+
 	if [ -f $x ]
 	then
 		file=`basename $x .wix`
-		echo "$x	=>	./var/doc/$file"
-		cat $x | perl bin/fwix.pl -n i > ./var/doc/$file
-		cat $x | perl bin/fwix.pl -L ENGLISH -n i > ./var/doc/${file}.English
+
+		echo "";
+		echo "________________________";
+		echo "";
+		echo "$x	=>	./$OUT_DIR/$file"
+
+		$FORMATTER -n i < $x > ./$OUT_DIR/$file
+		$FORMATTER -L ENGLISH -n i < $x > ./$OUT_DIR/${file}.English
 	else
 		echo "cannot found $x"
 	fi
+}
+
+
+# /var/tmp/.fml/INFO is also a wix format
+for x in doc/ri/*.wix /var/tmp/.fml/INFO 
+do
+	OUT_DIR=var/doc
+	gendoc
+done
+
+for x in doc/master/*.wix
+do
+	OUT_DIR=var/doc/drafts
+	gendoc
 done
 
 

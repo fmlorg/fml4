@@ -1,0 +1,79 @@
+#.FML HEADER
+# NEW FORMAT FOR FURTHER EXTENTION
+# e.g. fukachan@phys r=relayserver m=3u s=skip 
+# r= relayserver
+# m= matomeokuri parameter is time and option
+# s= skip. can post from this address but not delivered here.
+#
+# the same obsolete format is compatible with new format and as follows:
+# e.g. fukachan@phys relayserver matome 3u
+#.endFML HEADER
+kuroda@ais.kudpc.kyoto-u.ac.jp 
+fukachan@axion.phys.titech.ac.jp 
+##BYE tsuboy@sowa.is.uec.ac.jp
+##BYE matsui@moon.ss.ts.fujitsu.co.jp
+doukai@ss.ts.fujitsu.co.jp 
+##BYE matsui@moon.ss.ts.fujitsu.co.jp 
+mikami@s42017.hcs.ts.fujitsu.co.jp 
+sengoku@intsys.co.jp 
+# sengoku@panda.intelligent-systems.co.jp
+##BYE kata@rokoh.gen.u-tokyo.ac.jp 
+# oguri@cse.canon.co.jp
+##BYE oguri@ccc.canon.co.jp
+miura@cs.titech.ac.jp 
+fukase@cst.nihon-u.ac.jp 
+muroyama@chem4.chem.nagoya-u.ac.jp 
+tanigawa@tribo.mech.nitech.ac.jp 
+koyachi@melnksn1.mel.go.jp 
+shirai@syrinx.gen.u-tokyo.ac.jp 
+sha@harl.hitachi.co.jp 
+kashira@ss.titech.ac.jp 
+##BYE skaji@msv.cc.iwate-u.ac.jp
+yamagiwa@i6es20.info.eng.niigata-u.ac.jp 
+##BYE u9113013@ceres.mbox.sist.ac.jp 
+koyachi@mel.go.jp 
+tana@com2hw01.ed1.was.fc.nec.co.jp 
+##BYE hirai@emb.ccm.eng.osaka-u.ac.jp
+##BYE wakayama@mars.elcom.nitech.ac.jp   
+takuji@med.nagoya-u.ac.jp 
+# dcshimod@knctgw.cc.knct.ac.jp 
+youcan@knctih.cs.knct.ac.jp 
+#	s-v@utsc.s.u-tokyo.ac.jp 
+hasegawa@cec.co.jp 
+NBF03720@niftyserve.or.jp 
+money@dblab.is.tsukuba.ac.jp 
+taka@cs.titech.ac.jp 
+u93b217@ed.teu.ac.jp  s=skip 
+u93b217@cc.teu.ac.jp 
+hyodo@youkoso.wincnet.or.jp 
+oshikawa@mmm.t.u-tokyo.ac.jp 
+saito@sol.cs.ritsumei.ac.jp 
+yossie@kuamp.kyoto-u.ac.jp 
+koyama@kutsuda.kuis.kyoto-u.ac.jp 
+ushida@kronos.mp.es.osaka-u.ac.jp 
+fukachan 
+makoto@tsurumi.toshiba.co.jp 
+fuk@tcp-ip.or.jp 
+mori@isc.mew.co.jp 
+nishino@eiger.okilab.oki.co.jp 
+kokai@paradise.kz.tsukuba.ac.jp 
+##BYE hogawa@mesh.ad.jp 
+##BYE hogawa@mesh.ad.jp 
+kunihiro@nis.co.jp 
+t-sumita@ccs.mt.nec.co.jp 
+taratta@jcagw.jca-p.shinagawa.tokyo.jp 
+kikuchi@krecina.tmit.ac.jp 
+kikuchi@st.rim.or.jp 
+#	kikuchi@ec.tmit.ac.jp
+#	kikuchi@karen.rim.or.jp
+#	qu93211@cc.tmit.ac.jp
+tbaba@mtl.t.u-tokyo.ac.jp 
+matsui@iij.ad.jp 
+695l1108@cfi.waseda.ac.jp 
+hogawa@mesh.ad.jp 
+odagi@oedo.ohta.is.uec.ac.jp 
+shin@tsu.cow.melco.co.jp 
+t-ishida@tni.co.jp 
+#	mikami@st.rim.or.jp 
+kishiba@ipc.hiroshima-u.ac.jp 
+kise@ocean.ie.u-ryukyu.ac.jp

@@ -1,0 +1,96 @@
+	管理者コマンドのヘルプ
+
+	"# admin コマンド" ＝＝ "# approve パスワード コマンド" 
+	と同じです
+	＃approveは毎回書きますが、
+	＃admin の方では最初にパスワードの認証が必要になります
+
+
+# admin pass パスワード
+# admin password パスワード
+	もしパスワードを必要とする設定なら必ず先頭にこれがないといけま
+	せん。キーワードはｐａｓｓｗｄにしようかと思ったけど、
+	そうすると、コマンドラインとごっちゃになるからｆｔｐからとって
+	きてｐａｓｓというキーワードを使います。
+
+# admin passwd 新しいパスワード
+	shell% passwd ってやつとおなじっす（複数は要らないけど）。
+
+# admin help
+	管理者コマンドヘルプを取り寄せる（このファイル）
+
+# admin log
+	ログを取り寄せる
+
+# admin add address
+	address の人をＭＬに登録する
+
+# admin off address
+	address の人をＭＬ一時おやすみにする
+	（actives file にのみ作用する）
+
+# admin on address
+	address の人のＭＬ一時おやすみを解除
+	（actives file にのみ作用する）
+
+# admin bye address
+	address の人をＭＬメンバーから削除
+
+# admin change old-addr new-addr
+	old-addrを削除して、new-addrを登録する
+	＃bye + add です
+
+# admin matome 引数 address 
+	address の人を まとめおくりに
+	引数は6 6u 6i等	
+
+# admin skip address
+	この address を配送はしないけど投稿はできるようにする
+
+# admin addadmin address
+# admin addpriv  address
+	address の人を管理者メンバーとして登録
+
+# admin byeadmin address
+# admin byepriv  address
+	address の人を管理者メンバーから削除
+
+# admin dir
+	ＭＬのある場所の階層全部のリスト（ls -lR）
+
+# admin ls options
+	ＭＬのある場所のリスト（ls）
+
+	# admin ls -l
+	# admin ls -l spool
+	のようにオプション（一行に書く限りいくつあってもいい）も使える
+
+# admin remove filename
+	ＭＬのある場所の filename というファイルを削除
+
+# admin get filename
+	ＭＬのある場所の filename というファイルをとってくる
+
+# admin put filename
+	ＭＬのある場所の filename というファイルを置く。
+	もし filename というファイルがある場合は、
+	古い filename は filename.back に変えておく
+
+# admin rename filename1 filename2
+	ＭＬのある場所の filename1 というファイルを filename2 という名
+	前にする
+
+
+＃＃＃ admin はつかないけど…
+
+# set debug		
+		デバッグモードをオン
+
+# set addr_check_max LEVEL
+		アドレスのチェックを LEVEL(数字)へ。つまり
+		$ADDR_CHECK_MAX = LEVEL へ
+
+# set exact
+		アドレスのチェックをExact へ
+		実は $ADDR_CHECK_MAX = 9; です:-)
+

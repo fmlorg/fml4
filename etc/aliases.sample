@@ -1,0 +1,17 @@
+# ML itself
+Elena: :include:/home/axion/fukachan/work/spool/EXP/etc/include.sample
+
+# ML-command-server, NOT REQUIRED but just recommended
+#Elena-ctl: :include:/home/axion/fukachan/work/spool/EXP/etc/include.sample
+
+#owner-Elena: your-username (Sendmail R8)
+owner-Elena:fukachan
+
+#maintainer. an error mail comes back here
+Elena.Lolobrigita:fukachan
+
+#Conventionally we should also make ML-request
+#ML-request is a receipt of ML
+#It is O.K where ML-request is an alias of MAINTAINER
+Elena-request:Elena.Lolobrigita
+

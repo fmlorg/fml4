@@ -1,0 +1,6 @@
+#"|$EXECDIR/fml.pl $MLDIR --distribute"
+#  or when using without config.ph
+"|$EXECDIR/fml.pl $MLDIR --distribute --mladdr=$MAIL_LIST $OPTIONS"
+
+"|$EXECDIR/fml.pl $MLDIR --distribute --mladdr=$MAIL_LIST $OPTIONS "
+

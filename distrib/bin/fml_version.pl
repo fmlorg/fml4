@@ -1,29 +1,41 @@
 #!/usr/local/bin/perl
 
 require 'getopts.pl';
-&Getopts("iqts");
+&Getopts("iqtsp:L:");
 
 $RELEASE_ID   = "$ENV{'FML'}/etc/release_version";
 $RELEASE_DATE = "$ENV{'FML'}/etc/release_date";
 $SHOW_ID      = $opt_s;
 $query        = $opt_q;
+$patchlevel   = $opt_p;
+$Label        = $opt_L;
 
 &StoreTime if $opt_t;
 
 &GetTime;
 $Year     = 1900 + $year;
 
-($ID, $PL) = &GetID;
-if ($opt_i) { # initialize;
-    print STDERR "@ARGV INCREMENT: $PL -> ";
-    $PL++; # $PL = &PLIncrement($PL);
-    print STDERR "$PL\n";
-} 
+if ($Label) {
+	$ID = $Label;
+}
+else {
+	($ID, $PL) = &GetID;
+
+	if ($opt_i) { # initialize;
+	    print STDERR "@ARGV INCREMENT: $PL -> ";
+	    $PL++; # $PL = &PLIncrement($PL);
+	    print STDERR "$PL\n";
+	} 
+}
 
 $MailDate = &GetDate;
 
-#if ($SHOW_ID) { print "fml $ID$PL: ${MailDate}JST $Year\n"; exit 0;}
-if ($SHOW_ID) { print "fml $ID$PL\n"; exit 0;}
+$PL = "${PL}pl$patchlevel" if $patchlevel;
+
+if ($SHOW_ID) { 
+    print "fml $ID$PL\n"; 
+    exit 0;
+}
 
 while (<>) {
     if (/^\$Rcsid.*=\s+[\'\"](\S+)/) {

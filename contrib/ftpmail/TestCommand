@@ -1,0 +1,44 @@
+#!/bin/sh
+
+unset PERLLIB
+
+FML=/home/axion/fukachan/work/spool/EXP
+HDR=" perl $FML/bin/testheader.pl -f < ./testmail "
+
+
+(
+	echo -n "Command: " 1>&2
+	echo "# $*" 1>&2
+)
+
+# GETOPT
+set -- `getopt abo: $*`
+if test $? != 0
+then
+        echo 'Usage: ...'
+        exit 2
+fi
+for i
+do
+	case "$i" 
+	in
+	-a)
+		opta=$i; shift;;
+	-o)
+		oarg=$2; shift; shift;;
+	--)
+		shift; break;;
+	esac
+done
+
+if [ "X$opta" = "X-a"  ]
+then
+	echo "-------------------------"
+	(eval $HDR; cat com)
+	echo "-------------------------"
+	(eval $HDR; cat com) |$FML/fml.pl $PWD $FML
+else
+	(eval $HDR; echo "# $*") | $FML/fml.pl $PWD $FML -llibftpmail.pl
+fi
+
+exit 0

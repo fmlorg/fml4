@@ -1,0 +1,20 @@
+Useful URLs for Win32 Perl (NT Perl)
+------------------------------------
+Evangelo's Frequently Asked Questions (FAQ):
+    http://www.endcontsw.com/people/evangelo/Perl_for_Win32_FAQ.html
+
+Win32 Perl for Windows NT:
+    http://www.activeware.com/    [also online web pages]
+    http://www.perl.com/CPAN/ports/win32/Perl5/  [faster download?]
+
+Searchable Archive for Perl-Win32-users Mailing List:
+    http://www.divinf.it/perl-win32/index.sht
+
+Database access via ODBC by Dave Roth's Win32::ODBC module:
+    Win32::ODBC Home Page with Online Documentation:
+        http://www.roth.net/odbc/
+
+    Download from:
+        http://www.perl.com/CPAN/authors/Dave_Roth/
+
+--

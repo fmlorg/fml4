@@ -41,7 +41,7 @@ while (1) {
 	$Process .= "-include_file $IncludeFile{$ml} ";
 	$Process .= "-pop_passwd $ML_DIR/etc/pop_passwd ";
 	$Process .= "-perl_prog $PerlProgram ";
-	$Process .= "--COMPAT_ARCH=$COMPAT_ARCH";
+	$Process .= "-arch $COMPAT_ARCH";
 
 	if ($debug) {
 	    print STDERR "Perl   \t$PerlProgram\n";

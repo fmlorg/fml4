@@ -1,0 +1,43 @@
+********************   ./etc/motd   ********************
+
+
+[ sbin/ccfml suggests ]
+
+Your OS has POSIX-like setuid mechanism.
+
+    please use :include: form in /etc/aliases
+    #sample is seen in ./etc/include.sample and ./etc/aliases.sample
+
+If it does not work well, you may have to use 
+
+    "root-setuid fml (C wrapper)"
+
+which is compiled with -DPOSIX. 
+THIS IS DANGER! Please pay attention a lot on this!
+see doc/op for the detail
+
+
+[ sbin/configure_fml2 reports ]
+
+	"config.ph"  is set to recommended config.ph
+	"sitedef.ph" has command settings (e.g. TAR, GZIP,..) 
+		to fit your environment
+
+	*** Anyway you have done the fundamental settings now! ***
+
+	I've create "sample" settings for your conveninece mentioned above
+
+		in ./samples
+
+		samples/sitedef.ph
+
+	Please use these samples to do the config
+
+[ FYI(For Your Information) ]
+
+	% make doc 
+
+to make html, nroff and texinfo files for fml documents
+
+ 
+		Enjoy Internetworking!

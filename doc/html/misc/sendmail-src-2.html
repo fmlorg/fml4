@@ -1,0 +1,37 @@
+<TITLE>
+FILTER PROGRAM 2
+</TITLE>
+
+see CF*/ml-support
+
+<PRE>
+#! /bin/sh
+#
+#	Tiny ML filter by motonori@wide.ad.jp on Mar.16,1994
+#
+# entries for /etc/aliases:
+#	hoge-ml:		"|/this/script"
+#	hoge-recipients:	:include: /member/list/file
+#	hoge-request:		administrator
+
+/bin/awk '\
+BEGIN {skip = 0; rplto = 0}\
+/^$/ {\
+	if (!rplto){\
+		print "Reply-To: hoge-ml"; rplto = 1;\
+	}\
+}\
+/^$/, NR == 0 {print; next;}\
+/^Reply-To:/ {print; rplto = 1; next;}\
+/^(X-Ml-Name|Received|Return-Path|Return-Receipt-To):/ {skip = 1; next;}\
+/^[ 	]/ && skip == 1 {next;}\
+{skip = 0};\
+/^From:/ {\
+	print "Precedence: list";\
+	print "X-Ml-Name: hoge-ml";\
+	print;\
+	next;\
+}\
+{print;}'\
+| /usr/lib/sendmail -oi -fhoge-request hoge-recipients
+

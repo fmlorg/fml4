@@ -1,0 +1,73 @@
+Received: by axion.phys.titech.ac.jp (8.6.11+2.4W/3.1W-yokyun2.1a); Thu, 20 Jul 1995 20:27:15 +0900
+Message-Id: <199507201127.UAA03359@axion.phys.titech.ac.jp>
+Date: Thu, 20 Jul 95 20:27:13  JST
+From: kise@ocean.ie.u-ryukyu.ac.jp
+Subject: ls-lR in ftpmail
+Sender: kise@ocean.ie.u-ryukyu.ac.jp
+To: fml-support@phys.titech.ac.jp (fml supporting ML)
+Reply-To: fml-support@phys.titech.ac.jp
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-2022-JP
+Posted: Thu, 20 Jul 1995 20:27:08 +0900
+X-ML-Name: fml-support
+X-Mail-Count: 00475
+X-MLServer:  fml 1.5.1.2b current #rmsc / libsmtp 1.5b / libMIME 1.0 
+Precedence: list
+Lines: 56
+
+喜瀬＠琉大です。
+
+X-Mail-Count: 00367 を参考にして(というより、ほぼそのまんまをconfig.ph
+に書き加えて)、コマンド・メイル中の"# ftpmail"でftpmailモードになる
+ようにしました。
+
+ftpmailで、"# ls"としたとき、オリジナルでは、ls-lR.gzかls-lR.Zを
+探して、それを(uuencodeして)送るようになっていますよね。これだと、
+uudecodeして、gunzipしないと、ls-lRの結果が得られず、不便だと思います。
+
+libftpmail.plをいじって、"# ls"のとき、
+・ls-lR.gzもls-lR.Zもなく、ls-lRが存在すれば、それを送る
+・ls-lRはplain textなので、そのまま送る
+ようにしてみました。
+
+(libftpmail 1.0です)
+================
+*** libftpmail.pl.original	Thu Jul 20 19:26:41 1995
+--- libftpmail.pl	Thu Jul 20 19:52:57 1995
+***************
+*** 82,92 ****
+  	      $f = "ls-lR.Z";
+  	      $s .= "[ls-lR.Z]";
+  	  }
+  	  else {
+! 	      &Log("FAIL $TOPDIR/ls-lR.gz or .Z");
+! 	      $_cf{'return'} .= "Fail to Send Back ls-lR.gz or .Z\n";
+  	      next GivenCommands;
+  	  }
+  
+  	  &SendBack($TOPDIR, $f, $s, $SLEEPTIME, $to);
+  	  $_cf{'return'} .= "Send Back ls-lR\n";
+--- 82,99 ----
+  	      $f = "ls-lR.Z";
+  	      $s .= "[ls-lR.Z]";
+  	  }
++ 	  elsif (-f "$TOPDIR/ls-lR") {
++ 	      &Log("ls-lR");
++ 	      $f = "ls-lR";
++ 	      $s .= "[ls-lR]";
++ 	  }
+  	  else {
+! 	      &Log("FAIL $TOPDIR/ls-lR, .gz or .Z");
+! 	      $_cf{'return'} .= "Fail to Send Back ls-lR, .gz or .Z\n";
+  	      next GivenCommands;
+  	  }
++ 	  
++ 	  -T "$TOPDIR/$f" && ($_cf{'SendBack', 'plaintext'} = 1);
+  
+  	  &SendBack($TOPDIR, $f, $s, $SLEEPTIME, $to);
+  	  $_cf{'return'} .= "Send Back ls-lR\n";
+================
+＃ できれば、ML本体のように、ishやlhaなんかを自由に選べたらいいんです
+＃ けど、そんなに欲しくもないです。:-)
+--
+喜瀬“冬猫”浩＠琉球大学

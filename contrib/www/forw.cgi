@@ -1,10 +1,14 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
-# Please obey GNU Public License(see ./COPYING)
-#
-
-# RCS
+# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1997 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+# 
 $rcsid   = q$Id$;
 $rcsid   =~ s/,v//;
 $rcsid   =~ s/Id: (.*)\s+Exp\s+\S+/$1/;
@@ -13,11 +17,11 @@ $rcsid   =~ s/Id: (.*)\s+Exp\s+\S+/$1/;
 
 ##### variables to customize #####
 
-$WWW_ADMIN = "www-admin\@sapporo.iij.ad.jp";
-$RCPT_ADDR = 'questionnaire\@sapporo.iij.ad.jp';
+$WWW_ADMIN = "www-admin\@fml.org";
+$RCPT_ADDR = 'questionnaire\@fml.org';
 $SENDMAIL  = 'sendmail';
 $ADD_PATH  = ":/usr/sbin:/usr/lib:/usr/local/bin:/usr/contrib/bin";
-$SUBJECT   = "questionnaire of www.sapporo.iij.ad.jp";
+$SUBJECT   = "questionnaire of www.fml.org";
 
 @SKIP_FIELDS = ('submit-p');
 @SKIP_ENV    = ('HTTP_ACCEPT', 'HTTP_ACCEPT_ENCODING',

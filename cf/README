@@ -1,0 +1,19 @@
+The set of "cf/" is a utility to help you to maintenance your customization of "fml".
+This directory is not necessary to install "fml".
+It must be useful in the same sense of customizing /etc/sendmail.cf.
+
+
+If you would like to convert your fml-Release-1-format "config.ph" to the new style,
+
+	% sbin/config -r config.ph > my-setting
+
+The file "my-setting" is a summary under the new style format.  
+It consists of entries different from the default settings (cf/MANIFEST). 
+
+Please check and edit "my-setting" for your preference. 
+To generate the config.ph 
+
+	% sbin/config my-setting > config.ph
+
+This config.ph includes all the entries of fml customizing variables
+irrespective of the demand.

@@ -1,0 +1,20 @@
+... configurations above are omitted ...
+
+
+# YOU CAN EDIT MANUALLY AFTER HERE.
+
+@MEMBER_LIST = ($MEMBER_LIST, "$FML_SUPPORT_ML_DIR/members");
+
+$FILE_TO_REGIST = $ACTIVE_LIST;
+
+$START_HOOK = q#
+	if ($Envelope{'mode:ctladdr'}  && 
+	    !&CheckMember($From_address, $FILE_TO_REGIST)) {
+		require 'libamctl.pl';
+		&AutoRegist(*Envelope);
+	}
+#;
+
+$ProcedureException{"bye", "ignore_list"} = $MEMBER_LIST;
+
+1;

@@ -1,222 +1,188 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
 <TITLE>
-Mailing List Server の設計と実装
-<br>
-The Design and Implementation of the fml current Mailing List Server
+The Design and Implementation of the fml Mailing List Server
 </TITLE>
-<-! -----------------------------------------------------------------------
+<LINK REV=MADE HREF="mailto:fukachan@sapporo.iij.ad.jp">
+</HEAD>
+<BODY BGCOLOR="#E6E6FA">
+
+<!-- =================================================================== -->
 <H1>
-Mailing List Server の設計と実装
-</H1>
-<H2>
+fml Mailing List Server の設計と実装
+<BR>
 The Design and Implementation of the fml current 
 2.x Mailing List Server
+</H1>
+<IMG SRC="p_list.gif" ALIGN=RIGHT ALT="FSP受賞作品">
+
+<A HREF="index-e.html">[English] is here.</A>
+
+<!-- =================================================================== -->
+<HR>
+<H2>
+fml 2.1 is released
 </H2>
 
-<-! -----------------------------------------------------------------------
-<HR>
-	fml 2.1 (BEING RELEASE-Prepared、リリース用に調整中)
-	<IMG SRC=p_list.gif>
+<H3>
+Information とドキュメントのHTML版
+</H3>
+
 <UL>
 
 	<LI>
-	<A HREF=INFO.html>
+	<A HREF="INFO.html">
 	最新の情報(INFO)
-	[fml@axion.phys.titech.ac.jpにメールを出すと返送されるもの]
 	</A>
+	[<A HREF="mailto:fml@ffs.fml.org">fml@ffs.fml.org</A>
+	にメールを出すと返送されるもの]
 
 	<LI>
-	<A HREF=README/>
+	<A HREF="README/">
 	README
 	</A>
 
 	<LI>
-	<A HREF=INSTALL/>
+	<A HREF="INSTALL/">
 	INSTALL ガイド
+	</A>
+	<BR>
+	<A HREF="INSTALL_on_NT4/">
+	INSTALL ガイド (for NT4)
+	</A>
+	<BR>
+	<A HREF=UPGRADE/>
+	FOR UPGRADE
 	</A>
 
 	<LI>
-	<A HREF=op/index.html>
-	Fml 2.1 の設計と実装 (Devil's Book for fml)
-	<br>
+	<A HREF="op/index.html">
+	Fml 2.1 の設計と実装 (Deamon Book for fml)
+	<BR>
 	The Design and Implementation of the Fml Mailing List Server 
-	<br>
+	<BR>
 	(fml-source-tree/doc/smm/)
 	</A>
 
 	<LI>
-	<A HREF=RELEASE_NOTES.html>
+	<A HREF="RELEASE_NOTES.html">
 	RELEASE_NOTES
 	</A>
 
 	<LI>
-	<A HREF=GPL.html>
+	<A HREF="GPL.html">
 	GNU PUBLIC LICENSE
 	</A>
+
 </UL>
 
-<HR>
-ソースへのリンク
+<H3>
+ソースコード
+</H3>
 <UL>
-
 	<LI>
-	<A HREF=fml-current.tar.gz>
-	fml 最新版ソースコード一式(fml-current.tar.gz)
+	<A HREF="fml-current.tar.gz">
+	fml 最新版ソースコード一式 (fml-current.tar.gz)
 	</A>
 
 	<LI>
-	<A HREF=ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/>
-	fml のcurrentソースコード (fml-current)
-	<br>
+	<A HREF="http://www.sapporo.iij.ad.jp/staff/fukachan/archive/">
+	fml ソース一式 archive
+	<BR>
+	(the same as on ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/)
+	</A>
+
+	<LI>
+	<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/">
+	fml ソース一式 on
+	<BR>
 	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 	</A>
-	<br>
-	lha, ish and mime_pls.* sendmail, bind, ntperl 
+
+	<BR>
+	lha, ish and mime_pls.* sendmail, bind, ntperl
 	等も一緒に置いてあります。御利用下さい
-	<br>
+	<BR>
 	あと、
-	<A HREF=ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/snapshot/>
+	<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/snapshot/">
 	snapshot
 	</A>
-	の下にはcurrentのソースが広がった形でおいてあります。
+	の下には current のソースが広がった形でおいてあります。
 
 	<LI>
-	<A HREF=http://www.sendmail.org/?
-	http://www.sendmail.org
+	その他のソフトウエア
+	<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/">
+	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/
+	</A>	
+
+</UL>
+
+<H3>
+links around mail systems
+</H3>
+<UL>
+	<LI>
+	<A HREF="http://www.sendmail.org/">
+	http://www.sendmail.org/
 	</A>
 
-	<A HREF=http://www.perl.com/CPAN/ports/>
+	<LI>
+	<A HREF="http://www.isc.org/bind.html">
+	http://www.isc.org/bind.html
+	</A>
+	<BR>
+	<A HREF="ftp://ftp.isc.org/">
+	ftp://ftp.isc.org/
+	</A>
+
+	<LI>
+	<A HREF="http://www.cert.org/">
+	http://www.cert.org/
+	</A>
+	<BR>
+	<A HREF="http://www.jpcert.or.jp/">
+	http://www.jpcert.or.jp/
+	</A>
+
+	<LI>
+	<A HREF="http://www.perl.org/">
+	http://www.perl.org/
+	</A>
+
+	<LI>
+	<A HREF="http://www.perl.com/CPAN/ports/">
 	http://www.perl.com/CPAN/ports/
 	</A>
 
-	<A HREF=http://www.perl.org/>
-	http://www.perl.org
+	<LI>
+	<A HREF="http://www.qmail.org/">
+	http://www.qmail.org/
+	</A>
+	<BR>
+	<A HREF="http://tehanu.hpcl.titech.ac.jp/">
+	qmail ドキュメントの日本語訳 (http://tehanu.hpcl.titech.ac.jp/)
 	</A>
 
-	<A HREF=ftp://ftp.iis.u-tokyo.ac.jp/pub6/winsock/papa.indstate.edu/WindowsNT/Daemons/>
-	ftp://ftp.iis.u-tokyo.ac.jp/pub6/winsock/papa.indstate.edu/WindowsNT/Daemons/
-	</A>
+	<LI>
+	<A HREF="nt.html">
+	links around Windows NT
+	</A>	
 
 </UL>
 
-<! ###################################################################
-<HR>
-<UL>
-	<LI>
-	mh interface で 
-	<PRE>
-	24 -09/01 "No.6 Fukachan" fml-su Re: compatibility of listserv? 
-	31  09/04 "No.6 Fukachan" fml-su Re: compatibility of listserv? 
-	</PRE>
-	みたいにするための scan.format の
-	<A HREF= mh.html>
-	設定例
-	</A>
-
-	<LI>
-	sed等で最低限の機能だけの簡単な実例集
-	<A HREF=filter.html>
-	最低限だと、こうかな?
-	</A>
-
-	<LI>
-	CF-3.?W に収録されているフィルタの例
-	<UL>
-		<LI>
-		<A HREF=sendmail-src-1.html>
-		その1
-		</A>
-
-		<LI>
-		<A HREF=sendmail-src-1.html>
-		その2
-		</A>
-	</UL>
-
-	<LI>
-	fj.mail より
-	<UL>
-		<LI>
-		<A HREF=fj.mail-38.html>
-		例1
-		</A>
-
-		<LI>
-		<A HREF=fj.mail-45.html>
-		例2
-		</A>
-
-		<LI>
-		NIFTYについて二、三
-		<A HREF=fj.mail-nifty.html>
-		Erros-to問題(解決したみたい？）
-		</A>
-
-		<LI>
-		<A HREF=nifty-info.html>
-		行数制限は?
-		</A>
-</UL>
-
-<! ###################################################################
+<!-- =================================================================== -->
 
 <HR>
-他へのリンク
+<ADDRESS>
 
-<P>WINDOWS 
-<A HREF=nt.html>
-NT
-</A>
-<br>
-
-
-<br>
-<A HREF=http://wildside.kwnet.on.ca/WinSmtp.html/>
-http://wildside.kwnet.on.ca/WinSmtp.html/
-</A>
-<br>
-
-<A HREF=http://metrics.com/>
-http://metrics.com/
-</A>
-<br>
-
-<P>NTPERL 4.036
-
-
-<P>NTPERL 5.001
-<br>
-Binary
-<br>
-<A HREF=ftp://ntperl.hip.com/ntperl/ntperl5.001.beta.2.i86.zip>
-        ftp://ntperl.hip.com/ntperl/ntperl5.001.beta.2.i86.zip 
-</A>
-<br>
-    Source Version 
-<br>
-<A HREF=ftp://ntperl.hip.com/ntperl/ntperl5.001.beta.2.src.zip>
-        ftp://ntperl.hip.com/ntperl/ntperl5.001.beta.2.src.zip 
-</A> 
-
-
-<A HREF=ftp://ftp.hipecs.hokudai.ac.jp/pub/MSDOS/network/winsock/apps/Winbiff>
-Winbiff
+<A HREF="mailto:fukachan@sapporo.iij.ad.jp">
+[Author] fukachan@sapporo.iij.ad.jp
 </A>
 
-<A HREF=ftp://ftp.ipc.chiba-u.ac.jp/ftp.kyoto-u.ac.jp/.u3/doc/MscSummary-190-240.txt.Z>
-MscSummary-190-240.txt.Z
+<A HREF="http://www.sapporo.iij.ad.jp/staff/fukachan/">
+(http://www.sapporo.iij.ad.jp/staff/fukachan/)
 </A>
-<br>
-
-<A HREF=ftp://ftp.lab.kdd.co.jp/usenet/fj.sources/1995/jan/mime_pls-2.00alpha.tar.gz>
-ftp://ftp.lab.kdd.co.jp/usenet/fj.sources/1995/jan/mime_pls-2.00alpha.tar.gz
-</A>
-<br>
-
-<H2>
-<br><A HREF=http://www.sapporo.iij.ad.jp/staff/fukachan/>
-http://www.sapporo.iij.ad.jp/staff/fukachan/
-<br>
-</A>
-<A HREF=mailto:fukachan@sapporo.iij.ad.jp>
-fukachan@sapporo.iij.ad.jp
-</A>
+</ADDRESS>
+</BODY>
+</HTML>

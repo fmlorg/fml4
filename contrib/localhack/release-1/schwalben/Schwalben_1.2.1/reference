@@ -1,0 +1,102 @@
+From: miura@cs.titech.ac.jp
+Subject: available Schwalben mailing-list
+Date: Wed, 18 Aug 93 09:59:45 JST
+
+三浦＠TIT Schwalben Chor ＯＢ.東工大Ｍ１です。
+
+  この度、東京工業大学 Schwalben Chor E-mail Address List の仕組みを
+以下の *３点* について変更させていただきます。
+  多少なりとも、便利にお使いいただけるようになるかと思います。今後とも
+引続きよろしくお願い致します。
+  ご不明の点などがございましたら、お手数ですがschwalben-request@cs.titech.ac.jp
+まで御一報下さい。
+
+(1) mailing-list 化しました。
+
+    従来、シュヴァルベンの中のあるまとまったグループへまとめてメールを出す
+  ことは、若干の手間がかかりました。
+    今回、mailing-listの形にしましたので、以下の宛先に送れば、シュヴァルベン
+  全体や特定のパート全体などへ簡単に送ることができるようになりました。
+    宛先欄にaddressを並べたり、mail-aliasを個人で持つ必要もありません。
+
+   宛先                                送られる人達
+   -------------------------------------------------------------------
+   schwalben-all@cs.titech.ac.jp       全員
+   schwalben-top@cs.titech.ac.jp       Top Tenorの人
+   schwalben-sec@cs.titech.ac.jp       Second Tenorの人
+   schwalben-bari@cs.titech.ac.jp      Baritoneの人
+   schwalben-bass@cs.titech.ac.jp      Bassの人
+   schwalben-student@cs.titech.ac.jp   学生の人(学部・院生・他大学を問わず)
+   schwalben-19??@cs.titech.ac.jp      19??年入学の人
+                                        (??は該当する数字に置き換えて下さい)
+   schwalben-request@cs.titech.ac.jp   登録希望・変更・訂正等の連絡
+                                       (mailing-listを管理する人(当面は、三浦))
+
+    このことにより、私個人がメールを送ることが容易になるだけでなく、皆様
+  一人一人から、より多くのメールの交換が行なわれることを期待しております。
+  近況報告、現在自分が属している合唱団の宣伝など、お気軽にご活用下さい。
+
+    (注)現在、schwalben-19??@cs.titech.ac.jp は、該当入学年度の方が5名程度以上
+        いらっしゃる年度のみ、登録しております。今後、検討していく予定です。
+        現在の登録年度: 1986, 1987, 1988, 1989, 1990
+
+(2) 情報提供専用addressの設置について
+
+    下記のアドレス宛にメールを送って頂けば、随時、最新情報を返送致します。
+  当面は手作業で返送致しますが、近い将来、自動化する予定です。
+
+   宛先                              提供する情報
+   -------------------------------------------------------------------
+   schwalben-info@cs.titech.ac.jp    Schwalbenに関する最新情報
+   schwalben-list@cs.titech.ac.jp    Schwalben E-mail Address List 最新版
+
+(3) E-mail Address List のフォーマット変更について
+
+    従来、E-mail Address List の配布に当たっては、近況報告なども含めた
+  フォーマットのlist全体を再送する形をとって参りました。しかし、実際の
+  利用上の便宜、長文をメールすることの問題などを考慮し、今後は以下のような
+  形で、list の配布を行ないます。
+
+    (i)  定期的に皆様にお送りするもの
+
+           (a) list への新規追加の情報
+               従来のような近況報告なども含めたフォーマット
+           (b) list の変更・訂正
+               変更点・訂正点のみ
+
+   (ii)  請求に応じてお送りするもの
+
+           新規登録者および希望者(schwalben-list@cs.titech.ac.jp に請求した方)
+         のみにlist全体をお送りします。
+           なお、当方で管理するlistは次の２種類のフォーマットがあります。
+
+           (a) 従来のような近況報告なども含めた複数行フォーマットのもの
+           (b) 以下のような一行フォーマットのもの
+               (例) miura@cs.titecch.ac.jp,Nobuyuki Miura,三浦 信幸,1989,Bass
+
+           (b)の部分のみを切り出していただくことにより、各種データベースソフト
+         への登録やコマンドラインからの検索(grep,awkなど)などがしやすくなるかと
+         思います。
+           例外的に、今回のlistの配布では、(b)のフォーマットのものを全員に
+         配布致します。
+
+(*) mailing-list について
+
+     御承知の方も多いかと思いますが、念のためご説明させていただきます。
+     internetwork 上の net news やパソコン通信などのBBS(電子掲示板)などは
+   不特定多数を対象とした情報交換システムです。これに対し、mailing-list は、
+   特定の人(登録者)のみを対象としたシステムです。
+     news や BBS での「投稿」に対応するのが、mailing-list の宛先にメールを送る
+   ことです。mailing-list の宛先に送れば、登録メンバー全員に同一内容を知らせる
+   ことができます。
+     現在、internetwork上でのmailing-list は、さまざまな人達のボランティアの
+   力によって運営されております。万一、何らかの不都合などが生じた場合にもこの
+   ことをご理解いただき、ご利用下さいますようお願い申し上げます。
+
+     今回のmailing-list化に当たっては、友石 正彦さん(1985年入学)に多大な御協力
+   を頂きました。この場を借りてお礼を申し上げます。
+
+>> 三浦  信幸 東京工業大学 修士課程１年 電気・電子工学専攻 知識システム講座 <<
+>> E-mail: miura@cs.titech.ac.jp               佐伯研究室 (南3号館 809号室) <<
+>>         ddh60111@pcvan.or.jp  nbb01571@niftyserve.or.jp                  <<
+>> Phone : miura@rin.cs.titech.ac.jp    Tel:03-3726-1111 Ext.2192           <<

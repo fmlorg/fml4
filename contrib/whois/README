@@ -1,0 +1,210 @@
+開発コード：リンちゃん	Rin.pl	
+
+Rin.pl	は whois と同じ挙動をするが日本語にもマッチするようにする。
+というextensionをもった本物の whois server です。
+使い方は普通のＢＳＤのものと同じです。
+
+
+インストール：
+
+例えば 
+/var/local/whois/Rin.pl
+
+という場所におくとして、/etc/inetd.conf にこんな感じに書く
+
+--- /etc/inetd.conf ---
+
+whois	stream	tcp	nowait	fukachan /var/local/whois/Rin.pl Rin.pl
+------------------------------------
+＃実行permission等は適当に出しておく。
+
+
+カスタマイズ：
+
+whois serverが引くデータベースの名前は
+
+$FILE      = "/var/local/whois/whoisdb";
+
+ログファイル
+
+$LOGFILE   = "/var/local/whois/log";
+
+ヘルプファイル
+
+$HELP_FILE = "/var/local/whois/help";
+
+
+なお、submit.pl にデータベース名を適当に書いて
+
+$FILE      = "/var/local/whois/whoisdb";
+
+whois server に誰でも登録できるようにすることができます。
+
+fml.pl とかと独立に単独で submit.pl は動きます。fml.pl と同様にしかけ
+てください。
+
+-------------- 解説 -------------- 
+
+
+% whois -h axion.phys.titech.ac.jp argument
+	Ascii か EUC ならＯＫです
+	引数は
+	* なんでもマッチ
+	. 任意の一文字
+	! は実装されてません。ごめんなさい(_o_)
+
+もしＩＰでないなら、メールで間接的にアクセスできます
+
+	echo "whois argument" | mail -v whois@phys.titech.ac.jp 
+
+Special	Keywords(大文字子文字を問わず):
+	"mailing-list" or "mailinglists"
+	サーバにのってるＭＬ一覧の情報
+
+	"when"
+	サーバにのってるＴＶ番組の情報（特に今日の遅れは何分）
+
+	"all"
+	全部ＯＵＴＰＵＴ
+
+どうやってあなたの情報をサーバにのせるか？
+このアドレスへ載せたい情報を送るだけです
+
+	whois-ctl@phys.titech.ac.jp
+		or
+	whois-submit@phys.titech.ac.jp
+
+キャンセルはできませんが、次に書いたメールが前の情報を上書きしていきま
+すの。
+＃実質的にキャンセルしたいなら、中身のないメールを送る？
+
+特別なキーワードの登録には
+
+X-Mailinglist		mailinglist
+
+X-When			When
+
+という一文を本文のどっかに入れておいて下さいね
+例：
+---------
+fukachan@phys.titech.ac.jp
+
+X-Mailinglist
+
+うち（phys.titech.ac.jp）のＭＬ’ｓ 紹介：
+	ママは小学四年生、セーラームーンの時代を記念して
+	裏 fj.rec.animation ＭＬ
+
+---------
+
+Example:
+% whois -h axion.phys.titech.ac.jp fukachan
+% whois -h axion.phys.titech.ac.jp fukachan@phys.titech.ac.jp
+% whois -h axion.phys.titech.ac.jp 西原久美子
+% whois -h axion.phys.titech.ac.jp mailinglist
+% whois -h axion.phys.titech.ac.jp when
+
+データベース whoisdb はこんな感じにかきます。
+^. までが一つのエントリーです。
+------------------------------------------------
+fukachan@phys.titech.ac.jp	深町賢一 
+.
+
+Elena@phys.titech.ac.jp		Elena Lolabrigita
+うそ…
+そんなぁ〜
+.
+
+fukachan@phys.titech.ac.jp
+
+深町賢一	東京工業大学理学部物理Ｄ２
+専攻：理論物理学、非線形物理、カオス、計算物理学のはず… -o-;;
+
+Keyword: 1/f fluctuaion, RFC822, Distributed Infomation Service
+
+好きな声優：
+西原久美子が好きですぅ(^^;)
+信沢三恵子
+荘真由美
+白鳥由里
+矢島晶子
+とか…健気声な人が好きですぅ
+
+	うじゃ…
+.
+
+Elena@phys.titech.ac.jp
+
+エレナ ロロブリジータ Elena Lolabrigita
+深ちゃんの秘書 アドレス、コマンド、プログラム総称
+
+「うそ…」
+「そんなぁ〜」
+
+西原久美子:
+エレナ ロロブリジータ     あしたへフリーキック
+栗原ルミ                  あしたへフリーキック
+小谷ミチ                  あしたへフリーキック
+ウレＰ                    ＮＧ騎士ラムネ＆４０
+六道冥子                  ＧＳ美神
+パパイヤ姫                サラダ十勇士トマトマン
+泉  芹香                  絶愛 -1989-
+キャバレーの女            その気にさせてよ ｍｙマイ舞
+公園の女                  その気にさせてよ ｍｙマイ舞
+けろりーん                大好き！ハローキティ
+エンジェラ                ドラゴンボール Z
+ピー                      とんがり帽子のメモル
+ユミ                      トンデケマン
+雪之嬢                    は〜いステップジュン
+レア                      バビル２世 ('92)
+リン ラッセル             ハロー！レディリン
+ルーミィ                  フォーチュン・クエスト
+ミモラ                    まじかるタルるートくん
+ポロン                    魔法使いサリー ('89)
+ヴィヴィアン              モルダイバー
+ファーレ ルウ             緑野原迷宮
+.
+
+fukachan@phys.titech.ac.jp
+
+X-Mailinglist
+
+うち（phys.titech.ac.jp）のＭＬ’ｓ 紹介：
+	ママは小学四年生、セーラームーンの時代を記念して
+	裏 fj.rec.animation ＭＬ
+
+	超 くせになりそう ＭＬ
+
+	声優玩具箱 ＭＬ
+	声優辞書デバッグ用ＭＬ
+
+	ママは小学四年生, the Sequel ＭＬ
+	mama4@phys.titech.ac.jp（自動登録）
+
+	ママは小学四年生 ＭＬ（国際版）〔公用語は英語〕
+	mama4-world@phys.titech.ac.jp（自動登録）
+
+	外国ＴＶシリーズ ＭＬ
+	enterprise@phys.titech.ac.jp（自動登録）
+
+	水色時代ＭＬ（やぶうち優ＭＬ）
+	mizuiro@phys.titech.ac.jp（自動登録）
+
+	fj.sci.physics ＦＡＱ作成 Editors ＭＬ
+	phys-faq@phys.titech.ac.jp（誰でも出せる）
+
+	fml-bugs@phys.titech.ac.jp
+	fml-support@phys.titech.ac.jp
+	ｆｍｌ ＭＬサーバー バグレポート等ＭＬ（自動登録）
+
+	fml-current@phys.titech.ac.jp
+	fml-current ソース自動送り返し アドレス	
+
+	萌ちゃん ＭＬ
+	KISS Data ＭＬ
+
+	Ｙｏｕｎｇ Ｐｈｙｓ − ＭＬ バックアップ
+
+	うじゃうじゃ…
+.
+------------------------------------------------

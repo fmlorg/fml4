@@ -1,0 +1,51 @@
+1.2.2 currnet は fj.sources より 1.11alpha を導入しました
+
+-------------------
+1.2.1 current 6/14 から
+
+mime_pls 1.10 version をいただいたので fj よりひと足先にパッケージに導
+入します。くわしくは README をごらんください（mime_pls.doc）
+
+-------------------
+1.2.1 current 6/13 まで
+
+以下の記事を使用しました。
+なおこのdirectoryにあるものはmime_pls 1.00aにヴァージョンアップされた
+ものです。(private communication)
+
+この３つが mime_pls 1.00a です
+mime_pls.doc   mimer.pl       mimew.pl       
+
+Acknowledgement (1.2.1)
+
+I thank Mr. Ikuta (c1977@crcsn82.mdc.crc.co.jp) for private
+communication on mime_pls 1.00a.
+
+			1994.3.24	fukachan@phys.titech.ac.jp
+
+---------------------------------------------------------------
+From: c1977@crcsn82.mdc.crc.co.jp (Noboru Ikuta)
+Newsgroups: fj.lang.perl,fj.sources
+Subject: mimer.pl & mimew.pl Ver.1.00 -- MIME header encode/decode perl library
+Message-ID: <C1977.94Jan24130052@crcsn82.mdc.crc.co.jp>
+Date: 24 Jan 94 04:00:52 GMT
+
+いくた＠ＣＲＣ総研と申します。News は初投稿です。
+
+メッセージヘッダフィールド中の日本語文字列を MIME encode/decode する
+ための perl library です。perl のスクリプト中で、require することに
+より、&mimeencode と &mimedecode の２つの関数が使えるようになります。
+
+mimer.pl & mimew.pl は以前いくつかのMLに投稿した rwmime をライブラリ
+化したものです。アプリケーションとしての rwmime は fj に投稿するべく
+改良作業中ですが、先にライブラリ版を投稿することにします。
+ライブラリファイルを２つに分けたのは、PC 等の小メモリマシン上でも部
+分的に利用できるようにするためです。
+
+大日本印刷の黒江さんから、MH-p(scan.pl&repl.pl)に mimer.pl を同梱し
+て投稿したという連絡をいただいています。この記事に含まれる mimer.pl
+は黒江さんの記事に含まれるものと機能的には同一のものですが、ドキュメ
+ント部分を若干変更しています。再配布される場合はできるだけこの記事の
+ものを優先していただきますようお願いします。
+
+……以下ソースコード……

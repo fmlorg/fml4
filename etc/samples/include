@@ -1,0 +1,12 @@
+# Standard 
+# 標準的運用
+#"|$EXECDIR/fml.pl $MLDIR"
+#  or when using without config.ph
+#"|$EXECDIR/fml.pl $MLDIR --mladdr=$MAIL_LIST $OPTIONS" 
+
+"|$EXECDIR/fml.pl $MLDIR --mladdr=$MAIL_LIST $OPTIONS "
+
+# --fml オプションは listname-admin 型の管理者アドレス
+# 好みとしては listname-admin listname-request は両方欲しいところ
+#"|$EXECDIR/fml.pl $MLDIR --mladdr=$MAIL_LIST $OPTIONS --fml"
+

@@ -1,0 +1,151 @@
+<TITLE>
+MH scan.format example
+</TITLE>
+
+
+<PRE>
+%; NOTE: This file is supplied for reference only; it shows the default
+%;	format string (for non-UK sites) which was compiled into "scan".
+%;	See the source file "h/scansbr.h" for details.
+%;&lt
+%4(msg)%<(cur)+%| %>%<{replied}-%?{encrypted}E%| %>\
+%02(mon{date})/%02(mday{date})%<{date} %|*%>\
+%<(mymbox{from})%<{to}To:%12(friendly{to})%>%>%<(zero)%15(friendly{from})%> \
+%; begining of extention
+%<{X-Ml-Name}%6{X-Ml-Name}\
+%?{X-Ml-Nickname}%6{X-Ml-Nickname}\
+%?{Newsgroups}%6{Newsgroups}\
+%?{X-Mail-Name}%6{X-Mail-Name}\
+%?{X-Mailing-List-Name}%6{X-Mailing-List-Name}\
+%?{X-Mailinglist-Name}%6{X-Mailinglist-Name}\
+%?{X-Distribute}386bsd\
+%?{X-Phys-Mail-Count}cpcmp \
+%?{To}\
+%<(match usagi@)USAGI \
+%?(match NetBSD.ORG)NetBSD\
+%?(match admin)#A %3{To}\
+%?{Cc}\
+%<(match usagi@)USAGI \
+%?(match @NetBSD.ORG)NetBSD\
+%?(match admin)#A %3{Cc}\
+%|%6{}\
+%>\
+%>\
+%<(null)%6{}%>\
+%|%6{}\
+%>\
+ \
+%; ends of extention
+%{subject}%<{body}<<%{body}>>%>
+%; if X-mail-count ...
+%;           X-mail-count
+%; elsif to
+%;       if to is matched
+%;          to-field
+%;       else cc
+%;          cc-field
+%;       fi
+%; else
+%;       "     "
+%; fi
+%;
+%; <%<{Cc}%<(putstr {Cc})%>%>>\
+
+
+</PRE>
+<PRE>
+<br>
+%; NOTE: This file is supplied for reference only; it shows the default
+<br>
+%;	format string (for non-UK sites) which was compiled into "scan".
+<br>
+%;	See the source file "h/scansbr.h" for details.
+<br>
+%4(msg)%&lt(cur)+%| %&gt%&lt{replied}-%?{encrypted}E%| %&gt\
+<br>
+%02(mon{date})/%02(mday{date})%&lt{date} %|*%&gt\
+<br>
+%&lt(mymbox{from})%&lt{to}To:%12(friendly{to})%&gt%&gt%&lt(zero)%15(friendly{from})%&gt \
+<br>
+%; begining of extention
+<br>
+%&lt{X-Ml-Name}%6{X-Ml-Name}\
+<br>
+%?{X-Ml-Nickname}%6{X-Ml-Nickname}\
+<br>
+%?{Newsgroups}%6{Newsgroups}\
+<br>
+%?{X-Mail-Name}%6{X-Mail-Name}\
+<br>
+%?{X-Mailing-List-Name}%6{X-Mailing-List-Name}\
+<br>
+%?{X-Mailinglist-Name}%6{X-Mailinglist-Name}\
+<br>
+%?{X-Distribute}386bsd\
+<br>
+%?{X-Phys-Mail-Count}cpcmp \
+<br>
+%?{To}\
+<br>
+%&lt(match usagi@)USAGI \
+<br>
+%?(match NetBSD.ORG)NetBSD\
+<br>
+%?(match admin)#A %3{To}\
+<br>
+%?{Cc}\
+<br>
+%&lt(match usagi@)USAGI \
+<br>
+%?(match @NetBSD.ORG)NetBSD\
+<br>
+%?(match admin)#A %3{Cc}\
+<br>
+%|%6{}\
+<br>
+%&gt\
+<br>
+%&gt\
+<br>
+%&lt(null)%6{}%&gt\
+<br>
+%|%6{}\
+<br>
+%&gt\
+<br>
+ \
+<br>
+%; ends of extention
+<br>
+%{subject}%&lt{body}&lt&lt%{body}&gt&gt%&gt
+<br>
+%; if X-mail-count ...
+<br>
+%;           X-mail-count
+<br>
+%; elsif to
+<br>
+%;       if to is matched
+<br>
+%;          to-field
+<br>
+%;       else cc
+<br>
+%;          cc-field
+<br>
+%;       fi
+<br>
+%; else
+<br>
+%;       "     "
+<br>
+%; fi
+<br>
+%;
+<br>
+%; &lt%&lt{Cc}%&lt(putstr {Cc})%&gt%&gt&gt\
+<br>
+
+<br>
+
+<br>

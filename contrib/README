@@ -1,11 +1,4 @@
-1.6 では
+contrib はおまけです。contrib 以下のものがすべて FML 2.1 Release と協
+調して動くかどうかは無保証です。
 
-	MatomeOkuri2
-	MatomeOkuri
-	Sendmail
-	libhml
-	Master
-
-は削除しました。もう使わないでしょ…
-あとの詳細は doc/op (Fml Operations Guide)をみてください
-
+当然パッケージ標準というより hack して遊びたい人向けなのは確かでしょうね。

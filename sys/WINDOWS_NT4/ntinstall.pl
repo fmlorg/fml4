@@ -11,11 +11,17 @@
 #
 # $Id$
 
+# flush
+$| = 1;
+
 chop($PWD = `cd`);
 $PWD =~ s#\\#/#g;
 
 @DIRS = ("bin", "sbin", "libexec", "cf", "etc", "doc", "var\\html");
-	 
+
+#
+# print STDERR "Expireing backup failes ... \n";
+# &Expire;
 
 $EXEC_DIR   = shift @ARGV;
 $EXEC_DIR   =~ s#/#\\#g;
@@ -85,6 +91,7 @@ sub RecursiveCopy
 
 	$dir =~ s#/#\\#g;
 	print STDERR "copy $dir\\* $EXEC_DIR\\$target\n";
+	system "del $dir\\*.bak";
 	system "copy $dir\\* $EXEC_DIR\\$target";
     }
 }
@@ -150,5 +157,26 @@ sub Warn
 {
     print STDERR "Warn: @_\n";
 }
+
+
+sub Expire
+{
+    require "find.pl";
+
+    # Traverse desired filesystems
+    &find('.');
+
+    print STDERR "\nDone.\n\n";
+}
+
+
+sub wanted 
+{
+    /^.*\.(b0|bak)$/ && do {
+	print("$name ");
+	unlink $name;
+    };
+}
+
 
 1;

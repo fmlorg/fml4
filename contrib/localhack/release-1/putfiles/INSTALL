@@ -1,0 +1,33 @@
+インストール：
+
+config.ph に
+
+    $COMMAND_HOOK =q#
+    if (/^put$/io){
+	$PutFileName = $Fld[2];
+	if(&InSecureP($PutFileName)){ 
+	    &Sendmail($to, "Insecure:put failed. $ML_FN");
+	    last GivenCommands;
+	}
+	
+	local($mail_file) = "$SPOOL_DIR/$PutFileName";
+	if (-f $mail_file ) {
+	    &Sendmail($to,"(put)FileName $PutFileName already exist. $ML_FN");
+	    $status = "Fail";
+	}else {
+	    open(PUTFILE,"> $mail_file")|| (&Logging("$!"), return $NULL);
+	    print PUTFILE $MailBody;
+	    close PUTFILE;    
+	    open(SUMMARY, ">> $SUMMARY_FILE") || (&Logging("$!"), return);
+	    printf SUMMARY "%s [%s:%s] %s\n", 
+	    $Now, $PutFileName, $User, $Summary_Subject;
+	    close(SUMMARY);
+	    $status = "Success";
+	}
+
+	&Logging("Put \"$PutFileName\", ($From_address), status is $status");
+	last GivenCommands;
+    }
+#;       
+
+とかく。

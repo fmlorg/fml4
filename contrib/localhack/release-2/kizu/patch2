@@ -1,0 +1,40 @@
+*** 1.1	1997/04/23 07:11:07
+--- config.ph	1997/04/25 03:09:51
+***************
+*** 282,288 ****
+  # DEFAULT: @DenyProcedure = ('library');
+  # So you cannot use the 'library' command;
+  # Please set @DenyProcedure = ('');
+! 
+  $LIBRARY_DIR                   = "var/library";
+  $LIBRARY_ARCHIVE_DIR           = "archive";
+  
+--- 283,291 ----
+  # DEFAULT: @DenyProcedure = ('library');
+  # So you cannot use the 'library' command;
+  # Please set @DenyProcedure = ('');
+! @DenyProcedure                 = ('chaddr', 'msg', 'whois', 'who', 'iam');
+! %LocalProcedure                = ('list', 'ProcSummary',
+! 				  'summary', 'ProcMySummary');
+  $LIBRARY_DIR                   = "var/library";
+  $LIBRARY_ARCHIVE_DIR           = "archive";
+  
+***************
+*** 358,364 ****
+  
+  
+  
+! # $START_HOOK                  = "";
+  # $DISTRIBUTE_START_HOOK       = "";
+  # $SMTP_OPEN_HOOK              = "";
+  # $HEADER_ADD_HOOK             = "";
+--- 361,369 ----
+  
+  
+  
+! # $START_HOOK                  = "q%
+! 	&use('kizu');
+! %";
+  # $DISTRIBUTE_START_HOOK       = "";
+  # $SMTP_OPEN_HOOK              = "";
+  # $HEADER_ADD_HOOK             = "";

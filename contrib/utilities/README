@@ -1,0 +1,25 @@
+Contributions(Thanks to yamane@ngi.co.jp)
+
+Rmail2fml.pl	RMAILファイルから fmlへのメッセージの取込みプログラム
+		S.Yamane (yamane@ngi.co.jp)
+
+		手動で、もっとも単純な aliasesの設定だけで MLを運用し
+		ていて、その後 fmlを導入したような場合、以前のメイルを
+		spoolにおく単純な形式へのコンバーター
+
+
+packmbox.pl	1,2,3,...のように並んでいるファイルをmbox形式のファイ
+		ルにするスクリプト
+
+		つまり、mget してきたファイルたちをｍｈでない人はmbox
+		にした後で好きなインターフェイスをつかえばよいように
+		(ukai@hplj.hpl.hp.com)
+
+scan.format fml用に あらかじめ X-ML-Name とかも出す見本（ｍｈ）
+		(fukachan@phys.titech.ac.jp)	
+
+my-mh-post.pl	postproc をいれかえて X-Stardate: をつける
+		(ukai@hplj.hpl.hp.com)
+
+stardate.pl 	X-Stardate: をつける mh-e 
+		(fukachan@phys.titech.ac.jp)	

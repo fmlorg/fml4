@@ -1,0 +1,10 @@
+#!/bin/sh
+
+echo -n "Command: " 1>&2
+echo "# $*" 1>&2
+echo "####################"
+(cat test_mime; /usr/5bin/echo "# $*"; cat test)
+echo "####################"
+
+(cat test_mime; /usr/5bin/echo "# $*"; cat test) | $HOME/work/spool/EXP/fml.pl $PWD $HOME/work/spool/EXP
+

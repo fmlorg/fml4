@@ -1,0 +1,101 @@
+% whois -h axion.phys.titech.ac.jp argument
+	Ascii and EUC Japanese codes as argument is O.K.
+	Argument may contain 
+	* matches everything.
+	. arbitrary one character
+	! is not implemented. Sorry(_o_)
+
+If you are not IP-unreachable to phys.titech.ac.jp, the following
+procedure is the same as
+
+	echo "whois argument" | mail -v whois@phys.titech.ac.jp 
+
+
+Special	Keywords(case insensitive):
+	"mailing-list" or "mailinglists"
+	index of mailing-list submittd to this server
+
+	"when"
+	index of program deley information submittd to this server	
+
+	"all"
+	show all the information submitted to this server
+
+To register information about special keywords, put the following
+keyword somewhere in your body. # See the example below 
+
+X-Mailinglist		mailinglist
+
+X-When			When
+
+
+How to submit your information to this server:
+	Only send your infomation to
+		whois-ctl@phys.titech.ac.jp
+			or
+		whois-submit@phys.titech.ac.jp
+
+Cancel is not implemented but your another mail overwrite your
+information.
+
+
+			日本語解説：
+
+% whois -h axion.phys.titech.ac.jp argument
+	Ascii か EUC ならＯＫです
+	引数は
+	* なんでもマッチ
+	. 任意の一文字
+	! は実装されてません。ごめんなさい(_o_)
+
+もしＩＰでないなら、メールで間接的にアクセスできます
+
+	echo "whois argument" | mail -v whois@phys.titech.ac.jp 
+
+Special	Keywords(大文字子文字を問わず):
+	"mailing-list" or "mailinglists"
+	サーバにのってるＭＬ一覧の情報
+
+	"when"
+	サーバにのってるＴＶ番組の情報（特に今日の遅れは何分）
+
+	"all"
+	全部ＯＵＴＰＵＴ
+
+どうやってあなたの情報をサーバにのせるか？
+このアドレスへ載せたい情報を送るだけです
+
+	whois-ctl@phys.titech.ac.jp
+		or
+	whois-submit@phys.titech.ac.jp
+
+キャンセルはできませんが、次に書いたメールが前の情報を上書きしていきま
+すの。
+＃実質的にキャンセルしたいなら、中身のないメールを送る？
+
+特別なキーワードの登録には
+
+X-Mailinglist		mailinglist
+
+X-When			When
+
+という一文を本文のどっかに入れておいて下さいね
+例：
+---------
+fukachan@phys.titech.ac.jp
+
+X-Mailinglist
+
+うち（phys.titech.ac.jp）のＭＬ’ｓ 紹介：
+	ママは小学四年生、セーラームーンの時代を記念して
+	裏 fj.rec.animation ＭＬ
+
+---------
+
+Example:
+% whois -h axion.phys.titech.ac.jp fukachan
+% whois -h axion.phys.titech.ac.jp fukachan@phys.titech.ac.jp
+% whois -h axion.phys.titech.ac.jp 西原久美子
+% whois -h axion.phys.titech.ac.jp mailinglist
+% whois -h axion.phys.titech.ac.jp when
+

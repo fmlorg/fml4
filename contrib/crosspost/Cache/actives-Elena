@@ -1,0 +1,16 @@
+#.FML HEADER
+# NEW FORMAT FOR FURTHER EXTENTION
+# e.g. fukachan@phys r=relayserver m=3u s=skip 
+# r= relayserver
+# m= matomeokuri parameter is time and option
+# s= skip. can post from this address but not delivered here.
+#
+# the same obsolete format is compatible with new format and as follows:
+# e.g. fukachan@phys relayserver matome 3u
+#.endFML HEADER
+##BYE fukachan 
+fukachan@beth.phys.titech.ac.jp 
+fukachan@paffy.psy.titech.ac.jp 
+##BYE fukachan@phys.titech.ac.jp 
+pollyanna@phys.titech.ac.jp  m=1d 
+##BYE fukachan@phys.titech.ac.jp  m=3 

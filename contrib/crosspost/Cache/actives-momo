@@ -1,0 +1,35 @@
+#.FML HEADER
+# NEW FORMAT FOR FURTHER EXTENTION
+# e.g. fukachan@phys r=relayserver m=3u s=skip 
+# r= relayserver
+# m= matomeokuri parameter is time and option
+# s= skip. can post from this address but not delivered here.
+#
+# the same obsolete format is compatible with new format and as follows:
+# e.g. fukachan@phys relayserver matome 3u
+#.endFML HEADER
+fukachan@axion.phys.titech.ac.jp 
+Elena@phys.titech.ac.jp  m=12u 
+harasawa@is.titech.ac.jp 
+koyama@kutsuda.kuis.kyoto-u.ac.jp 
+s9121016@ws.ipc.fit.ac.jp  r=axion.phys.titech.ac.jp 
+masuda@cadgi.tosmec.toshiba.co.jp 
+##BYE huge@eiehost.gee.kyoto-u.ac.jp 
+t-sugiya@csis.oita-u.ac.jp 
+daikouji@tuhep.phys.tohoku.ac.jp 
+halo@cim.pu-toyama.ac.jp 
+s940334@ipe.tsukuba.ac.jp 
+hyodo@youko-so.youkoso.wincnet.or.jp  s=skip 
+hyodo@youkoso.wincnet.or.jp 
+wakita@acs.dnp.co.jp 
+ZJ2Y-SKRB@j.asahi-net.or.jp  m=18u 
+g440729@komaba.c.u-tokyo.ac.jp   
+saga@crl.hitachi.co.jp 
+nakamura@soflab.elc.oit.ac.jp 
+nakamura@soflab.elc.oit.ac.jp  m=3 
+fukachan 
+matumoto@po.iijnet.or.jp 
+##BYE natumi@hipecs.hokudai.ac.jp 
+#	bagman@cc.win.or.jp
+CXP05474@niftyserve.or.jp  m=12u 
+suzuki@cis.ebina.fujixerox.co.jp

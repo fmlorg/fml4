@@ -1,0 +1,85 @@
+<TITLE>
+例２
+</TITLE>
+<PRE>
+
+Path: phys.titech!is.titech!nirvana.cs.titech!wnoc-tyo-news!news.iij.ad.jp!wincgw1!creamy!icspub!cattleya!kawamoto
+From: kawamoto@ics.es.osaka-u.ac.jp (KAWAMOTO Yosihisa)
+Newsgroups: fj.mail
+Subject: Re: [WANTED] tiny tiny ML server.
+Message-ID: <KAWAMOTO.94Mar28141853@cattleya.ics.es.osaka-u.ac.jp>
+Date: 28 Mar 94 05:18:53 GMT
+References: <KOMEDA.94Mar17174210@yebisu.ics.es.osaka-u.ac.jp>
+	<KIZU.94Mar28134659@shiranui.ics.es.osaka-u.ac.jp>
+Sender: news@icspub.ics.es.osaka-u.ac.jp
+Organization: Dept. of Information & Computer Sciences, Osaka Univ., JAPAN
+Lines: 67
+In-reply-to: kizu@ics.es.osaka-u.ac.jp's message of 28 Mar 94 04:46:59 GMT
+
+川本＠大阪大学です.
+
+In article <KIZU.94Mar28134659@shiranui.ics.es.osaka-u.ac.jp>
+	kizu@ics.es.osaka-u.ac.jp (KIZU takashi) writes:
+
+>   こんにちは，木津＠阪大です．
+
+どもども. 
+
+>   うーむ，
+> 
+> sed '1,/^$/{
+> COMMANDS
+> }'
+> 
+> でヘッダのみ編集するようにしていた積もりですが，COMMANDS 中で使った N 
+> や n コマンドで(ヘッダ終端の)空行を読み込んでしまうと，読み込んだ行が 
+> "1,/^$/" にかからないので，本文中の最初の空行まで編集してしまいますね．
+
+>   他の解決策の提示 or バグの指摘をお待ちしています(^_^;)．
+
+では, もう一つの解決方法を提示したいと思います. 
+＃けっこうシンプルになったでしょ(^.^). 
+
+デフォルト入力を行なわずに次のサイクルに移るという, この場合には
+うってつけの D コマンドの機能を利用しています. 
+＃やっぱ sed & awk 本なんかより, MS-DOSを256倍使う本vol.3ですよ(^.^). 
+--
+iかわもと よしひさ!               kawamoto@ics.es.osaka-u.ac.jp
+
+#!/bin/sh
+PATH=/usr/ucb:/bin:/usr/bin
+umask 077
+
+ML_ADDR=test-ml@ics.es.naniwa-u.ac.jp
+ML_NAME=test-ml
+DELIVER_ADDR=test-deliver
+MAINTAINER=test-ml-request@ics.es.naniwa-u.ac.jp
+
+#SENDMAIL="/usr/lib/sendmail -oee -oi -odb -f $MAINTAINER $DELIVER_ADDR"
+SENDMAIL=/bin/cat
+
+sed '1,/^$/{
+/^Received: / b del
+/^Return-Path: / b del
+/^Return-Receipt-To: / b del
+/^Errors-To: / b del
+/^Reply-To: / H
+/^$/{
+i\
+Errors-To: '"$MAINTAINER"'\
+Resent-From: <'"$ML_ADDR"'>\
+X-Ml-Name: '"$ML_NAME"'
+x
+s/^$/Reply-To: '"$ML_ADDR"'/p
+x
+}
+b
+:del
+N
+s/\n[ 	].*$//
+t del
+D
+}' | $SENDMAIL
+exit 0
+--
+iかわもと よしひさ!               kawamoto@ics.es.osaka-u.ac.jp

@@ -1,0 +1,153 @@
+ ファイルの取り寄せには，getコマンドを使えば良いが，
+初心者ユーザー向けおよび頻繁に取り寄せられる可能性のあるファイル
+に関しては，専用のaddressをつくって，そこになんらかのメールを送る
+だけで，指定されたファイルを返送するように改造した例．
+また，メンバーチェックをする場合としない場合の改造例がある．
+
+具体的にこの改造例で実装しているのは，
+
+・schwalben-listという宛先にメールが来たら，メンバーチェックをし，
+  指定されたファイルを自動的に返送する．来たメールのSubjectも本文も
+  一切参照していないので，とにかくメールが来たら返送するだけ．
+・schwalben-anonymousという宛先にメールが来たら，メンバーチェックを
+  ＊しないで＊指定されたファイルを自動的に返送する．
+  ^^^^^^^^^^^^
+  来たメールのSubjectも本文も一切参照していないのはschwalben-listと同じ．
+・schwalben-infoに関しては，コマンドモードと通常の投稿モードとで
+  メンバーチェックのために参照するファイルを変える．ニュアンスとしては，
+  ModeratedなMail spoolみたいなもんで，通常の投稿モードではModeratorみたいな
+  人が整理した情報をspoolにたたき込んで，それをみんながコマンドモードで
+  取り寄せるといった感じです．
+
+という機能です．
+
+以下のように，手が加えられています．
+
+●libsch.plというのがfml.plへの差分ファイルです。
+
+Schwalben Chor ML用にｆｍｌ本体に対するreconfigrationを行なうだけです。
+
+○reconfigrationのみ
+&SchwalbenConfig;
+
+○anonymous, listのようにファイルを送り返すだけのアドレス用のroutine
+&SchwalbenSpecialAddress;
+
+
+●fml.plの中で矢印の位置でsubroutineを呼んでください。
+＃一応 patch.sedというのがfml.plを以下のように変更してくれるsedのスク
+  リプトです．(最新のfml.plに対応しているとは限らないので，手でpatchingする
+                ことをお勧めします．:-))
+＃２箇所で別のroutineを使うので先にrequireしてます。
+
+	require 'config.ph';		# a config header file
+	require 'libsmtp.pl';		# a library using smtp
+	require 'liblock.pl' unless $USE_FLOCK;
+ここ→	require 'libsch.pl';
+
+
+	&Parsing;			# Phase 1(1st pass), pre-parsing here
+					# e.g. MIME
+	&GetFieldsFromHeader;		# Phase 2(2nd pass), extract headers
+	
+ここ→	&SchwalbenConfig;
+	
+	if($ML_MEMBER_CHECK) { 
+	    if(! &MLMemberCheck) {	# if failed
+		(!$USE_FLOCK) ? &Unlock : &Funlock;
+		exit 0;
+	    }
+	} else { 
+	    if(! &MLMemberNoCheckAndAdd) { # if failed
+		(!$USE_FLOCK) ? &Unlock : &Funlock;
+		exit 0;
+	    }
+	}
+	
+ここ→	&SchwalbenSpecialAddress;
+	
+	if ($CommandMode) {		# If "# (.*)" form is given, Command mode
+	    require 'libfml.pl'; 
+	} else {			# distribution mode(Mailing List)
+	    &Distribute;
+	}
+
+
+●それぞれのaddressに対応するconfig.phで以下のような設定をする．
+
+schwalben-list: $LIST_Requested = 1，$ADDR = "list"
+schwalben-anonymous: $Anonymous_Requested = 1，$ADDR = "anonymous"
+schwalben-info: $INFO_requested = 1，$ADDR = "info"
+
+＃冗長な情報を含んでいるが，他の複数ＭＬの管理との整合性のために
+  こうなっている．
+
+●あとは，libsch.plをlibfml.plとかがあるところに移動する．
+
+
+
+＜ちょっと説明＞
+
+libsch.plを見てもらえば，だいたい見当はつくとは思うのですが....
+
+●  $ALLLIST_FILE = "$DIR/../spools/spool-info/alllist";
+    $LISTSubject  = "Schwalben Chor All List";
+
+    $Anonymous_FILE    = "$DIR/../spools/spool-info/Anonymous";
+    $AnonymousSubject  = "Schwalben Chor Anonymous File Service";
+
+    ${ALLLIST,Anonymous}_FILEはそれぞれ，返送するファイルの指定です．
+    ちょっと置き場所がへんですけど，それは気にしないで下さい．
+    ${LIST,Anonymous}Subjectは，返送するメールにつく，Subjectです．
+
+● sub SchwalbenConfig
+
+   メンバーチェックに関する指定を行っています．あとは，趣味でLoggingを追加．
+
+● sub SchwalbenSpecialAddress
+
+   実際に，自動返送を行います．
+
+● schwalben-infoのメンバーチェックファイル
+
+   投稿モードでは，members-$ADDR (i.e. members-info)が使われ，
+   コマンドモードでは，schwalben-infoに対応する，config.ph の $MEMBER_LISTを
+   使っています．
+
+● schwalben-anonymousでのメンバーチェックファイル
+
+   $MEMBER_LIST 	= "$DIR/../members/members-$ADDR";
+   $ML_MEMBER_CHECK = 0;
+
+   となっています．メンバーチェックしないので，逆に，誰が取っていったかが
+   $DIR/../members/members-$ADDR に残ります．$DIR/../members/members-$ADDRに
+   一行目に，+ と書いておけば，記録されません．
+
+
+<<<おまけ>>>
+
+●メンバーファイルを,で区切るように変更
+
+メンバーファイルを何らかの都合で，address以外の情報も記録しておきたい場合，
+以下のようにすることで可能となる．
+fukachan@phys.titech.ac.jp, 深ちゃん、...
+fukachan@phys.titech.ac.jp , 深ちゃん、...
+という形を仮定している
+ただし，activesはこのような形式では書けないので注意．
+参照： 5.1	activesファイルによるリレー（sendmail 8.x）
+       5.2	activesファイルによるリレー（sendmail 5.x）
+
+at subroutine CheckMember in fml.pl 
+
+      /^[ \t]*(\S+)[ \t]*.*$/o && ($_ = $1); # including .*#.*
+→
+      /^[ \t]*(\S+)[ \t]*.*$/o && ($_ = $1); # including .*#.*
+      /^[ \t]*(\S+)[ \t]*,.*$/o && ($_ = $1); # Field separator , 
+
+
+at subroutine StripFieldAndMatchCheck in libfml.pl 
+
+    /^[ \t]*(\S+)[ \t]*.*/o && ($_ = $1);
+→
+    /^[ \t]*(\S+)[ \t]*.*/o && ($_ = $1);
+    /^[ \t]*(\S+)[ \t]*,.*/o && ($_ = $1);

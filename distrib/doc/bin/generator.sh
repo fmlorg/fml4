@@ -1,11 +1,27 @@
 #!/bin/sh
 
 FILE=$1
+SOURCE_DIR=$2
 
-chdir $FML
+FWIX="perl bin/fwix.pl"
 
-test -d var/html/$FILE || mkdir var/html/$FILE
+GEN_HTML () {
+	chdir $FML
 
-perl usr/sbin/fix-wix.pl doc/ri/$FILE |\
-perl bin/fwix.pl -T $FILE -m html -D var/html/$FILE -d doc/smm -N 
+	if [ doc/$SOURCE_DIR/$FILE.wix -nt var/html/$TARGET/index.html ]
+	then
+		test -d var/html/$TARGET || mkdir var/html/$TARGET
 
+		perl usr/sbin/fix-wix.pl doc/$SOURCE_DIR/$FILE.wix |\
+		$FWIX -L $LANG -T $FILE -m html -D var/html/$TARGET -d doc/smm
+	fi
+
+}
+
+LANG=JAPANESE
+TARGET=${FILE}
+GEN_HTML;
+
+LANG=ENGLISH
+TARGET=${FILE}-e
+GEN_HTML;

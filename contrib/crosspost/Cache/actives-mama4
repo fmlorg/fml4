@@ -1,0 +1,92 @@
+#.FML HEADER
+# NEW FORMAT FOR FURTHER EXTENTION
+# e.g. fukachan@phys r=relayserver m=3u s=skip 
+# r= relayserver
+# m= matomeokuri parameter is time and option
+# s= skip. can post from this address but not delivered here.
+#
+# the same obsolete format is compatible with new format and as follows:
+# e.g. fukachan@phys relayserver matome 3u
+#.endFML HEADER
+fukachan@axion.phys.titech.ac.jp 
+Elena@phys.titech.ac.jp  m=2u 
+fukachan  s=skip 
+#	chchen@leland.stanford.edu 
+chchen@ellis.qr.cas.uec.ac.jp  s=skip 
+koyama@kutsuda.kuis.kyoto-u.ac.jp 
+bobrinn@qr.cas.uec.ac.jp 
+#	ee17078@isc.meiji.ac.jp 
+machi@wz0623.hipecs.hokudai.ac.jp  s=skip 
+##BYE natumi@hipecs.hokudai.ac.jp
+ishihara@jake.mfd.cs.fujitsu.co.jp 
+#	makoto@cc.win.or.jp
+#	g2p123@cfi.waseda.ac.jp   
+MAP3877@mapletown.or.jp  s=skip 
+nojiri@katura.tutics.tut.ac.jp 
+# wakita@cts.dnp.co.jp
+wakita@acs.dnp.co.jp 
+maruha@takuya.ee.sophia.ac.jp 
+minaka@slab.tnr.sharp.co.jp 
+masa@hpysofx.tky.hp.com 
+# masa@hpysofx.tky.yhp.co.jp
+harasawa@is.titech.ac.jp 
+##BYE s915717@educ.info.kanagawa-u.ac.jp 
+##BYE ikeda@agusa.nuie.nagoya-u.ac.jp 
+murayama@toro.kuee.kyoto-u.ac.jp 
+miyake@kurasc.kyoto-u.ac.jp 
+##BYE iwata@fml.ec.tmit.ac.jp  r=axion.phys.titech.ac.jp 
+iwata@maekawa.is.uec.ac.jp
+# iwata@loki.maekawa.is.uec.ac.jp 
+sango@eieub.yz.yamagata-u.ac.jp 
+mizuno@orient.center.nitech.ac.jp 
+t91124kk@sfc.keio.ac.jp 
+odam@himiko.cc.saga-u.ac.jp 
+# k-se@albert.advanced-software.co.jp   r=axion.phys.titech.ac.jp 
+# k-se@advanced-software.co.jp 
+# l0461617@icesv1.ice.nuie.nagoya-u.ac.jp 
+l0461617@icemilk.ice.nuie.nagoya-u.ac.jp 
+HHC00417@niftyserve.or.jp  m=6u 
+13531912@people.or.jp 
+t-sugiya@csis.oita-u.ac.jp 
+tama@aloe.ibbsal.or.jp 
+halo@cim.pu-toyama.ac.jp 
+##BYE afuru@egg.ics.nitech.ac.jp 
+takahashi@tktvfs.enet.dec-j.co.jp 
+##BYE natumi@hipecs.hokudai.ac.jp 
+##BYE huge@eiehost.gee.kyoto-u.ac.jp 
+##BYE okouchi@info.human.nagoya-u.ac.jp 
+#	ohkubo@konansun2.kek.jp
+daikouji@tuhep.phys.tohoku.ac.jp 
+##BYE koke@kokko.com
+#	g1k104@cfi.waseda.ac.jp 
+ivan@hulab.hudson.co.jp 
+masatosi@is.titech.ac.jp 
+MXH02707@niftyserve.or.jp  m=19u 
+##BYE tanabe@mech.rd.sanyo.co.jp
+##BYE z440573@wf0141.hipecs.hokudai.ac.jp
+# lgreenf@CATI.CSUFresno.EDU
+# u91c145@ed.teu.ac.jp 
+u91c123@ed.teu.ac.jp 
+s9121016@ws.ipc.fit.ac.jp  r=axion.phys.titech.ac.jp 
+minaka@mail.st.rim.or.jp 
+sd94114@ypcfs1.toyota-ti.ac.jp 
+##BYE gan@kuic.kyoto-u.ac.jp 
+##BYE g1a238@cfi.waseda.ac.jp
+##BYE g1a238@cfi.waseda.ac.jp   
+##BYE g1a238@cfi.waseda.ac.jp   
+##BYE g1a238@cfi.waseda.ac.jp   
+##BYE g1a238@cfi.waseda.ac.jp   
+##BYE g1a238@cfi.waseda.ac.jp   
+##BYE g1a238@cfi.waseda.ac.jp   
+##BYE g1a238@cfi.waseda.ac.jp   
+MXA03327@niftyserve.or.jp 
+##BYE g1a238@cfi.waseda.ac.jp   
+chchen@efi.com 
+#	Jason.Chen@efi.com   
+##BYE g1a238@cfi.waseda.ac.jp   
+##BYE g1a238@cfi.waseda.ac.jp   
+joker@st.rim.or.jp 
+695l1108@cfi.waseda.ac.jp 
+#	ikeda@agusa.nuie.nagoya-u.ac.jp 
+KHF11335@niftyserve.or.jp 
+natsumi@masami.rim.or.jp

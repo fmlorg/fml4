@@ -1,0 +1,59 @@
+<TITLE>
+Erros-to問題（１９９４年７月現在でもUNIX FROMをみていない）
+</TITLE>
+<PRE>
+Newsgroups: fj.mail
+From: masui@flab.fujitsu.co.jp (Motoo Masui)
+Subject: Re: Nifty-WIDE started to deal with "Reply-To:"
+In-Reply-To: masui@flab.fujitsu.co.jp's message of Fri, 13 Aug 1993 02:51:38 GMT
+Message-ID: <MASUI.93Aug17175630@dharma.syslab.iias.flab.fujitsu.co.jp>
+Lines: 42
+Sender: usenet@iias.flab.fujitsu.co.jp
+Nntp-Posting-Host: dharma.syslab.iias.flab.fujitsu.co.jp
+Organization: ISIS, Fujitsu Labs, Makuhari, Japan.
+References: <MASUI.93Aug13115138@dharma.syslab.iias.flab.fujitsu.co.jp>
+Distribution: fj
+Date: Tue, 17 Aug 1993 08:56:30 GMT
+
+
+In article <MASUI.93Aug13115138@dharma.syslab.iias.flab.fujitsu.co.jp>, 
+masui@flab.fujitsu.co.jp (Motoo Masui) writes:
+> Nifty-Serve に以下のようなお知らせが出ていました。
+
+>> "WIDE Internet" との電子メール相互接続実験において、インターネットの
+>> メール機能の一つである"Reply-To:" への対応を開始しました。
+
+反則技の Errors-To: ですが、やはりつけておく方がいい
+ようです。試しにメールが溢れている Nifty ユーザ の
+JBB00712 さん ;-p に対してメールを送りつけると、
+
+==========================================================
+From postmaster@niftyserve.or.jp Tue Aug 17 17:32:13 1993
+........
+Received: by inetnif.niftyserve.or.jp (4.1/2.8Wb-niftyserve/1.3)
+	id AA20749; Tue, 17 Aug 93 17:27:14 JST
+Return-Path: <postmaster@niftyserve.or.jp>
+Message-Id: <9308170827.AA20749@inetnif.niftyserve.or.jp>
+From: postmaster@niftyserve.or.jp
+To: Motoo "F" MASUI <masui@flab.fujitsu.co.jp>
+Subject: Returned mail: JBB00712 did not receive a mail.
+Date: Tue, 17 Aug 1993 17:10:00 JST
+
+----- Unsent reason follows -----
+JBB00712 could not receive a mail that you had sent.
+Because JBB00712's mailbox in Nifty had been full.
+
+----- Unsent message follows -----
+From: Motoo "F" MASUI <masui@flab.fujitsu.co.jp>
+Subject: test
+Date: Tue, 17 Aug 1993 16:59:09 +0900
+Reply-To: Motoo "R" MASUI <masui@flab.fujitsu.co.jp>
+To: Motoo "T" MASUI <JBB00712@niftyserve.or.jp>
+
+（以下略）
+========================================================
+
+といった感じで、Errors-To: を付けない場合は、
+From: に対してエラーが戻るようです。ご注意を。
+
+			masui@flab.fujitsu.co.jp

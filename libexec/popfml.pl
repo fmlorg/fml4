@@ -23,6 +23,7 @@ $ENV{'IFS'}   = '' if $ENV{'IFS'} ne '';
 # format: fml.pl [-options] DIR(for config.ph) [PERLLIB's -options]
 # "free order is available" Now for the exist-check (DIR, LIBDIR) 
 foreach (@ARGV) { 
+    /^\-h$/ && die (&USAGE);
     /^\-/   && &Opt($_) || push(@INC, $_);
     $LIBDIR || ($DIR  && -d $_ && ($LIBDIR = $_));
     $DIR    || (-d $_ && ($DIR = $_));
@@ -43,20 +44,28 @@ chdir $DIR || die "Can't chdir to $DIR\n";
 
 &PopFmlInit;
 
+### POPFML Win32 Version
 if ($COMPAT_WIN32) {
     # require 'arch/Win32/libwin32.pl';
-    require 'libwin32.pl';
+    # require 'libwin32.pl';
 
     ### &PopFmlGabble; (without fork version)
     $status = &Pop'Gabble(*PopConf);#';
     if ($status) { die("Error: $status\n");}
 
     ### &PopFmlProg;
-
+    &PopFmlProg;
 }
-# UNIX
+### UNIX Version
 else {
+    # anyway shutdown after 45 sec (60 sec. must be a unit).
+    $SIG{'ALRM'} = "PopFmlProgShutdown";
+    alarm($TimeOut{"pop:flock"} || 45) if $HAS_ALARM;
+
+    # spool -POP3-> pop.queue
     &PopFmlGabble;
+
+    # scan pop.queue and fork() and exec()
     &PopFmlProg;
 }
 
@@ -96,15 +105,41 @@ sub PopFmlGetOpts
 	/^\-d/    && $debug++;
 	/^\-D/    && $DUMPVAR++;
 
-	/^\-conf/   && ($PopConf{'POPFML_RC'} = shift @ARGV) && next; 
-	/^\-pwfile/ && ($PopConf{'NETRC'}     = shift @ARGV) && next; 
+	/^\-include_file/ && ($PopConf{'INCLUDE_FILE'} = shift @ARGV) && next;
+	/^\-pwfile/       && ($PopConf{'NETRC'} = shift @ARGV) && next;
+	/^\-pop_passwd/   && ($PopConf{'POP_PASSWD'} = shift @ARGV) && next;
+	/^\-perl_prog/    && ($PerlProg = shift @ARGV) && next;
+
+	/^\-arch/         && ($COMPAT_ARCH = shift @ARGV) && next;
     }
 
-    if ($debug) {
-	while (($k, $v) = each %ENV) {
-	    print STDERR "$k\t=>\t$v\n";
-	}
+    if (0 && $debug) {
+	while (($k, $v) = each %ENV) { print STDERR "$k\t=>\t$v\n";}
     }
+}
+
+
+sub USAGE
+{
+    local($n) = $0;
+    $n =~ s#.*/(\S+)#$1#;
+
+qq#
+   $n [options] \$DIR [options] \$LIBDIR [options]
+
+   \$DIR     popfml's directory (log, queue, tmp, etc..)
+   \$LIBDIR  FML system library
+
+   options:
+   -h      this help
+   -user   user
+   -host   pop server
+   -pwfile password file      (.netrc style)
+   -f      configuration file (alternative of .popfmlrc)
+   -d      debug mode
+   -D      dumpvar
+
+#;
 }
 
 
@@ -129,29 +164,42 @@ sub PopFmlInit
     $PopConf{'LOGFILE'}   = "$DIR/var/log/_poplog";
     $PopConf{"PROG"}      = "/usr/local/mh/lib/rcvstore";
 
+    # log file of popfml proceess
+    $LOGFILE              = "$DIR/log";
+
     # search config file
-    for ($PopConf{'POPFML_RC'}, 
-	 "$ENV{'HOME'}/.popfmlrc", "$ENV{'HOME'}/.popexecrc") { 
+    for ("$ENV{'HOME'}/.popfmlrc", "$ENV{'HOME'}/.popexecrc") { 
 	if (-f $_) { $ConfigFile = $_;}
     }
 
     &PopFmlGetOpts;
 
     ### NTFML ###
+    # load architecture dependent default 
+    # here for command line options --COMPAT_ARCH
     if ($ENV{'OS'} =~ /Windows_NT/) {
 	$HAS_ALARM = $HAS_GETPWUID = $HAS_GETPWGID = 0;
+	$COMPAT_ARCH  = "WINDOWS_NT4";
 	$COMPAT_WIN32 = 1;
+
+	require "arch/$COMPAT_ARCH/depend.pl";
     }
     ### NTFML ENDS ###
 
     # debug 
-    # for (keys %PopConf) { print STDERR "$_\t$PopConf{$_}\n" if $debug;}
+    # for (keys %PopConf) { print STDERR "$_\t$PopConf{$_}\n";}
 
     # get password for the host;
-    &PopFmlGetPasswd($PopConf{'SERVER'}, 
-		     $PopConf{'NETRC'} || "$ENV{'HOME'}/.netrc");
-    $PopConf{"PASSWORD"}  = $Password;
-
+    if (-f $PopConf{'POP_PASSWD'}) {
+	print STDERR "POP3: user passwd format file\n" if $debug;
+	$PopConf{"PASSWORD"} = &GetPopPasswd($USER, $PopConf{'POP_PASSWD'});
+    }
+    else {
+	print STDERR "POP3: .netrc format file\n" if $debug;
+	&PopFmlGetPasswd($PopConf{'SERVER'}, 
+			 $PopConf{'NETRC'} || "$ENV{'HOME'}/.netrc");
+	$PopConf{"PASSWORD"}  = $Password;
+    }
 
     if (! $PopConf{'USER'}) {
 	$PopConf{'USER'} = getlogin || (getpwuid($<))[0];
@@ -164,7 +212,16 @@ sub PopFmlInit
 	}
     }
 
-    if (-f $ConfigFile) { 
+    local($if);
+    if ($if = $PopConf{'INCLUDE_FILE'}) {
+	if (-f $if) {
+	    $PopConf{"PROG"} = &EvalIncludeFile($if);
+	}
+	else {
+	    die("Error: include_file[$if] is defined but not exists.\n");
+	}
+    }
+    elsif (-f $ConfigFile) { 
 	package popcf;
 	require $main'ConfigFile; #';
 	$POPFML_PROG = $POP_EXEC if $POP_EXEC;
@@ -172,6 +229,36 @@ sub PopFmlInit
 
 	$PopConf{"PROG"} = $popcf'POPFML_PROG; #';
     }
+    else {
+	&Log("not found $ConfigFile");
+    }
+}
+
+
+sub EvalIncludeFile
+{
+    local($if) = @_;
+    local($s);
+    
+    open(IF, $if) || die("Error: cannot read $if [$!]");
+    while (<IF>) {
+	chop;
+	next if /^\s*$/;
+	next if /^\#/;
+	
+	s/\"//g;
+
+	$s = $_ if /^|/;
+    }
+    close(IF);
+    
+    $s =~ s/\|//g;
+    $s =~ s#\\#/#g;
+    $s = "$PerlProg $s" if $PerlProg;
+    $s .= " --COMPAT_ARCH=$COMPAT_ARCH" if $COMPAT_ARCH;
+    print STDERR "include[$s]\n" if $debug;
+
+    $s;
 }
 
 
@@ -206,7 +293,7 @@ sub PopFmlProgShutdown
 {
     local($sig) = @_;
 
-    print STDERR "--caught signal $sig ($$)\n";
+    print STDERR "--caught SIG$sig ($$)\n";
     print STDERR "--alarm PopFmlProgShutdown ($$)\n";
     exit(0);
 }
@@ -216,10 +303,6 @@ sub PopFmlLock
     local($queue_dir) = $PopConf{'QUEUE_DIR'};
 
     print STDERR "--try lock ... ($$)\n" if $debug;
-
-    # anyway shutdown after 45 sec (60 sec. must be a unit).
-    $SIG{'ALRM'} = "PopFmlProgShutdown";
-    alarm($TimeOut{"pop:flock"} || 45) if $HAS_ALARM;
 
     open(LOCK, $queue_dir);
     flock(LOCK, $LOCK_EX);
@@ -249,12 +332,15 @@ sub PopFmlProg
     $prog  = $PopConf{'PROG'};
     $prog =~ s/^\|+//;
 
-    print STDERR "--PopFmlProg (queue_dir=$queue_dir prog=$prog)\n" if $debug;
+    print STDERR "--PopFmlProg (\n\tqueue_dir=$queue_dir\n\tprog=$prog\n)\n"
+	if $debug;
 
     &PopFmlLock;
 
     opendir(DIRD, $queue_dir) || &Log("Cannot opendir $queue_dir");
     for $qf (sort {$a <=> $b} readdir(DIRD)) {
+	print STDERR "   scan: $qf\n" if $debug;
+
 	next if $qf =~ /^\./;
 	next if $qf =~ /\.prog$/;
 
@@ -263,11 +349,12 @@ sub PopFmlProg
 
 	$queue = "$queue_dir/$qf";
 
-	print STDERR "===queue $queue\n" if $debug;
+	print STDERR "   queue: $queue\n" if $debug;
 
 	# checks the current progs (if exists, fatal error since unlocked);
 	# againt another context doing the processing...;
 	next if -f "${queue}.prog";
+
 
 	if (-f "${queue}.prog") {
 	    # NOT MATCH THIE CONDISION, but should do the error handling;
@@ -286,38 +373,27 @@ sub PopFmlProg
 
 	    # change the queue file name after setup;
 	    $queue = "${queue}.prog";
+
+	    print STDERR "   exec: $queue\n" if $debug;
 	}
 
-	### FORKED, CHILDREN IS THE MAIN PROG ###
-	if (($pid = fork) < 0) {
-	    &Log("Cannot fork");
+
+	# fork and exec
+	if ($COMPAT_WIN32) { 
+	    &PopFmlDoExec($qf, $queue, $prog);
 	}
-	elsif (0 == $pid) {
-	    print STDERR "--PopFmlProg [$qf] ... ($$)\n" if $debug;
-	    print STDERR "   $prog" if $debug;
-
-	    if (! open(QUEUE_IN, $queue)) {
-		&Log("Cannot open $queue");
+	else {
+	    ### FORKED, CHILDREN IS THE MAIN PROG ###
+	    if (($pid = fork) < 0) {
+		&Log("Cannot fork");
+	    }
+	    elsif (0 == $pid) {	# child;
+		&PopFmlDoExec($qf, $queue, $prog);
 		exit 0;
 	    }
-
-	    if (! open(PROG_IN, "|$prog")) {
-		&Log("Cannot exec [$prog] for $queue");
-		exit 0;
-	    }
-
-	    while (<QUEUE_IN>) { print PROG_IN $_;}
-
-	    close(PROG_IN);
-	    close(QUEUE_IN);
-
-	    unlink $queue || &Log("PopFmlProg: fails to remove the queue $qf");
-
-	    exit 0;
 	}
 
 	$ForkCount++; # parent;
-
     }
     
     # O.K. Setup the prog of the queue; GO!
@@ -327,12 +403,75 @@ sub PopFmlProg
     &PopFmlUnLock;
     closedir(DIRD);
 
-    # &Log("fork $ForkCount childrens") if $ForkCount;
+    &Log("fork $ForkCount childrens") if $ForkCount;
+
+    print STDERR "---PopFmlProg Ends\n" if $debug;
+
+    # NTPERL has no wait(), fork(), ...
+    if ($COMPAT_WIN32) { return 1;}
 
     # Wait for the child to terminate.
     while (($dying = wait()) != -1 && ($dying != $pid) ){
 	;
     }
+}
+
+
+sub PopFmlDoExec
+{
+    local($qf, $queue, $prog) = @_;
+    local($pid);
+
+    print STDERR "--PopFmlDoExec [$qf] ... ($$)\n" if $debug;
+    print STDERR "   $prog\n\n" if $debug;
+
+    if (! open(QUEUE_IN, $queue)) {
+	&Log("Cannot open $queue");
+	exit 0;
+    }
+    else {
+	&Debug("open $queue") if $debug;
+    }
+
+    if (! open(PROG_IN, "|$prog")) {
+	&Log("Cannot exec [$prog] for $queue");
+	exit 0;
+    }
+    else {
+	&Debug("open |$prog") if $debug;
+    }
+
+    while (<QUEUE_IN>) { 
+	s/^From /From /;
+	print PROG_IN $_;
+    }
+
+    close(PROG_IN);
+    close(QUEUE_IN);
+
+    unlink $queue || &Log("PopFmlProg: fails to remove the queue $qf");
+}
+
+
+sub Grep
+{
+    local($key, $file) = @_;
+
+    open(IN, $file) || (&Log("Grep: cannot open file[$file]"), return $NULL);
+    while (<IN>) { return $_ if /$key/i;}
+    close(IN);
+
+    $NULL;
+}
+
+
+sub GetPopPasswd
+{
+    local($ml, $f) = @_;
+    local($buf, @buf);
+
+    $buf = &Grep("^$ml", $f);
+    (split(/\s+/, $buf, 2))[1];
 }
 
 

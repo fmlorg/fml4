@@ -1,0 +1,10 @@
+#!/bin/sh
+
+echo "Reply-To: ＭＬのアドレス"
+echo "Errors-To: 管理者アドレス"
+sed '1,/^$/{
+	   /^Received: /d
+	   /^[ 	][0-9A-Za-z][0-9A-Za-z]*/d
+	   /^Reply-To: /d
+	   /^Errors-To: /d
+}'
