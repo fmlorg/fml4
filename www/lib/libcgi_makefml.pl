@@ -79,7 +79,7 @@ sub UpperHalf
     &P("fml configuration interface");
     &P("</TITLE>");
     &P("</HEAD>");
-    &P("<BODY>");
+    &P("<BODY BGCOLOR=\"E6E6FA\">");
 
     if ($ErrorString) { &Exit($ErrorString);}
 
