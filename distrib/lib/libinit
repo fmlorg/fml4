@@ -76,8 +76,9 @@ INIT_VERSION () {
 
 	if [ $package = 1 ]
 	then
-		echo "record rcs revision set for the symbol [$RID]"
-		echo " "; 
+		echo ""; 
+		echo "-- export list of RCS ID in snapshot balls for [$RID]"
+		echo ""; 
 		for file in $RS
 		do
 			perl $FML/distrib/bin/show-rcsid.pl $file |\
