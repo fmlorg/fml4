@@ -100,13 +100,16 @@ INIT_VERSION () {
 		# log cvs status unless $MODE
 		if [ X$MODE = X ]; then
 		   echo "save cvs status to distrib/history/$TID/$RID"
-		   ${PERL} distrib/bin/cvsscan.pl -f distrib/etc/cvsscan.conf |\
+		   cvs_scan_conf=/tmp/cvsscan.conf.$$
+		   awk -v FS=/ '{print $2}' ${FML}/CVS/Entries > $cvs_scan_conf
+		   ${PERL} distrib/bin/cvsscan.pl -f $cvs_scan_conf |\
 		   tee -a distrib/history/$TID/$RID
 			(
 			 echo "--------------------------";
 			 echo "";
 			) >> distrib/history/$TID/$RID
 			echo " "; 
+		   rm -f $cvs_scan_conf
 		else
 			echo "";
 			echo -- ignore cvs status log
