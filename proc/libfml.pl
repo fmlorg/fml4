@@ -629,6 +629,8 @@ sub ProcFileSendBack
     &SendPluralFiles(*to, *subject, *files);
     undef $Envelope{'mode:doc:repl'};	# off
     undef $e{'mode:doc:ignore#'};
+
+    1;
 }
 
 
