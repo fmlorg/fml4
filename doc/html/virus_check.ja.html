@@ -24,16 +24,28 @@ virus_check.ph の使い方
 はデフォールトの値( /usr/local/fml と /var/spool/ml )を使って説明して
 います。
 
+フィルタリングを使う（つまり、変数 $USE_DISTRIBUTE_FILTER を有効にした）
+場合、デフォルトで、いくつかのルールが設定されます。しかし、それらは基
+本的なもので、各ウィルス用などの個別対応は考えられていません。
+<PRE>
+メニュー &gt SECURITY &amp FILTERING &gt USE_DISTRIBUTE_FILTER &gt y/n
+</PRE>
+
+そこで、
 <P>
 <A HREF=http://www.fml.org/fml/Japanese/examples/virus_check.ph>
 http://www.fml.org/fml/Japanese/examples/virus_check.ph
 </A>
-は Envelope Filter で使うフィルタルール集です。
-これは個人的に収集し、不定期に更新しています。
-
+に Envelope Filter に追加するとよいフィルタのルールが集めています。
+このルール群は個人的に収集し、不定期に更新しています。
 ルールの意味はコメントを読んで下さい。
 
+
 <P> 
+ルールの種々選択は個人的な判断なので、やりすぎのルール(例: .exe という
+ファイル名の添付ファイルは認めない)もあります。適宜削るなり、適当にカッ
+ト＆ペーストするなりして活用して下さい。
+<BR>
 このファイルをダウンロードして使う場合、
 全ＭＬに一気に反映させたいでしょう。
 全ＭＬにこれらのルールを一気に適用するためには
