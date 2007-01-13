@@ -20,6 +20,99 @@
    proc/libMIME.pl (2.21-2.22): 
 	DecodeMimeString() should return string in jis code.
 
+2003/12/13:
+
+   etc/makefml/menu.conf (1.26-1.27):
+	enable $USE_NEW_HTML_GEN
+
+   databases/ldap/toymodel.pl (1.7-1.8):
+	enable addmember and addactives
+
+   databases/mysql/toymodel.pl (1.8-1.11):
+
+   databases/postgresql/DBI_toymodel.pl (1.4-1.7):
+
+   databases/postgresql/Pg_toymodel.pl (1.2-1.4):
+
+   databases/postgresql/toymodel.pl (1.9-1.11):
+
+   kern/libenvfsubr.pl (2.4-2.8):
+
+   kern/libenvf.pl (2.15-2.20):
+
+   kern/libkernsubr.pl (2.4-2.7):
+
+   kern/libsmtp.pl (2.52-2.58 and 2.60-2.63):
+
+   kern/libloadconfig.pl (2.19-2.25):
+
+   kern/liblmtp.pl (1.3-1.4):
+
+   kern/libsmtpmci.pl (2.4-2.7):
+
+   kern/libsmtpsubr.pl (1.7-1.10):
+
+   kern/libsmtphack.pl (1.4-1.6):
+
+   kern/libtrap.pl (2.2-2.3):
+
+   kern/libsmtputils.pl (2.13-2.16):
+
+   kern/libsmtpsubr2.pl (2.3-2.4):
+	my()-ify if could.
+
+   kern/msend.pl (2.12-2.13):
+	s/$LOCKFILE/$MyProcessInfo/
+
+   kern/fml.pl
+   kern/libkernsubr2.pl
+	sync w/ current.
+	o update EmulRFC2369() to take hash as arguments.
+	o change $0.
+
+   proc/libamctl.pl (2.48-2.49):
+
+   proc/libcksum.pl (1.6-1.8):
+
+   proc/libconfirm.pl (2.25-2.26):
+
+   proc/libdist.pl (2.27-2.31):
+
+   proc/libfml.pl (2.40-2.42):
+
+   proc/libmd5.pl (2.6-2.8):
+
+   proc/libmodedef.pl (2.7-2.8):
+	enable $USE_NEW_HTML_GEN
+
+   proc/libmti.pl (2.14-2.18):
+
+   proc/libmoderated.pl (2.17-2.19):
+
+   proc/libqmail.pl (1.2-1.4):
+
+   proc/librelayhack.pl (2.4-2.5):
+	fix channel name
+
+   libexec/popfml.pl (2.9-2.10):
+
+   sys/WINDOWS_NT4/ntfml.pl (1.3-1.4):            
+	modified sleep() to be contollable a little.  calculate
+	$SLEEP_UNIT as int($LOOP_UNIT /100) and do sleep in
+	$SLEEP_UNIT. so we use sleep($SLEEP_UNIT) if $SLEEP_UNIT;
+
+   bin/emumail.pl (2.9-2.10): 
+	-M option.
+
+   bin/fwix.pl (2.35-2.38): 
+	fix typo: \PRE -> PRE
+	switch user document code base: jis -> euc
+	update copyright template
+
+   www/lib/libcgi_cleanup.pl (1.5-1.7):
+	global variable declaration
+	fix copyright, add $FML$
+
 2003/12/08:
 
    use Mail::Message::Encode of fml8 for MIME encoding.
@@ -317,7 +410,7 @@
 	perl モジュールの呼出順( include path )を修正し、
 	fml 附属モジュールが最優先になりました。
 
-$FML: CHANGES-4.0.4.wix,v 1.1.2.49 2004/02/15 06:12:21 fukachan Exp $
+$FML: CHANGES-4.0.4.wix,v 1.37 2004/02/15 06:12:50 fukachan Exp $
 .# Copyright (C) 2001,2002 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001,2002 fukachan@sapporo.iij.ad.jp
