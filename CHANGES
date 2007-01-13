@@ -5,6 +5,11 @@
 	$Date$
 
 
+2004/02/15
+
+  fix MIME library.
+	DecodeMimeString() should return string in jis code.
+
 2003/12/05
 
   unsubscibe コマンドのバグを修正
@@ -490,7 +495,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.281 2003/11/20 14:08:13 fukachan Exp $
+	add $FML: CHANGES,v 1.282 2003/12/06 03:59:40 fukachan Exp $
 
 2001/10/03
 
